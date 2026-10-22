@@ -1,0 +1,296 @@
+.viewport {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--viewport);
+}
+.tabbar {
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  background: var(--view-panel);
+  color: var(--control-border);
+  border-bottom: 1px solid var(--view-raised);
+}
+.tabbar > span:first-child {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 11px;
+}
+.tabbar small {
+  color: var(--muted);
+  margin-left: 15px;
+  font-family: var(--font-data);
+  font-size: 10px;
+}
+.demo {
+  font-size: 10px;
+  color: var(--viewport-ink);
+  border: 1px solid var(--view-border);
+  border-radius: 3px;
+  padding: 2px 7px;
+}
+.stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at 48% 40%,
+    var(--view-grid) 0%,
+    var(--viewport) 80%
+  );
+}
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+.canvas canvas {
+  display: block;
+}
+.caption {
+  position: absolute;
+  top: 24px;
+  left: 26px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--viewport-ink);
+}
+.caption > span {
+  font: 10px var(--font-data);
+  letter-spacing: 1px;
+  color: var(--view-dim);
+}
+.caption strong {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--view-bright);
+}
+.caption small {
+  font-size: 10px;
+  color: var(--view-dim);
+}
+.tools {
+  position: absolute;
+  right: 19px;
+  top: 128px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: color-mix(in srgb, var(--view-grid) 91%, transparent);
+  border: 1px solid var(--view-border);
+  border-radius: 5px;
+  padding: 5px;
+}
+.tools button {
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 0;
+  color: var(--viewport-ink);
+  border-radius: 3px;
+}
+.tools button:hover,
+.tools button.active {
+  background: var(--view-hover);
+  color: var(--view-bright);
+}
+.tools i {
+  height: 1px;
+  background: var(--view-border);
+  margin: 2px;
+}
+.navigator {
+  position: absolute;
+  top: 21px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+}
+.navigator button {
+  background: var(--view-raised);
+  border: 1px solid var(--title-line);
+  width: 36px;
+  height: 28px;
+  color: var(--viewport-ink);
+  font-size: 10px;
+  border-radius: 2px;
+}
+.navigator > div {
+  display: flex;
+  gap: 3px;
+}
+.navigator button:hover,
+.navigator button[aria-pressed="true"] {
+  color: var(--blue-soft);
+  border-color: var(--ink-soft);
+  background: var(--view-hover);
+}
+.navigator .iso {
+  width: 75px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  font-size: 9px;
+  color: var(--view-dim);
+}
+.axes {
+  position: absolute;
+  left: 26px;
+  bottom: 35px;
+  width: 75px;
+  height: 70px;
+  pointer-events: none;
+  font: 10px var(--font-data);
+}
+.axes svg {
+  position: absolute;
+  top: 10px;
+  left: 3px;
+}
+.axisY {
+  color: var(--ink-soft);
+  position: absolute;
+  left: 23px;
+  top: 0;
+}
+.axisX {
+  color: var(--amber);
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+}
+.axisZ {
+  color: var(--viewport-ink);
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.stats {
+  position: absolute;
+  bottom: 18px;
+  left: 26px;
+  display: flex;
+  gap: 16px;
+  color: var(--view-dim);
+  font: 10px var(--font-data);
+}
+.help {
+  position: absolute;
+  bottom: 18px;
+  right: 19px;
+  display: flex;
+  gap: 7px;
+  color: var(--view-dim);
+  font-size: 10px;
+}
+.empty {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--viewport-ink);
+  max-width: 400px;
+}
+.empty h2 {
+  font-size: 18px;
+  font-weight: 500;
+}
+.empty p {
+  line-height: 1.8;
+}
+.pickbar {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(650px, calc(100% - 40px));
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--selected-border);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--shadow) 26.7%, transparent);
+  border-radius: 6px;
+  padding: 12px;
+}
+.pickhead {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 12px;
+  white-space: nowrap;
+}
+.pickhead > span:nth-of-type(2) {
+  color: var(--muted);
+  font-size: 11px;
+  margin-right: auto;
+}
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.pickbar button {
+  background: var(--paper);
+  border: 1px solid var(--view-bright);
+  padding: 6px 9px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.pickbar button svg {
+  margin-right: 4px;
+}
+.pickbar .confirm {
+  background: var(--blue);
+  color: var(--paper);
+  border-color: var(--blue);
+}
+.picklist {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.picklist > span {
+  color: var(--muted);
+  font-size: 10px;
+  margin-right: 4px;
+}
+.picklist button {
+  font: 10px var(--font-data);
+  padding: 5px 7px;
+}
+.picklist button[aria-pressed="true"] {
+  background: var(--selection-bg);
+  border-color: var(--selection-border);
+  color: var(--selection-ink);
+}
+@media (max-height: 780px) {
+  .pickbar {
+    bottom: 40px;
+  }
+  .caption {
+    top: 15px;
+  }
+}
+/* 短窗口及浏览器放大后，将视图工具横排，避免底部按钮被裁切。 */
+@media (max-height: 780px) {
+  .tools {
+    top: auto;
+    bottom: 44px;
+    flex-direction: row;
+  }
+  .tools i {
+    width: 1px;
+    height: 24px;
+  }
+}

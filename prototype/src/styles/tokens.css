@@ -1,0 +1,115 @@
+/* 2026-10-22 原型设计值，非源截图测量结果。 */
+:root {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #263342;
+  background: #e8ecf1;
+  font-synthesis: none;
+  --ink: #263342;
+  --muted: #7c8796;
+  --line: #dce2e9;
+  --paper: #ffffff;
+  --surface: #f7f9fb;
+  --blue: #346fce;
+  --blue-soft: #eaf1fc;
+  --viewport: #182331;
+  --viewport-ink: #a9bacd;
+  --cyan: #60c5d6;
+  --amber: #f1ba62;
+  --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --control-height: 29px;
+  --radius: 4px;
+  --space: 8px;
+  --icon-small: 17px;
+  --icon-large: 29px;
+  --z-menu: 30;
+  --z-dialog: 50;
+  --ink-secondary: #65798f;
+  --ink-soft: #95a2b2;
+  --ink-faint: #b3becb;
+  --ink-control: #46607f;
+  --control-border: #cfd8e4;
+  --panel-soft: #f2f5f9;
+  --selected-border: #bed0e8;
+  --titlebar: #253345;
+  --title-line: #506176;
+  --view-panel: #202e3d;
+  --view-raised: #293d50;
+  --view-border: #3b4a5b;
+  --view-grid: #233345;
+  --view-dim: #7d94a8;
+  --view-bright: #d3e0eb;
+  --view-hover: #3b5a72;
+  --success: #6d9b91;
+  --error: #a74934;
+  --error-bg: #fff2ef;
+  --error-border: #f0cfc4;
+  --selection-bg: #fce9c5;
+  --selection-ink: #715018;
+  --selection-border: #dbaa53;
+  --shadow: #0a1424;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  color: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+input,
+select {
+  color: var(--ink);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+button {
+  touch-action: manipulation;
+}
+svg {
+  flex-shrink: 0;
+}
+button svg {
+  vertical-align: middle;
+}
+::selection {
+  background: #c6dcff;
+}
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-thumb {
+  background: #bcc6d1;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
