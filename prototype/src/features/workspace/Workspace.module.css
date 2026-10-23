@@ -206,124 +206,160 @@
   background: var(--surface);
 }
 .ribbon {
+  --ci-badge-ring: #f8fafc;
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
   height: 110px;
   overflow-x: auto;
   overflow-y: hidden;
-  background: var(--surface);
+  background: linear-gradient(180deg, #fcfdfe 0%, #f4f7fa 100%);
   border-bottom: 1px solid var(--control-border);
-  padding: 8px 10px 0 18px;
+  box-shadow: inset 0 1px 0 #ffffff;
+  padding: 7px 10px 0 14px;
 }
 .ribbonGroup {
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 0 14px;
-  border-right: 1px solid var(--line);
+  padding: 0 12px;
   flex-shrink: 0;
+}
+.ribbonGroup::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 4px;
+  bottom: 8px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--control-border) 18%,
+    var(--control-border) 82%,
+    transparent
+  );
 }
 .ribbonGroup:first-child {
   padding-left: 0;
 }
 .ribbonItems {
-  height: 77px;
+  height: 78px;
   display: flex;
   align-items: flex-start;
-  gap: 7px;
+  gap: 4px;
 }
 .groupCaption {
   text-align: center;
   color: var(--ink-soft);
-  font-size: 9px;
-  line-height: 20px;
-  letter-spacing: 0.4px;
+  font-size: 10px;
+  line-height: 18px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
 }
 .largeCommand {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 7px;
-  padding: 6px 10px 4px;
-  height: 77px;
-  min-width: 64px;
+  gap: 6px;
+  padding: 8px 8px 5px;
+  height: 78px;
+  min-width: 62px;
   background: none;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 11px;
-  color: var(--ink-secondary);
+  line-height: 14px;
+  color: var(--ink-control);
   white-space: nowrap;
   position: relative;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
-.largeCommand > svg:not(:first-child) {
-  position: absolute;
-  right: 1px;
-  bottom: 15px;
-}
-.largeCommand small {
-  position: absolute;
-  top: 1px;
-  right: -1px;
-  background: var(--blue-soft);
-  color: var(--view-dim);
-  font-size: 8px;
-  padding: 1px 3px;
-  border-radius: 2px;
+.largeCommand > svg {
+  transition: transform 160ms ease;
 }
 .largeCommand.featured {
   color: var(--blue);
+  font-weight: 600;
 }
 .largeCommand:hover:not(:disabled) {
   border-color: var(--selected-border);
+  background: var(--paper);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow) 8%, transparent);
+}
+.largeCommand:hover:not(:disabled) > svg {
+  transform: translateY(-1px);
+}
+.largeCommand:active:not(:disabled) {
   background: var(--blue-soft);
+  box-shadow: none;
+}
+.splitLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 .smallCommands {
-  padding-top: 5px;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 3px;
 }
 .smallCommands button {
   display: flex;
   align-items: center;
   gap: 7px;
-  height: 27px;
-  padding: 4px 7px;
+  height: 28px;
+  padding: 3px 9px 3px 6px;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 4px;
   background: none;
-  color: var(--ink-secondary);
+  color: var(--ink-control);
   white-space: nowrap;
   font-size: 11px;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
 }
-.smallCommands button > svg:last-child:not(:first-child) {
-  margin-left: 8px;
+.caret {
+  margin-left: 4px;
+  color: var(--ink-soft);
 }
 .smallCommands button[aria-pressed="true"] {
   background: var(--blue-soft);
-  border-color: var(--line);
-  color: var(--ink-control);
+  border-color: var(--selected-border);
+  color: var(--blue);
 }
 .smallCommands button:hover:not(:disabled) {
-  background: var(--blue-soft);
+  background: var(--paper);
+  border-color: var(--selected-border);
 }
-.demoCommands {
-  border-right: 0;
+.ribbon button:disabled {
+  opacity: 1;
+  color: var(--ink-faint);
 }
-.demoCommands .largeCommand {
-  min-width: 64px;
-  font-size: 10px;
-  gap: 10px;
-  padding-top: 10px;
+.ribbon button:disabled > svg {
+  filter: grayscale(1);
+  opacity: 0.42;
+}
+.demoCommands::after {
+  display: none;
 }
 .ribbonHelp {
   margin: auto 3px auto auto;
   border: 0;
+  border-radius: 4px;
   background: none;
   color: var(--ink-soft);
-  padding: 5px;
+  padding: 6px;
+}
+.ribbonHelp:hover:not(:disabled) {
+  background: var(--blue-soft);
+  color: var(--blue);
 }
 .contextbar {
   height: 40px;
@@ -831,10 +867,11 @@
     height: 103px;
   }
   .ribbonItems {
-    height: 70px;
+    height: 71px;
   }
   .largeCommand {
-    height: 70px;
+    height: 71px;
+    padding-top: 5px;
   }
   .treeRow {
     height: 27px;
@@ -844,15 +881,14 @@
   }
 }
 .commandDropdown {
-  width: 17px;
-  height: 30px;
+  width: 18px;
+  height: 62px;
   align-self: center;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-secondary);
-  border-radius: 3px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--ink-soft);
+  border-radius: 4px;
   padding: 0;
-  margin-left: -5px;
 }
 .commandDropdown:hover {
   border-color: var(--selected-border);

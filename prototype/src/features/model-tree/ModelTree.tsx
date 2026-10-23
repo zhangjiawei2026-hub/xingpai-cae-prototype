@@ -13,13 +13,13 @@ import {
   Workflow,
 } from "lucide-react";
 import { useStore } from "../../app/Store";
-import { CAEIcon } from "../../components/CAEIcon";
+import { CAEIcon, type CAEIconName } from "../../components/CAEIcon";
 import type { Command } from "../../types/domain";
 import s from "../workspace/Workspace.module.css";
 interface Group {
   id: string;
   label: string;
-  icon: string;
+  icon: CAEIconName;
   command?: Command;
   children: { id: string; name: string }[];
 }
@@ -59,15 +59,15 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
     {
       id: "parts",
       label: "部件",
-      icon: "box",
+      icon: "part",
       children: empty ? [] : [{ id: "part", name: "Part-1 · 安装支架" }],
     },
     { id: "materials", label: "材料", icon: "material", children: [] },
-    { id: "sections", label: "截面", icon: "material", children: [] },
+    { id: "sections", label: "截面", icon: "section", children: [] },
     {
       id: "assembly",
       label: "装配",
-      icon: "box",
+      icon: "instance",
       children: empty ? [] : [{ id: "instance", name: "Bracket-1" }],
     },
     {
@@ -80,9 +80,9 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
         ...model.steps.map((v) => ({ id: v.id, name: v.name })),
       ],
     },
-    { id: "interactions", label: "相互作用", icon: "domain", children: [] },
+    { id: "interactions", label: "相互作用", icon: "interaction", children: [] },
     { id: "loads", label: "载荷", icon: "load", children: [] },
-    { id: "boundaries", label: "边界条件", icon: "load", children: [] },
+    { id: "boundaries", label: "边界条件", icon: "boundary", children: [] },
     {
       id: "sets",
       label: "节点集合",
@@ -90,11 +90,11 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
       command: "nodeSet",
       children: model.sets.map((v) => ({ id: v.id, name: v.name })),
     },
-    { id: "elements", label: "单元集合", icon: "mesh", children: [] },
+    { id: "elements", label: "单元集合", icon: "elements", children: [] },
     {
       id: "optimization",
       label: "优化任务",
-      icon: "domain",
+      icon: "task",
       command: "domain",
       children: empty ? [] : [{ id: "task", name: "Task-1 · 拓扑优化" }],
     },

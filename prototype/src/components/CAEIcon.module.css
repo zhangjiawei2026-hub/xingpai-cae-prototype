@@ -1,0 +1,191 @@
+/* Professional CAE icon styling. Colours are prototype design tokens (tokens.css --ci-*). */
+.icon {
+  overflow: visible;
+}
+.icon * {
+  vector-effect: non-scaling-stroke;
+}
+.icon polygon,
+.icon path,
+.icon circle,
+.icon ellipse {
+  stroke: var(--ci-ink);
+  fill: none;
+}
+
+/* Iso box tones */
+.geo .f1 {
+  fill: var(--ci-geo-1);
+}
+.geo .f2 {
+  fill: var(--ci-geo-2);
+}
+.geo .f3 {
+  fill: var(--ci-geo-3);
+}
+.acc .f1 {
+  fill: var(--ci-acc-1);
+}
+.acc .f2 {
+  fill: var(--ci-acc-2);
+}
+.acc .f3 {
+  fill: var(--ci-acc-3);
+}
+.icon .acc polygon {
+  stroke: var(--ci-acc-ink);
+}
+.pale .f1 {
+  fill: var(--ci-pale-1);
+}
+.pale .f2 {
+  fill: var(--ci-pale-2);
+}
+.pale .f3 {
+  fill: var(--ci-pale-3);
+}
+.icon .pale polygon {
+  stroke: var(--ci-line);
+}
+
+/* Lines */
+.icon .dash {
+  stroke: var(--ci-line);
+  stroke-dasharray: 2.2 2;
+}
+.icon .dashThin {
+  stroke: var(--ci-line);
+  stroke-dasharray: 1.6 1.8;
+  stroke-width: 0.8;
+}
+.icon .thin {
+  stroke: var(--ci-line);
+  stroke-width: 0.8;
+}
+.icon .grid {
+  stroke: var(--ci-ink);
+  stroke-width: 0.75;
+  opacity: 0.55;
+}
+.icon .hidden {
+  stroke: var(--ci-line);
+  stroke-dasharray: 1.6 1.8;
+}
+
+/* Nodes / seeds */
+.icon .node {
+  fill: var(--ci-acc-3);
+  stroke: var(--ci-paper);
+  stroke-width: 1;
+}
+.icon .seedEdge {
+  stroke: var(--ci-acc-ink);
+  stroke-width: 1.6;
+}
+
+/* Material */
+.icon .matFill {
+  fill: var(--ci-mat-1);
+  stroke: none;
+}
+.icon .matShade {
+  fill: var(--ci-mat-2);
+  stroke: none;
+}
+.icon .matOutline {
+  stroke: var(--ci-mat-ink);
+}
+.icon .shine {
+  fill: var(--ci-paper);
+  stroke: none;
+  opacity: 0.9;
+}
+.icon .matBack {
+  fill: var(--ci-mat-2);
+  stroke: var(--ci-mat-ink);
+}
+.icon .matFront {
+  fill: var(--ci-mat-1);
+  stroke: var(--ci-mat-ink);
+}
+
+/* Analysis */
+.icon .anaSoft {
+  fill: var(--ci-ana-1);
+  stroke: none;
+}
+.icon .anaLine {
+  stroke: var(--ci-ana-ink);
+  stroke-width: 2.2;
+}
+.icon .anaArrow {
+  stroke: var(--ci-ana-ink);
+  stroke-width: 1.6;
+}
+.icon .anaDot {
+  fill: var(--ci-paper);
+  stroke: var(--ci-ana-ink);
+  stroke-width: 1.4;
+}
+.icon .target {
+  fill: var(--ci-acc-3);
+  stroke: var(--ci-paper);
+  stroke-width: 1.2;
+}
+
+/* Loads / supports */
+.icon .force {
+  stroke: var(--ci-force);
+  stroke-width: 1.8;
+}
+.icon .support {
+  fill: var(--ci-force-soft);
+  stroke: var(--ci-force);
+}
+.icon .contact {
+  fill: var(--ci-acc-2);
+  stroke: var(--ci-acc-ink);
+}
+
+/* Element */
+.icon .tetA {
+  fill: var(--ci-geo-1);
+}
+.icon .tetB {
+  fill: var(--ci-geo-3);
+}
+
+/* View axes */
+.icon .axX {
+  stroke: var(--ci-axis-x);
+  stroke-width: 1.6;
+}
+.icon .axY {
+  stroke: var(--ci-axis-y);
+  stroke-width: 1.6;
+}
+.icon .axZ {
+  stroke: var(--ci-axis-z);
+  stroke-width: 1.6;
+}
+.icon .origin {
+  fill: var(--ci-ink);
+  stroke: none;
+}
+
+/* Action badge */
+.icon .badge {
+  fill: var(--ci-badge);
+  stroke: var(--ci-badge-ring, var(--surface));
+  stroke-width: 1.6;
+}
+.icon .badgeDanger {
+  fill: var(--ci-badge-danger);
+}
+.icon .badgeGlyph {
+  stroke: var(--ci-paper);
+  stroke-width: 1.25;
+}
+.icon .axis {
+  stroke: var(--ci-ink);
+}

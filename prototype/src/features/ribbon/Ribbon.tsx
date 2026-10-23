@@ -1,51 +1,85 @@
-import {
-  ChevronDown,
-  Expand,
-  RotateCcw,
-  ListTree,
-  PanelBottom,
-  Info,
-} from "lucide-react";
+import { ChevronDown, ListTree, PanelBottom, Info } from "lucide-react";
 import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { useState } from "react";
 import { useStore } from "../../app/Store";
 import type { Command, Module } from "../../types/domain";
-import { CAEIcon } from "../../components/CAEIcon";
+import {
+  CAEIcon,
+  type CAEIconBadge,
+  type CAEIconName,
+} from "../../components/CAEIcon";
 import s from "../workspace/Workspace.module.css";
+type SmallCommand = { label: string; icon: CAEIconName; badge?: CAEIconBadge };
 const primary: Record<
   Module,
-  { icon: string; label: string; command?: Command; small: string[] }
+  { icon: CAEIconName; label: string; command?: Command; small: SmallCommand[] }
 > = {
-  Part: { icon: "box", label: "创建部件", small: ["编辑部件", "删除部件"] },
+  Part: {
+    icon: "part",
+    label: "创建部件",
+    small: [
+      { label: "编辑部件", icon: "part", badge: "edit" },
+      { label: "删除部件", icon: "part", badge: "delete" },
+    ],
+  },
   Property: {
     icon: "material",
     label: "创建材料",
-    small: ["截面定义", "属性指派"],
+    small: [
+      { label: "截面定义", icon: "section" },
+      { label: "属性指派", icon: "section", badge: "assign" },
+    ],
   },
-  Assembly: { icon: "box", label: "创建实例", small: ["平移实例", "旋转实例"] },
+  Assembly: {
+    icon: "instance",
+    label: "创建实例",
+    small: [
+      { label: "平移实例", icon: "instance", badge: "move" },
+      { label: "旋转实例", icon: "instance", badge: "rotate" },
+    ],
+  },
   Step: {
     icon: "step",
     label: "创建分析步",
     command: "step",
-    small: ["编辑分析步", "分析步管理"],
+    small: [
+      { label: "编辑分析步", icon: "step", badge: "edit" },
+      { label: "分析步管理", icon: "step", badge: "manage" },
+    ],
   },
   Interaction: {
-    icon: "domain",
+    icon: "interaction",
     label: "创建相互作用",
-    small: ["接触属性", "约束管理"],
+    small: [
+      { label: "接触属性", icon: "interaction", badge: "edit" },
+      { label: "约束管理", icon: "interaction", badge: "manage" },
+    ],
   },
-  Load: { icon: "load", label: "创建载荷", small: ["边界条件", "载荷管理"] },
+  Load: {
+    icon: "load",
+    label: "创建载荷",
+    small: [
+      { label: "边界条件", icon: "boundary" },
+      { label: "载荷管理", icon: "load", badge: "manage" },
+    ],
+  },
   Mesh: {
     icon: "nodes",
     label: "创建节点集合",
     command: "nodeSet",
-    small: ["编辑节点集合", "集合管理"],
+    small: [
+      { label: "编辑节点集合", icon: "nodes", badge: "edit" },
+      { label: "集合管理", icon: "nodes", badge: "manage" },
+    ],
   },
   Optimization: {
     icon: "domain",
     label: "创建设计域",
     command: "domain",
-    small: ["编辑设计域", "优化任务管理"],
+    small: [
+      { label: "编辑设计域", icon: "domain", badge: "edit" },
+      { label: "优化任务管理", icon: "task", badge: "manage" },
+    ],
   },
 };
 export function Ribbon({
@@ -92,12 +126,11 @@ export function Ribbon({
               item.command && dispatch({ type: "open", command: item.command })
             }
           >
-            <CAEIcon name={item.icon} size={32} />
+            <CAEIcon name={item.icon} size={32} badge="add" />
             <span>{item.label}</span>
-            {item.command && <small>新建</small>}
           </button>
           <div className={s.smallCommands}>
-            {item.small.map((label, i) => (
+            {item.small.map(({ label, icon, badge }, i) => (
               <button
                 key={label}
                 disabled={
@@ -118,9 +151,8 @@ export function Ribbon({
                   })
                 }
               >
-                <CAEIcon name={i ? "box" : item.icon} size={17} />
+                <CAEIcon name={icon} size={18} badge={badge} />
                 {label}
-                <ChevronDown size={10} />
               </button>
             ))}
           </div>
@@ -147,17 +179,19 @@ export function Ribbon({
             disabled
             title="真实网格生成功能未接入"
           >
-            <CAEIcon name="mesh" size={31} />
-            <span>生成网格</span>
-            <ChevronDown size={10} />
+            <CAEIcon name="mesh" size={32} />
+            <span className={s.splitLabel}>
+              生成网格
+              <ChevronDown size={10} />
+            </span>
           </button>
           <div className={s.smallCommands}>
             <button disabled title="未接入真实网格能力">
-              <CAEIcon name="nodes" size={17} />
+              <CAEIcon name="seed" size={18} />
               种子布置
             </button>
             <button disabled title="未接入真实网格能力">
-              <CAEIcon name="domain" size={17} />
+              <CAEIcon name="elementType" size={18} />
               单元类型
             </button>
           </div>
@@ -167,18 +201,18 @@ export function Ribbon({
       <div className={s.ribbonGroup}>
         <div className={s.ribbonItems}>
           <button className={s.largeCommand} onClick={onFit}>
-            <Expand size={27} strokeWidth={1.3} />
+            <CAEIcon name="fit" size={32} />
             <span>适合窗口</span>
           </button>
           <div className={s.smallCommands}>
             <button onClick={onIso}>
-              <RotateCcw size={16} />
+              <CAEIcon name="iso" size={18} />
               等轴测视图
             </button>
             <button disabled title="首轮仅显示一个演示部件">
-              <CAEIcon name="box" size={16} />
+              <CAEIcon name="part" size={18} badge="view" />
               显示 / 隐藏
-              <ChevronDown size={10} />
+              <ChevronDown className={s.caret} size={10} />
             </button>
           </div>
         </div>
@@ -188,11 +222,11 @@ export function Ribbon({
         <div className={s.ribbonItems}>
           <div className={s.smallCommands}>
             <button aria-pressed={treeVisible} onClick={onToggleTree}>
-              <ListTree size={16} />
+              <ListTree size={18} strokeWidth={1.5} />
               模型树
             </button>
             <button aria-pressed={logVisible} onClick={onToggleLog}>
-              <PanelBottom size={16} />
+              <PanelBottom size={18} strokeWidth={1.5} />
               信息窗口
             </button>
           </div>
@@ -214,7 +248,7 @@ export function Ribbon({
               disabled={empty || !!state.command}
               onClick={() => dispatch({ type: "open", command: i.command })}
             >
-              <CAEIcon name={i.icon} size={26} />
+              <CAEIcon name={i.icon} size={32} />
               <span>{i.label}</span>
             </button>
           ))}

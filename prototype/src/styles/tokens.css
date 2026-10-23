@@ -48,6 +48,33 @@
   --selection-border: #dbaa53;
   --shadow: #0a1424;
 
+  /* Professional CAE icon palette (prototype design values). */
+  --ci-ink: #34506f;
+  --ci-line: #7f97b1;
+  --ci-paper: #ffffff;
+  --ci-geo-1: #f1f7fe;
+  --ci-geo-2: #cfe0f5;
+  --ci-geo-3: #a6c4e8;
+  --ci-pale-1: #fafcfe;
+  --ci-pale-2: #e9eff6;
+  --ci-pale-3: #dbe4ee;
+  --ci-acc-1: #fff0d6;
+  --ci-acc-2: #fbcf86;
+  --ci-acc-3: #f0a33a;
+  --ci-acc-ink: #b9720f;
+  --ci-mat-1: #e7e2fc;
+  --ci-mat-2: #bfb3f1;
+  --ci-mat-ink: #5b4fa8;
+  --ci-ana-1: #cdece6;
+  --ci-ana-ink: #188a80;
+  --ci-force: #df5f2c;
+  --ci-force-soft: #fde3d6;
+  --ci-axis-x: #d9534a;
+  --ci-axis-y: #3a9d5d;
+  --ci-axis-z: #3c74d6;
+  --ci-badge: #2f6fd6;
+  --ci-badge-danger: #cf4636;
+
   font-size: 12px;
   font-weight: 400;
 }
