@@ -198,7 +198,7 @@ export function Viewport() {
                 </text>
               </g>
             ))}
-            <circle cx="38" cy="36" r="3" fill="#becfdf" />
+            <circle cx="38" cy="36" r="3" fill="#7c8796" />
           </svg>
         </div>
         <div className={s.stats}>

@@ -1,4 +1,15 @@
+/* Light viewport theme: remap the shared view tokens locally. */
 .viewport {
+  --viewport: #e6ecf2;
+  --view-grid: #f8fafc;
+  --view-panel: var(--paper);
+  --view-raised: var(--line);
+  --view-border: #d3dce6;
+  --view-hover: var(--blue-soft);
+  --viewport-ink: var(--ink-control);
+  --view-dim: var(--muted);
+  --view-bright: var(--ink);
+  --cyan: #3d9fc4;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -13,7 +24,7 @@
   justify-content: space-between;
   padding: 0 15px;
   background: var(--view-panel);
-  color: var(--control-border);
+  color: var(--ink);
   border-bottom: 1px solid var(--view-raised);
 }
 .tabbar > span:first-child {
@@ -84,7 +95,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: color-mix(in srgb, var(--view-grid) 91%, transparent);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--shadow) 8%, transparent);
   border: 1px solid var(--view-border);
   border-radius: 5px;
   padding: 5px;
@@ -114,7 +126,8 @@
   display: grid;
   grid-template-columns: repeat(2, 28px);
   gap: 4px;
-  background: color-mix(in srgb, var(--view-grid) 91%, transparent);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--shadow) 8%, transparent);
   border: 1px solid var(--view-border);
   border-radius: 5px;
   padding: 5px;
@@ -136,7 +149,7 @@
 }
 .navigator button[aria-pressed="true"] {
   background: var(--view-hover);
-  color: var(--view-bright);
+  color: var(--blue);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 55%, transparent);
 }
 .faceOff {
@@ -248,7 +261,7 @@
 }
 .pickbar button {
   background: var(--paper);
-  border: 1px solid var(--view-bright);
+  border: 1px solid var(--control-border);
   padding: 6px 9px;
   border-radius: 3px;
   font-size: 11px;

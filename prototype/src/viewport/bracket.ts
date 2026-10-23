@@ -107,9 +107,9 @@ export function makeBracket() {
     const edge = new THREE.LineSegments(
       new THREE.EdgesGeometry(geometry, 30),
       new THREE.LineBasicMaterial({
-        color: "#b9e0e7",
+        color: "#2f5a6b",
         transparent: true,
-        opacity: 0.65,
+        opacity: 0.7,
       }),
     );
     group.add(edge);
