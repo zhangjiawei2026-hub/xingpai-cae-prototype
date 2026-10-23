@@ -110,38 +110,44 @@
 .navigator {
   position: absolute;
   top: 21px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 3px;
+  right: 19px;
+  display: grid;
+  grid-template-columns: repeat(2, 28px);
+  gap: 4px;
+  background: color-mix(in srgb, var(--view-grid) 91%, transparent);
+  border: 1px solid var(--view-border);
+  border-radius: 5px;
+  padding: 5px;
 }
 .navigator button {
-  background: var(--view-raised);
-  border: 1px solid var(--title-line);
-  width: 36px;
+  width: 28px;
   height: 28px;
-  color: var(--viewport-ink);
-  font-size: 10px;
-  border-radius: 2px;
-}
-.navigator > div {
-  display: flex;
-  gap: 3px;
-}
-.navigator button:hover,
-.navigator button[aria-pressed="true"] {
-  color: var(--blue-soft);
-  border-color: var(--ink-soft);
-  background: var(--view-hover);
-}
-.navigator .iso {
-  width: 75px;
-  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
   border: 0;
-  background: transparent;
-  font-size: 9px;
-  color: var(--view-dim);
+  color: var(--viewport-ink);
+  border-radius: 3px;
+}
+.navigator button:hover {
+  background: var(--view-hover);
+  color: var(--view-bright);
+}
+.navigator button[aria-pressed="true"] {
+  background: var(--view-hover);
+  color: var(--view-bright);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 55%, transparent);
+}
+.faceOff {
+  fill: transparent;
+}
+.faceOn {
+  fill: color-mix(in srgb, var(--cyan) 48%, transparent);
+}
+.navigator button[aria-pressed="true"] .faceOn {
+  fill: color-mix(in srgb, var(--cyan) 75%, transparent);
+  stroke: var(--cyan);
 }
 .axes {
   position: absolute;

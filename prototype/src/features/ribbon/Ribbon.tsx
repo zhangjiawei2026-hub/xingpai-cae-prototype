@@ -114,17 +114,31 @@ export function Ribbon({
         : item.command === "domain"
           ? model.domains.find((v) => v.id === state.selectedTree)
           : undefined;
+  const locked = empty || !!state.command;
+  // Commands outside this prototype stay visually available but semantically
+  // disabled; clicking explains why instead of faking a result.
+  const unavailable = (label: string, reason = "首轮原型未接入此命令") => ({
+    "aria-disabled": true as const,
+    "data-pending": "",
+    disabled: !!state.command,
+    title: `${label} · ${reason}`,
+    onClick: () => dispatch({ type: "notice", value: `「${label}」${reason}` }),
+  });
   return (
     <div className={s.ribbon} aria-label="Ribbon 功能区">
       <div className={s.ribbonGroup}>
         <div className={s.ribbonItems}>
           <button
             className={`${s.largeCommand} ${item.command ? s.featured : ""}`}
-            disabled={!item.command || empty || !!state.command}
-            title={item.command ? item.label : "此命令未纳入首轮原型"}
-            onClick={() =>
-              item.command && dispatch({ type: "open", command: item.command })
-            }
+            {...(item.command
+              ? {
+                  disabled: locked,
+                  title: item.label,
+                  onClick: () =>
+                    item.command &&
+                    dispatch({ type: "open", command: item.command }),
+                }
+              : unavailable(item.label))}
           >
             <CAEIcon
               name={item.icon}
@@ -138,23 +152,21 @@ export function Ribbon({
             {item.small.map(({ label, icon, badge }, i) => (
               <button
                 key={label}
-                disabled={
-                  i !== 0 || !item.command || !selected || !!state.command
-                }
-                title={
-                  i === 0 && item.command
-                    ? "选中已有对象后编辑；模型树也支持双击或 F2"
-                    : "此命令未纳入首轮原型"
-                }
-                onClick={() =>
-                  item.command &&
-                  selected &&
-                  dispatch({
-                    type: "open",
-                    command: item.command,
-                    id: selected.id,
-                  })
-                }
+                {...(i !== 0 || !item.command
+                  ? unavailable(label)
+                  : !selected
+                    ? unavailable(label, "请先在模型树中选中要编辑的对象")
+                    : {
+                        disabled: !!state.command,
+                        title: "编辑选中对象；模型树也支持双击或 F2",
+                        onClick: () =>
+                          item.command &&
+                          dispatch({
+                            type: "open",
+                            command: item.command,
+                            id: selected.id,
+                          }),
+                      })}
               >
                 <CAEIcon name={icon} size={18} badge={badge} />
                 {label}
@@ -181,8 +193,7 @@ export function Ribbon({
         <div className={s.ribbonItems}>
           <button
             className={s.largeCommand}
-            disabled
-            title="真实网格生成功能未接入"
+            {...unavailable("生成网格", "真实网格生成功能未接入")}
           >
             <CAEIcon name="mesh" size={32} />
             <span className={s.splitLabel}>
@@ -191,11 +202,11 @@ export function Ribbon({
             </span>
           </button>
           <div className={s.smallCommands}>
-            <button disabled title="未接入真实网格能力">
+            <button {...unavailable("种子布置", "未接入真实网格能力")}>
               <CAEIcon name="seed" size={18} />
               种子布置
             </button>
-            <button disabled title="未接入真实网格能力">
+            <button {...unavailable("单元类型", "未接入真实网格能力")}>
               <CAEIcon name="elementType" size={18} />
               单元类型
             </button>
@@ -214,7 +225,7 @@ export function Ribbon({
               <CAEIcon name="iso" size={18} />
               等轴测视图
             </button>
-            <button disabled title="首轮仅显示一个演示部件">
+            <button {...unavailable("显示 / 隐藏", "首轮仅显示一个演示部件")}>
               <CAEIcon name="part" size={18} badge="view" />
               显示 / 隐藏
               <ChevronDown className={s.caret} size={10} />
@@ -250,7 +261,7 @@ export function Ribbon({
             <button
               key={i.command}
               className={s.largeCommand}
-              disabled={empty || !!state.command}
+              disabled={locked}
               onClick={() => dispatch({ type: "open", command: i.command })}
             >
               <CAEIcon name={i.icon} size={32} />

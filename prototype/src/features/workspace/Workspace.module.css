@@ -344,7 +344,20 @@
 }
 .ribbon button:disabled > svg {
   filter: grayscale(1);
-  opacity: 0.42;
+  opacity: 0.45;
+}
+/* Not in this prototype: full-colour but marked aria-disabled; click explains why. */
+.ribbon button[data-pending]:not(:disabled) {
+  cursor: help;
+  color: var(--ink-secondary);
+}
+.ribbon button[data-pending]:not(:disabled):hover {
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border-color: var(--line);
+  box-shadow: none;
+}
+.ribbon button[data-pending]:not(:disabled):hover > svg {
+  transform: none;
 }
 .demoCommands::after {
   display: none;
