@@ -294,3 +294,5 @@
     height: 24px;
   }
 }
+
+.picklist { flex-wrap: wrap; }

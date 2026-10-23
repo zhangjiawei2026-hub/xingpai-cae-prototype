@@ -33,6 +33,9 @@ export interface DesignDomain {
   minSize: string;
   maxSize: string;
   drawEnabled: boolean;
+  drawMaxSize?: string;
+  multiEnabled?: boolean;
+  multiType?: "section" | "material";
   base: number[];
   direction: number[];
 }
@@ -54,6 +57,7 @@ export interface WorkState {
   selectedTree: string;
   models: Record<string, ModelData>;
   command: Command | null;
+  editingId?: string;
   selection: SelectionSession | null;
   selectionResult: { target: SelectionSession["target"]; ids: number[] } | null;
   logs: string[];
@@ -64,7 +68,7 @@ export type Action =
   | { type: "model"; value: string }
   | { type: "step"; value: string }
   | { type: "tree"; value: string }
-  | { type: "open"; command: Command }
+  | { type: "open"; command: Command; id?: string }
   | { type: "close" }
   | { type: "pick"; session: SelectionSession }
   | { type: "toggle"; id: number }

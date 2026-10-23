@@ -5,16 +5,21 @@ import { Dialog, FormRow, formStyles as s } from "../../components/Dialog";
 export function StepDialog() {
   const { state, dispatch } = useStore();
   const model = state.models[state.model];
+  const existing = model.steps.find((v) => v.id === state.editingId);
   const [phase, setPhase] = useState(1),
-    [name, setName] = useState(`Step-${model.steps.length + 1}`),
+    [name, setName] = useState(
+      existing?.name ?? `Step-${model.steps.length + 1}`,
+    ),
     [error, setError] = useState("");
-  const [nonlinear, setNonlinear] = useState(false),
-    [increment, setIncrement] = useState<"auto" | "manual">("auto");
+  const [nonlinear, setNonlinear] = useState(existing?.nonlinear ?? false),
+    [increment, setIncrement] = useState<"auto" | "manual">(
+      existing?.increment ?? "auto",
+    );
   const [values, setValues] = useState({
-    initial: "",
-    min: "",
-    max: "",
-    iterations: "",
+    initial: existing?.initial ?? "",
+    min: existing?.min ?? "",
+    max: existing?.max ?? "",
+    iterations: existing?.iterations ?? "",
   });
   const validate = () => {
     if (!name.trim()) {
@@ -23,7 +28,9 @@ export function StepDialog() {
     }
     if (
       name.trim() === "Initial" ||
-      model.steps.some((step) => step.name === name.trim())
+      model.steps.some(
+        (step) => step.id !== existing?.id && step.name === name.trim(),
+      )
     ) {
       setError("本演示中分析步名称需唯一。");
       return false;
@@ -33,7 +40,7 @@ export function StepDialog() {
   };
   return (
     <Dialog
-      title="创建分析步"
+      title={existing ? "编辑分析步" : "创建分析步"}
       subtitle="类型选择与参数配置"
       error={error}
       footer={
@@ -53,7 +60,7 @@ export function StepDialog() {
                 dispatch({
                   type: "addStep",
                   value: {
-                    id: crypto.randomUUID(),
+                    id: existing?.id ?? crypto.randomUUID(),
                     name: name.trim(),
                     procedure: "静力，通用",
                     nonlinear,
@@ -63,7 +70,7 @@ export function StepDialog() {
                 });
             }}
           >
-            {phase === 1 ? "继续" : "创建分析步"}
+            {phase === 1 ? "继续" : existing ? "保存分析步" : "创建分析步"}
           </button>
         </>
       }
@@ -86,7 +93,11 @@ export function StepDialog() {
             <input
               readOnly
               aria-label="插入位置"
-              value={`在 ${state.step} 之后（演示）`}
+              value={
+                existing
+                  ? "保留当前列表位置（演示）"
+                  : "追加到分析步列表末尾（演示）"
+              }
             />
           </FormRow>
           <FormRow label="过程分类">

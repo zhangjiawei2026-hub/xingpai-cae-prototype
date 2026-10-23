@@ -195,6 +195,27 @@ export function Viewport() {
         </div>
         {selection && (
           <div className={s.pickbar}>
+            <div className={s.picklist} role="group" aria-label="专业选择方式">
+              <span>
+                当前字段：
+                {
+                  {
+                    nodes: "节点集合",
+                    elements: "优化区域",
+                    base: "基准点",
+                    direction: "第一点",
+                  }[selection.target]
+                }
+              </span>
+              <button aria-pressed="true" title="逐项点选，可累积多个演示对象">
+                单选 · 已激活
+              </button>
+              {["框选", "几何面关联", "角度关联", "集合选择"].map((method) => (
+                <button key={method} disabled title="专业选择算法未接入">
+                  {method} · 未接入
+                </button>
+              ))}
+            </div>
             <div className={s.pickhead}>
               <span className={s.pulse} />
               <strong>正在选择 {selection.entity}</strong>

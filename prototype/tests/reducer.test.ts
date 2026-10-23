@@ -86,3 +86,36 @@ describe("工作区状态边界", () => {
     expect(next.selectionResult).toBeNull();
   });
 });
+
+describe("已有对象编辑", () => {
+  it("取消保留原对象，保存按 ID 替换且不新增", () => {
+    const original = initialState();
+    const editing = reducer(original, {
+      type: "open",
+      command: "nodeSet",
+      id: "fixture",
+    });
+    expect(reducer(editing, { type: "close" }).models).toBe(original.models);
+    const saved = reducer(editing, {
+      type: "addSet",
+      value: { id: "fixture", name: "Changed", nodes: [8] },
+    });
+    expect(saved.models["Model-1"].sets).toEqual([
+      { id: "fixture", name: "Changed", nodes: [8] },
+    ]);
+    expect(original.models["Model-1"].sets[0].name).toBe("Fixture-nodes");
+    expect(saved.editingId).toBeUndefined();
+  });
+  it("拒绝不存在的对象及提交 ID 错配", () => {
+    const state = initialState();
+    expect(
+      reducer(state, { type: "open", command: "domain", id: "fixture" }),
+    ).toBe(state);
+    const editing = reducer(state, {
+      type: "open",
+      command: "nodeSet",
+      id: "fixture",
+    });
+    expect(reducer(editing, add)).toBe(editing);
+  });
+});

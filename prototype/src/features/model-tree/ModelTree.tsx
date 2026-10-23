@@ -1,5 +1,5 @@
 import { rememberDialogTrigger } from "../../components/dialogFocus";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Search,
   ChevronDown,
@@ -25,6 +25,8 @@ interface Group {
 }
 export function ModelTree({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useStore();
+  const treeRef = useRef<HTMLDivElement>(null);
+  const focusedId = useRef("");
   const model = state.models[state.model],
     empty = state.model === "Model-Empty";
   const [tab, setTab] = useState("model"),
@@ -107,6 +109,31 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
       model.domains.some((domain) =>
         domain.name.toLowerCase().includes(search.toLowerCase()),
       ));
+  const editObject = (id: string, trigger: HTMLElement) => {
+    const command = model.sets.some((v) => v.id === id)
+      ? "nodeSet"
+      : model.steps.some((v) => v.id === id)
+        ? "step"
+        : model.domains.some((v) => v.id === id)
+          ? "domain"
+          : null;
+    if (!command) return;
+    rememberDialogTrigger(trigger);
+    dispatch({ type: "open", command, id });
+  };
+  useEffect(() => {
+    const items = Array.from(
+      treeRef.current?.querySelectorAll<HTMLButtonElement>(
+        '[role="treeitem"]',
+      ) ?? [],
+    );
+    const current =
+      items.find((item) => item.dataset.id === focusedId.current) ?? items[0];
+    items.forEach((item) => {
+      item.tabIndex = item === current ? 0 : -1;
+    });
+    if (current) focusedId.current = current.dataset.id ?? "";
+  });
   return (
     <aside className={s.sidebar} aria-label="模型导航">
       <div className={s.treeTabs} role="tablist" aria-label="导航树类型">
@@ -177,7 +204,74 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                 <Plus size={14} />
               </button>
             </div>
-            <div role="tree" aria-label="模型对象" className={s.tree}>
+            <div
+              ref={treeRef}
+              role="tree"
+              aria-label="模型对象"
+              className={s.tree}
+              onFocus={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.getAttribute("role") !== "treeitem") return;
+                focusedId.current = target.dataset.id ?? "";
+                treeRef.current
+                  ?.querySelectorAll<HTMLElement>('[role="treeitem"]')
+                  .forEach((item) => {
+                    item.tabIndex = item === target ? 0 : -1;
+                  });
+              }}
+              onKeyDown={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.getAttribute("role") !== "treeitem") return;
+                const items = Array.from(
+                  treeRef.current!.querySelectorAll<HTMLElement>(
+                    '[role="treeitem"]',
+                  ),
+                );
+                const index = items.indexOf(target);
+                const id = target.dataset.id!;
+                let next: HTMLElement | undefined;
+                if (e.key === "ArrowDown")
+                  next = items[Math.min(items.length - 1, index + 1)];
+                else if (e.key === "ArrowUp")
+                  next = items[Math.max(0, index - 1)];
+                else if (e.key === "Home") next = items[0];
+                else if (e.key === "End") next = items.at(-1);
+                else if (e.key === "ArrowRight") {
+                  if (target.getAttribute("aria-expanded") === "false")
+                    setExpanded([...expanded, id]);
+                  else if (items[index + 1]?.dataset.parent === id)
+                    next = items[index + 1];
+                } else if (e.key === "ArrowLeft") {
+                  if (
+                    target.getAttribute("aria-expanded") === "true" &&
+                    !search
+                  )
+                    setExpanded(expanded.filter((v) => v !== id));
+                  else
+                    next = items.find(
+                      (item) => item.dataset.id === target.dataset.parent,
+                    );
+                } else if (e.key === "F2") editObject(id, target);
+                else return;
+                e.preventDefault();
+                next?.focus();
+              }}
+              onDoubleClick={(e) => {
+                const target = (e.target as HTMLElement).closest<HTMLElement>(
+                  '[role="treeitem"]',
+                );
+                if (target) editObject(target.dataset.id!, target);
+              }}
+              onContextMenu={(e) => {
+                const target = (e.target as HTMLElement).closest<HTMLElement>(
+                  '[role="treeitem"]',
+                );
+                if (target && !groups.some((g) => g.id === target.dataset.id)) {
+                  e.preventDefault();
+                  editObject(target.dataset.id!, target);
+                }
+              }}
+            >
               {groups.filter(matches).map((group) => {
                 const open = expanded.includes(group.id) || !!search;
                 return (
@@ -196,6 +290,9 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                     >
                       <button
                         role="treeitem"
+                        data-id={group.id}
+                        aria-level={1}
+                        tabIndex={-1}
                         aria-expanded={open}
                         onClick={() =>
                           setExpanded(
@@ -217,6 +314,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                       {group.command && !empty && (
                         <button
                           className={s.treeCreate}
+                          tabIndex={-1}
                           disabled={!!state.command}
                           aria-label={`从树创建${group.id === "steps" ? "分析步" : group.id === "sets" ? "节点集合" : "设计域"}`}
                           title="创建"
@@ -249,6 +347,10 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                             <button
                               key={c.id}
                               role="treeitem"
+                              data-id={c.id}
+                              data-parent={group.id}
+                              aria-level={2}
+                              tabIndex={-1}
                               aria-selected={state.selectedTree === c.id}
                               aria-expanded={
                                 c.id === "task"
@@ -307,6 +409,10 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                                   <button
                                     key={domain.id}
                                     role="treeitem"
+                                    data-id={domain.id}
+                                    data-parent="task"
+                                    aria-level={3}
+                                    tabIndex={-1}
                                     className={s.treeChild}
                                     aria-selected={
                                       state.selectedTree === domain.id

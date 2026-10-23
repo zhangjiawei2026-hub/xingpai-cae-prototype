@@ -39,13 +39,13 @@ const primary: Record<
     icon: "nodes",
     label: "创建节点集合",
     command: "nodeSet",
-    small: ["创建单元集合", "集合管理"],
+    small: ["编辑节点集合", "集合管理"],
   },
   Optimization: {
     icon: "domain",
     label: "创建设计域",
     command: "domain",
-    small: ["优化指标函数", "优化任务管理"],
+    small: ["编辑设计域", "优化任务管理"],
   },
 };
 export function Ribbon({
@@ -69,6 +69,17 @@ export function Ribbon({
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
   const item = primary[state.module],
     empty = state.model === "Model-Empty";
+  const model = state.models[state.model];
+  const selected =
+    item.command === "nodeSet"
+      ? model.sets.find((v) => v.id === state.selectedTree)
+      : item.command === "step"
+        ? model.steps.find(
+            (v) => v.id === state.selectedTree || v.name === state.step,
+          )
+        : item.command === "domain"
+          ? model.domains.find((v) => v.id === state.selectedTree)
+          : undefined;
   return (
     <div className={s.ribbon} aria-label="Ribbon 功能区">
       <div className={s.ribbonGroup}>
@@ -87,7 +98,26 @@ export function Ribbon({
           </button>
           <div className={s.smallCommands}>
             {item.small.map((label, i) => (
-              <button key={label} disabled title="此命令未纳入首轮原型">
+              <button
+                key={label}
+                disabled={
+                  i !== 0 || !item.command || !selected || !!state.command
+                }
+                title={
+                  i === 0 && item.command
+                    ? "选中已有对象后编辑；模型树也支持双击或 F2"
+                    : "此命令未纳入首轮原型"
+                }
+                onClick={() =>
+                  item.command &&
+                  selected &&
+                  dispatch({
+                    type: "open",
+                    command: item.command,
+                    id: selected.id,
+                  })
+                }
+              >
                 <CAEIcon name={i ? "box" : item.icon} size={17} />
                 {label}
                 <ChevronDown size={10} />

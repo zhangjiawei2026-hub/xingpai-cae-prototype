@@ -5,8 +5,11 @@ import { Dialog, FormRow, formStyles as s } from "../../components/Dialog";
 export function NodeSetDialog() {
   const { state, dispatch } = useStore();
   const model = state.models[state.model];
-  const [name, setName] = useState(`Nset-${model.sets.length + 1}`),
-    [nodes, setNodes] = useState<number[]>([]),
+  const existing = model.sets.find((v) => v.id === state.editingId);
+  const [name, setName] = useState(
+      existing?.name ?? `Nset-${model.sets.length + 1}`,
+    ),
+    [nodes, setNodes] = useState<number[]>(existing?.nodes ?? []),
     [error, setError] = useState("");
   const [collections, setCollections] = useState(false);
   useEffect(() => {
@@ -17,25 +20,33 @@ export function NodeSetDialog() {
   }, [state.selectionResult, dispatch]);
   const save = () => {
     if (!name.trim()) return setError("请输入集合名称。");
-    if (model.sets.some((set) => set.name === name.trim()))
+    if (
+      model.sets.some(
+        (set) => set.id !== existing?.id && set.name === name.trim(),
+      )
+    )
       return setError("本演示中集合名称需唯一，请修改名称。");
     if (!nodes.length)
       return setError("请先拾取至少一个演示节点，或从已有集合读取。");
     dispatch({
       type: "addSet",
-      value: { id: crypto.randomUUID(), name: name.trim(), nodes },
+      value: {
+        id: existing?.id ?? crypto.randomUUID(),
+        name: name.trim(),
+        nodes,
+      },
     });
   };
   return (
     <Dialog
-      title="创建节点集合"
+      title={existing ? "编辑节点集合" : "创建节点集合"}
       subtitle="定义一组可重复使用的节点"
       error={error}
       footer={
         <>
           <button onClick={() => dispatch({ type: "close" })}>取消</button>
           <button className={s.primary} onClick={save}>
-            创建集合
+            {existing ? "保存集合" : "创建集合"}
           </button>
         </>
       }

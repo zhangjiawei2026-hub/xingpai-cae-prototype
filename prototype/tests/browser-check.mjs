@@ -565,6 +565,97 @@ try {
       await shot(`fit-restored-${width}`);
     }
   });
+
+  await check("A01–A06 编辑闭环、字段结构和树键盘", async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const tree = page.getByRole("tree");
+    const parts = tree.locator('[data-id="parts"]');
+    await parts.focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(parts).toHaveAttribute("aria-expanded", "false");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect(tree.locator('[data-id="part"]')).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
+    await expect(parts).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(tree.locator('[data-id="part"]')).toBeFocused();
+    await page.keyboard.press("End");
+    await expect(tree.locator('[role="treeitem"][tabindex="0"]')).toHaveCount(
+      1,
+    );
+    for (const [name, input, value, save] of [
+      ["Review-nodes", "集合名称", "Review-nodes", "保存集合"],
+      ["Review-step", "分析步名称", "Review-step", "保存分析步"],
+      ["Review-domain", "设计域名称", "Review-domain", "保存设计域"],
+    ]) {
+      const object = page.getByRole("treeitem", { name, exact: true });
+      await object.dblclick();
+      await expect(field(input)).toHaveValue(value);
+      await field(input).fill("Unsaved");
+      await button("取消").click();
+      await expect(object).toBeFocused();
+      await object.click();
+      await button(
+        name.includes("nodes")
+          ? "编辑节点集合"
+          : name.includes("step")
+            ? "编辑分析步"
+            : "编辑设计域",
+      ).click();
+      await expect(field(input)).toHaveValue(value);
+      if (name.includes("step")) await button("继续").click();
+      if (name.includes("domain")) {
+        for (const tab of ["基础", "最大尺寸", "脱模"]) {
+          await page.getByRole("tab", { name: tab, exact: true }).click();
+          await expect(
+            page.getByRole("group", { name: "多材料/多截面优化", exact: true }),
+          ).toBeVisible();
+        }
+        await field("脱模方向上的结构最大尺寸").fill("12");
+        await expect(
+          page.getByRole("combobox", { name: "脱模类型", exact: true }),
+        ).toHaveValue("SINGLE");
+        await expect(button("选择障碍物 · 未接入")).toBeDisabled();
+        await page
+          .getByRole("checkbox", { name: "激活多材料/多截面优化", exact: true })
+          .check();
+        await page.getByRole("radio", { name: "截面", exact: true }).check();
+        await shot("fixed-domain-draw");
+        await button("选择基准点").click();
+        await expect(
+          page.getByRole("group", { name: "专业选择方式" }),
+        ).toContainText("基准点");
+        await expect(button("框选 · 未接入")).toBeDisabled();
+        await shot("fixed-selection-tools");
+        await button("选择Node 3").click();
+        await button("取消拾取").click();
+      }
+      await button(save).click();
+      await expect(object).toHaveCount(1);
+      await object.dblclick();
+      if (name.includes("domain")) {
+        await page.getByRole("tab", { name: "脱模", exact: true }).click();
+        await expect(field("脱模方向上的结构最大尺寸")).toHaveValue("12");
+        await expect(
+          page.getByRole("radio", { name: "截面", exact: true }),
+        ).toBeChecked();
+        await expect(
+          page.getByRole("group", { name: "脱模方向与基准对象" }),
+        ).toContainText("已选 1 项");
+      }
+      await button("取消").click();
+    }
+    await page.getByRole("treeitem", { name: "Initial", exact: true }).click();
+    await button("分析步").click();
+    await expect(field("插入位置")).toHaveValue("追加到分析步列表末尾（演示）");
+    await field("分析步名称").fill("Append-check");
+    await button("继续").click();
+    await button("创建分析步").click();
+    const names = await tree.locator('[data-parent="steps"]').allTextContents();
+    assert.deepEqual(names, ["Initial", "Review-step", "Append-check"]);
+    await shot("fixed-step-order");
+  });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();
     await expect(
@@ -582,7 +673,7 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 });
   await shot("workspace-final");
   const report = {
-    date: "2026-10-22",
+    date: "2026-10-23",
     browser: await browser.version(),
     runtime: process.version,
     platform: process.platform,

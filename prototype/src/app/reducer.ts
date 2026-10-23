@@ -39,7 +39,16 @@ export function reducer(state: WorkState, action: Action): WorkState {
     case "tree":
       return { ...state, selectedTree: action.value };
     case "open":
-      return state.command || state.model === "Model-Empty"
+      return state.command ||
+        state.model === "Model-Empty" ||
+        (action.id !== undefined &&
+          !(
+            action.command === "nodeSet"
+              ? current.sets
+              : action.command === "step"
+                ? current.steps
+                : current.domains
+          ).some((v) => v.id === action.id))
         ? state
         : {
             ...state,
@@ -47,6 +56,7 @@ export function reducer(state: WorkState, action: Action): WorkState {
               { nodeSet: "Mesh", step: "Step", domain: "Optimization" } as const
             )[action.command],
             command: action.command,
+            editingId: action.id,
             selection: null,
             selectionResult: null,
           };
@@ -54,6 +64,7 @@ export function reducer(state: WorkState, action: Action): WorkState {
       return {
         ...state,
         command: null,
+        editingId: undefined,
         selection: null,
         selectionResult: null,
         notice: "已取消编辑，演示数据未更改",
@@ -99,55 +110,90 @@ export function reducer(state: WorkState, action: Action): WorkState {
     case "consumeResult":
       return { ...state, selectionResult: null };
     case "addSet": {
-      if (state.command !== "nodeSet" || state.selection) return state;
+      if (
+        state.command !== "nodeSet" ||
+        state.selection ||
+        (state.editingId && action.value.id !== state.editingId)
+      )
+        return state;
       return {
         ...state,
         models: {
           ...state.models,
-          [state.model]: { ...current, sets: [...current.sets, action.value] },
+          [state.model]: {
+            ...current,
+            sets: state.editingId
+              ? current.sets.map((v) =>
+                  v.id === state.editingId ? action.value : v,
+                )
+              : [...current.sets, action.value],
+          },
         },
         command: null,
+        editingId: undefined,
         selectionResult: null,
         selectedTree: action.value.id,
         ...changed(
-          `[演示] 已创建节点集合 ${action.value.name} · ${action.value.nodes.length} 个节点`,
+          `[演示] 已${state.editingId ? "更新" : "创建"}节点集合 ${action.value.name} · ${action.value.nodes.length} 个节点`,
         ),
       };
     }
     case "addStep": {
-      if (state.command !== "step" || state.selection) return state;
+      if (
+        state.command !== "step" ||
+        state.selection ||
+        (state.editingId && action.value.id !== state.editingId)
+      )
+        return state;
       return {
         ...state,
         models: {
           ...state.models,
           [state.model]: {
             ...current,
-            steps: [...current.steps, action.value],
+            steps: state.editingId
+              ? current.steps.map((v) =>
+                  v.id === state.editingId ? action.value : v,
+                )
+              : [...current.steps, action.value],
           },
         },
         step: action.value.name,
         command: null,
+        editingId: undefined,
         selectionResult: null,
         selectedTree: action.value.id,
-        ...changed(`[演示] 已创建分析步 ${action.value.name} · 未执行计算`),
+        ...changed(
+          `[演示] 已${state.editingId ? "更新" : "创建"}分析步 ${action.value.name} · 未执行计算`,
+        ),
       };
     }
     case "addDomain": {
-      if (state.command !== "domain" || state.selection) return state;
+      if (
+        state.command !== "domain" ||
+        state.selection ||
+        (state.editingId && action.value.id !== state.editingId)
+      )
+        return state;
       return {
         ...state,
         models: {
           ...state.models,
           [state.model]: {
             ...current,
-            domains: [...current.domains, action.value],
+            domains: state.editingId
+              ? current.domains.map((v) =>
+                  v.id === state.editingId ? action.value : v,
+                )
+              : [...current.domains, action.value],
           },
         },
         command: null,
+        editingId: undefined,
         selectionResult: null,
         selectedTree: action.value.id,
         ...changed(
-          `[演示] 已创建设计域 ${action.value.name} · ${action.value.elements.length} 个演示单元`,
+          `[演示] 已${state.editingId ? "更新" : "创建"}设计域 ${action.value.name} · ${action.value.elements.length} 个演示单元`,
         ),
       };
     }
