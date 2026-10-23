@@ -210,13 +210,13 @@
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
-  height: 110px;
+  height: 88px;
   overflow-x: auto;
   overflow-y: hidden;
   background: linear-gradient(180deg, #fcfdfe 0%, #f4f7fa 100%);
   border-bottom: 1px solid var(--control-border);
   box-shadow: inset 0 1px 0 #ffffff;
-  padding: 7px 10px 0 14px;
+  padding: 6px 10px 6px 14px;
 }
 .ribbonGroup {
   display: flex;
@@ -229,8 +229,8 @@
   content: "";
   position: absolute;
   right: 0;
-  top: 4px;
-  bottom: 8px;
+  top: 6px;
+  bottom: 6px;
   width: 1px;
   background: linear-gradient(
     180deg,
@@ -244,18 +244,11 @@
   padding-left: 0;
 }
 .ribbonItems {
-  height: 78px;
+  flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 4px;
-}
-.groupCaption {
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 10px;
-  line-height: 18px;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
 }
 .largeCommand {
   display: flex;
@@ -263,9 +256,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  padding: 8px 8px 5px;
-  height: 78px;
-  min-width: 62px;
+  padding: 7px 8px 5px;
+  min-width: 60px;
   background: none;
   border: 1px solid transparent;
   border-radius: 5px;
@@ -304,9 +296,9 @@
   gap: 3px;
 }
 .smallCommands {
-  padding-top: 4px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 3px;
 }
 .smallCommands button {
@@ -877,14 +869,11 @@
     height: 95px;
   }
   .ribbon {
-    height: 103px;
-  }
-  .ribbonItems {
-    height: 71px;
+    height: 82px;
   }
   .largeCommand {
-    height: 71px;
     padding-top: 5px;
+    gap: 4px;
   }
   .treeRow {
     height: 27px;
@@ -895,7 +884,7 @@
 }
 .commandDropdown {
   width: 18px;
-  height: 62px;
+  height: 56px;
   align-self: center;
   border: 1px solid transparent;
   background: none;

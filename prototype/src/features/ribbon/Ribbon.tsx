@@ -126,7 +126,11 @@ export function Ribbon({
   });
   return (
     <div className={s.ribbon} aria-label="Ribbon 功能区">
-      <div className={s.ribbonGroup}>
+      <div
+        className={s.ribbonGroup}
+        role="group"
+        aria-label="创建与编辑"
+      >
         <div className={s.ribbonItems}>
           <button
             className={`${s.largeCommand} ${item.command ? s.featured : ""}`}
@@ -187,9 +191,12 @@ export function Ribbon({
             <ChevronDown size={12} />
           </button>
         </div>
-        <span className={s.groupCaption}>创建与编辑</span>
       </div>
-      <div className={s.ribbonGroup}>
+      <div
+        className={s.ribbonGroup}
+        role="group"
+        aria-label="网格工具 · 待接入"
+      >
         <div className={s.ribbonItems}>
           <button
             className={s.largeCommand}
@@ -212,9 +219,12 @@ export function Ribbon({
             </button>
           </div>
         </div>
-        <span className={s.groupCaption}>网格工具 · 待接入</span>
       </div>
-      <div className={s.ribbonGroup}>
+      <div
+        className={s.ribbonGroup}
+        role="group"
+        aria-label="视图"
+      >
         <div className={s.ribbonItems}>
           <button className={s.largeCommand} onClick={onFit}>
             <CAEIcon name="fit" size={32} />
@@ -232,9 +242,12 @@ export function Ribbon({
             </button>
           </div>
         </div>
-        <span className={s.groupCaption}>视图</span>
       </div>
-      <div className={s.ribbonGroup}>
+      <div
+        className={s.ribbonGroup}
+        role="group"
+        aria-label="工作区"
+      >
         <div className={s.ribbonItems}>
           <div className={s.smallCommands}>
             <button aria-pressed={treeVisible} onClick={onToggleTree}>
@@ -247,9 +260,12 @@ export function Ribbon({
             </button>
           </div>
         </div>
-        <span className={s.groupCaption}>工作区</span>
       </div>
-      <div className={`${s.ribbonGroup} ${s.demoCommands}`}>
+      <div
+        className={`${s.ribbonGroup} ${s.demoCommands}`}
+        role="group"
+        aria-label="代表性流程"
+      >
         <div className={s.ribbonItems}>
           {(
             [
@@ -269,7 +285,6 @@ export function Ribbon({
             </button>
           ))}
         </div>
-        <span className={s.groupCaption}>代表性流程</span>
       </div>
       <button
         className={s.ribbonHelp}
