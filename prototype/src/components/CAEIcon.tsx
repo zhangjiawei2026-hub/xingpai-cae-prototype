@@ -312,26 +312,23 @@ function glyph(
     case "treePanel":
       return (
         <>
-          <rect className={c.pnlBody} x="4" y="5" width="24" height="22" rx="2.5" />
-          <path className={c.pnlPane} d="M4 7.5a2.5 2.5 0 0 1 2.5-2.5H13v22H6.5A2.5 2.5 0 0 1 4 24.5Z" />
-          <rect className={c.pnlFrame} x="4" y="5" width="24" height="22" rx="2.5" />
-          <path className={c.pnlFrame} d="M13 5v22" />
-          <path className={c.axis} d="M6.8 9.8h3.2M8.4 13.4v4.2M8.4 13.4h1.8M8.4 17.6h1.8" />
-          <circle className={c.node} cx="7" cy="9.8" r="1.5" />
-          <path className={c.thin} d="M16.5 10h8M16.5 14h8M16.5 18h5" />
+          <rect className={c.pnlBody} x="2.5" y="4.5" width="27" height="23" rx="3" />
+          <path className={c.pnlPane} d="M2.5 7.5a3 3 0 0 1 3-3H15v23H5.5a3 3 0 0 1-3-3Z" />
+          <path className={c.pnlDivider} d="M15 4.5v23" />
+          <rect className={c.pnlFrame} x="2.5" y="4.5" width="27" height="23" rx="3" />
+          <circle className={c.pnlNode} cx="7" cy="10.5" r="2.3" />
+          <path className={c.pnlMark} d="M10.8 10.5h1.7M8.5 16h4M8.5 21.5h4" />
         </>
       );
     case "logPanel":
       return (
         <>
-          <rect className={c.pnlBody} x="4" y="5" width="24" height="22" rx="2.5" />
-          <path className={c.pnlPane} d="M4 19h24v5.5a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 24.5Z" />
-          <rect className={c.pnlFrame} x="4" y="5" width="24" height="22" rx="2.5" />
-          <path className={c.pnlFrame} d="M4 19h24" />
-          <path className={c.thin} d="M8 10h14M8 14h9" />
-          <circle className={c.node} cx="8" cy="21.8" r="1.2" />
-          <circle className={c.anaDot} cx="8" cy="21.8" r="1.2" />
-          <path className={c.axis} d="M11 21.8h9M11 24.2h5.5" />
+          <rect className={c.pnlBody} x="2.5" y="4.5" width="27" height="23" rx="3" />
+          <path className={c.pnlPane} d="M2.5 17.5h27v7a3 3 0 0 1-3 3h-21a3 3 0 0 1-3-3Z" />
+          <path className={c.pnlDivider} d="M2.5 17.5h27" />
+          <rect className={c.pnlFrame} x="2.5" y="4.5" width="27" height="23" rx="3" />
+          <path className={c.pnlPrompt} d="m6.5 20 2.5 2.5-2.5 2.5" />
+          <path className={c.pnlMark} d="M12 25h7" />
         </>
       );
     case "iso":

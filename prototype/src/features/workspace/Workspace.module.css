@@ -322,7 +322,6 @@
 }
 .smallCommands button[aria-pressed="true"] {
   background: var(--blue-soft);
-  border-color: var(--selected-border);
   color: var(--blue);
 }
 .smallCommands button:hover:not(:disabled) {

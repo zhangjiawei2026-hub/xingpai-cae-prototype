@@ -190,16 +190,35 @@
   stroke: var(--ci-ink);
 }
 
-/* Workspace panel toggles */
+/* Workspace panel toggles: light frame, tinted pane, one accent mark. */
 .icon .pnlBody {
-  fill: var(--ci-pale-1);
+  fill: var(--ci-paper);
   stroke: none;
 }
 .icon .pnlPane {
   fill: var(--ci-geo-2);
   stroke: none;
 }
+.icon .pnlDivider {
+  stroke: var(--ci-line);
+}
 .icon .pnlFrame {
   stroke: var(--ci-ink);
   fill: none;
+}
+.icon .pnlMark {
+  stroke: var(--ci-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon .pnlNode {
+  fill: var(--ci-acc-3);
+  stroke: none;
+}
+.icon .pnlPrompt {
+  stroke: var(--ci-ana-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
