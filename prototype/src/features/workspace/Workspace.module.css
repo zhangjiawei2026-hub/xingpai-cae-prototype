@@ -166,7 +166,7 @@
   align-items: stretch;
   padding: 0 17px;
   background: var(--paper);
-  gap: 4px;
+  gap: 0;
   border-bottom: 1px solid var(--line);
 }
 .modules button {
@@ -174,7 +174,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 0 13px;
+  padding: 0 var(--tab-pad);
   border: 0;
   background: transparent;
   color: var(--ink-secondary);
@@ -187,7 +187,6 @@
 .modules button[aria-current="page"] {
   color: var(--blue);
   font-weight: 600;
-  background: linear-gradient(0deg, var(--blue-soft), transparent);
 }
 .modules button[aria-current="page"] small {
   color: var(--view-dim);
@@ -197,11 +196,10 @@
   content: "";
   position: absolute;
   bottom: -1px;
-  height: 3px;
+  height: var(--tab-underline);
   background: var(--blue);
-  left: 12px;
-  right: 12px;
-  border-radius: 2px 2px 0 0;
+  left: 0;
+  right: 0;
 }
 .modules button:hover {
   background: var(--surface);
@@ -473,20 +471,24 @@
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--line);
-  padding: 0 10px;
+  padding: 0 4px;
   flex-shrink: 0;
 }
 .treeTabs > button {
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: var(--tab-underline) solid transparent;
   background: none;
-  color: var(--ink-soft);
-  padding: 0 8px;
-  font-size: 11px;
+  color: var(--ink-secondary);
+  padding: 0 var(--tab-pad);
+  font-size: 12px;
+}
+.treeTabs > button:hover {
+  background: var(--surface);
 }
 .treeTabs > button[aria-selected="true"] {
-  color: var(--ink-control);
-  border-bottom-color: var(--view-dim);
+  color: var(--blue);
+  font-weight: 600;
+  border-bottom-color: var(--blue);
 }
 .treeTabs span {
   font-size: 9px;
@@ -719,22 +721,27 @@
 }
 .log header > div {
   display: flex;
-  gap: 17px;
+  gap: 0;
   height: 100%;
 }
 .log button {
   border: 0;
+  border-bottom: var(--tab-underline) solid transparent;
   background: transparent;
   display: flex;
   gap: 6px;
   align-items: center;
-  color: var(--ink-soft);
-  font-size: 10px;
-  padding: 0 1px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  padding: 0 var(--tab-pad);
+}
+.log button:hover {
+  background: var(--surface);
 }
 .log button[aria-selected="true"] {
-  border-bottom: 2px solid var(--view-dim);
-  color: var(--ink-secondary);
+  border-bottom-color: var(--blue);
+  color: var(--blue);
+  font-weight: 600;
 }
 .log button span {
   font: 8px var(--font-data);

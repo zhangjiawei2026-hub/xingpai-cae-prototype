@@ -47,6 +47,8 @@
   --selection-ink: #715018;
   --selection-border: #dbaa53;
   --shadow: #0a1424;
+  --tab-pad: 12px;
+  --tab-underline: 2px;
 
   /* Professional CAE icon palette (prototype design values). */
   --ci-ink: #34506f;
