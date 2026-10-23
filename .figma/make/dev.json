@@ -1,0 +1,4 @@
+{
+  "installOn": ["prototype/package.json", "prototype/package-lock.json"],
+  "restartOn": ["prototype/vite.config.ts"]
+}
