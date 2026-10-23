@@ -126,7 +126,12 @@ export function Ribbon({
               item.command && dispatch({ type: "open", command: item.command })
             }
           >
-            <CAEIcon name={item.icon} size={32} badge="add" />
+            <CAEIcon
+              name={item.icon}
+              size={32}
+              badge="add"
+              hiddenNodes={item.icon === "nodes" ? [3] : undefined}
+            />
             <span>{item.label}</span>
           </button>
           <div className={s.smallCommands}>

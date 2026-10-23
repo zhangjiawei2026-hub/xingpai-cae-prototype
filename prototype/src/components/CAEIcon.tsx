@@ -107,7 +107,11 @@ const Dot = ({ at, r = 2.4 }: { at: P; r?: number }) => (
   <circle className={c.node} cx={at[0]} cy={at[1]} r={r} />
 );
 
-function glyph(name: CAEIconName, fine: boolean): ReactNode {
+function glyph(
+  name: CAEIconName,
+  fine: boolean,
+  hiddenNodes: number[] = [],
+): ReactNode {
   switch (name) {
     case "part":
     case "box":
@@ -207,9 +211,11 @@ function glyph(name: CAEIconName, fine: boolean): ReactNode {
       return (
         <>
           <Box tone="pale" />
-          {[v.top, v.r, v.l, v.f, v.lb, v.fb, v.rb].map((p) => (
-            <Dot key={p.join()} at={p} r={fine ? 2.5 : 3} />
-          ))}
+          {[v.top, v.r, v.l, v.f, v.lb, v.fb, v.rb].map((p, i) =>
+            hiddenNodes.includes(i) ? null : (
+              <Dot key={p.join()} at={p} r={fine ? 2.5 : 3} />
+            ),
+          )}
         </>
       );
     }
@@ -329,10 +335,13 @@ export function CAEIcon({
   name,
   size = 24,
   badge,
+  hiddenNodes,
 }: {
   name: CAEIconName;
   size?: number;
   badge?: CAEIconBadge;
+  /** Indices of "nodes" vertex dots to omit for a specific instance. */
+  hiddenNodes?: number[];
 }) {
   // Optical sizing: strokes stay crisp in screen pixels; fine detail drops below 20px.
   const fine = size >= 20;
@@ -349,7 +358,7 @@ export function CAEIcon({
       aria-hidden="true"
       data-icon={name}
     >
-      {glyph(name, fine)}
+      {glyph(name, fine, hiddenNodes)}
       {badge && (
         <g>
           <circle
