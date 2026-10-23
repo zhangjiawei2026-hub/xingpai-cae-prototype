@@ -13,7 +13,7 @@
   align-items: center;
   gap: 20px;
   color: #e8f0fb;
-  background: linear-gradient(90deg, #1d4a8f 0%, #2c63b8 55%, #3a78cf 100%);
+  background: linear-gradient(90deg, #3d76cc 0%, #4c88da 55%, #5e9ae4 100%);
   padding: 0 18px;
 }
 .brand {
@@ -33,7 +33,7 @@
   font-weight: 650;
 }
 .brand b span {
-  color: #bcd3f2;
+  color: #e0ebfa;
   font-weight: 400;
 }
 .brand i {
@@ -51,7 +51,7 @@
   font:
     10px "PingFang SC",
     sans-serif;
-  color: #bcd3f2;
+  color: #e0ebfa;
 }
 .titleBadge {
   color: #e8f0fb;
@@ -66,7 +66,7 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  color: #d4e3f7;
+  color: #eef4fc;
   font-size: 10px;
   letter-spacing: 1px;
 }
