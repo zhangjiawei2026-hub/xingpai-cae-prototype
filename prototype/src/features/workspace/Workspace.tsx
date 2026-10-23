@@ -4,7 +4,6 @@ import {
   ChevronDown,
   Check,
   FileBox,
-  PanelLeft,
   RefreshCcw,
   Terminal,
   Info,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import { useStore } from "../../app/Store";
 import { MODULES, MODULE_LABELS } from "../../data/demo";
+import { CAEIcon } from "../../components/CAEIcon";
 import { Ribbon } from "../ribbon/Ribbon";
 import { ModelTree } from "../model-tree/ModelTree";
 import { Viewport } from "../../viewport/Viewport";
@@ -186,7 +186,7 @@ export function Workspace() {
             title="展开模型树"
             onClick={() => setTreeVisible(true)}
           >
-            <PanelLeft size={15} />
+            <CAEIcon name="treePanel" size={16} />
           </button>
         )}
         <label>

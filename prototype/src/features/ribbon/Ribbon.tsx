@@ -1,4 +1,4 @@
-import { ChevronDown, ListTree, PanelBottom, Info } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { useState } from "react";
 import { useStore } from "../../app/Store";
@@ -251,11 +251,11 @@ export function Ribbon({
         <div className={s.ribbonItems}>
           <div className={s.smallCommands}>
             <button aria-pressed={treeVisible} onClick={onToggleTree}>
-              <ListTree size={18} strokeWidth={1.5} />
+              <CAEIcon name="treePanel" size={18} />
               模型树
             </button>
             <button aria-pressed={logVisible} onClick={onToggleLog}>
-              <PanelBottom size={18} strokeWidth={1.5} />
+              <CAEIcon name="logPanel" size={18} />
               信息窗口
             </button>
           </div>

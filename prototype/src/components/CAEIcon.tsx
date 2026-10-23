@@ -21,6 +21,8 @@ export type CAEIconName =
   | "task"
   | "fit"
   | "iso"
+  | "treePanel"
+  | "logPanel"
   // Legacy alias kept for existing call sites.
   | "box";
 
@@ -305,6 +307,31 @@ function glyph(
             d="M4 10V4h6M22 4h6v6M28 22v6h-6M10 28H4v-6"
           />
           <Box cx={16} y={8.5} w={7} h={7.5} />
+        </>
+      );
+    case "treePanel":
+      return (
+        <>
+          <rect className={c.pnlBody} x="4" y="5" width="24" height="22" rx="2.5" />
+          <path className={c.pnlPane} d="M4 7.5a2.5 2.5 0 0 1 2.5-2.5H13v22H6.5A2.5 2.5 0 0 1 4 24.5Z" />
+          <rect className={c.pnlFrame} x="4" y="5" width="24" height="22" rx="2.5" />
+          <path className={c.pnlFrame} d="M13 5v22" />
+          <path className={c.axis} d="M6.8 9.8h3.2M8.4 13.4v4.2M8.4 13.4h1.8M8.4 17.6h1.8" />
+          <circle className={c.node} cx="7" cy="9.8" r="1.5" />
+          <path className={c.thin} d="M16.5 10h8M16.5 14h8M16.5 18h5" />
+        </>
+      );
+    case "logPanel":
+      return (
+        <>
+          <rect className={c.pnlBody} x="4" y="5" width="24" height="22" rx="2.5" />
+          <path className={c.pnlPane} d="M4 19h24v5.5a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 24.5Z" />
+          <rect className={c.pnlFrame} x="4" y="5" width="24" height="22" rx="2.5" />
+          <path className={c.pnlFrame} d="M4 19h24" />
+          <path className={c.thin} d="M8 10h14M8 14h9" />
+          <circle className={c.node} cx="8" cy="21.8" r="1.2" />
+          <circle className={c.anaDot} cx="8" cy="21.8" r="1.2" />
+          <path className={c.axis} d="M11 21.8h9M11 24.2h5.5" />
         </>
       );
     case "iso":
