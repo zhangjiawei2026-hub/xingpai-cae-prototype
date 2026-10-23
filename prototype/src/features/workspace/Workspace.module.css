@@ -13,7 +13,7 @@
   align-items: center;
   gap: 20px;
   color: #e8f0fb;
-  background: linear-gradient(90deg, #3d76cc 0%, #4c88da 55%, #5e9ae4 100%);
+  background: var(--blue);
   padding: 0 18px;
 }
 .brand {
