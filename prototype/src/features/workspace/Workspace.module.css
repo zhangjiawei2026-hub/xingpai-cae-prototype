@@ -528,9 +528,6 @@
 .treeSearch:focus-within {
   border-color: var(--blue);
 }
-.treeSearch kbd {
-  color: var(--ink-faint);
-}
 .treeRoot {
   display: flex;
   align-items: center;

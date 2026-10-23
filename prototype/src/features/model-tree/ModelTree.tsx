@@ -185,7 +185,6 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                 placeholder="搜索对象…"
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <kbd>⌕</kbd>
             </div>
             <div className={s.treeRoot}>
               <Layers size={15} />
