@@ -1,7 +1,7 @@
 /* Light viewport theme: remap the shared view tokens locally. */
 .viewport {
-  --viewport: #e6ecf2;
-  --view-grid: #f8fafc;
+  --viewport: #dbe6f2;
+  --view-grid: #f3f7fb;
   --view-panel: var(--paper);
   --view-raised: var(--line);
   --view-border: #d3dce6;
@@ -51,11 +51,8 @@
   min-height: 0;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(
-    ellipse at 48% 40%,
-    var(--view-grid) 0%,
-    var(--viewport) 80%
-  );
+  /* Classic CAE backdrop: deeper blue at the top fading to near-white. */
+  background: linear-gradient(180deg, #9fbde0 0%, #c9daee 45%, #eef3f9 100%);
 }
 .canvas {
   position: absolute;

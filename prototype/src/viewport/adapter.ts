@@ -12,7 +12,7 @@ export function createViewport(
   const scene = new THREE.Scene();
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor("#e6ecf2", 0);
+  renderer.setClearColor("#dbe6f2", 0);
   renderer.domElement.setAttribute(
     "aria-label",
     "安装支架三维演示模型，拖动旋转，滚轮缩放",
@@ -34,7 +34,10 @@ export function createViewport(
   const rim = new THREE.DirectionalLight("#5ecce5", 1.8);
   rim.position.set(-5, 3, -4);
   scene.add(rim);
-  const grid = new THREE.GridHelper(22, 44, "#b4c1ce", "#d2dbe4");
+  const grid = new THREE.GridHelper(22, 44, "#8aa6c4", "#a9bfd8");
+  const gridMaterial = grid.material as THREE.LineBasicMaterial;
+  gridMaterial.transparent = true;
+  gridMaterial.opacity = 0.45;
   grid.position.y = -0.94;
   scene.add(grid);
   const markerGroup = new THREE.Group();
