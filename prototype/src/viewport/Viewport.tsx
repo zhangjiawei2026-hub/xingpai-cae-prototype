@@ -6,7 +6,6 @@ import {
   Minus,
   Box,
   Grid2X2,
-  MousePointer2,
   Check,
   X,
 } from "lucide-react";
@@ -209,12 +208,6 @@ export function Viewport() {
               <span>{counts.elements.toLocaleString()} 三角面</span>
             </>
           )}
-        </div>
-        <div className={s.help}>
-          <MousePointer2 size={12} />
-          {selection
-            ? "点击模型拾取 · 同项再点取消 · 右键拖动平移"
-            : "拖动旋转 · 右键平移 · 滚轮缩放"}
         </div>
         {selection && (
           <div className={s.pickbar}>

@@ -200,15 +200,6 @@
   color: var(--view-dim);
   font: 10px var(--font-data);
 }
-.help {
-  position: absolute;
-  bottom: 18px;
-  right: 19px;
-  display: flex;
-  gap: 7px;
-  color: var(--view-dim);
-  font-size: 10px;
-}
 .empty {
   position: absolute;
   left: 50%;
