@@ -4,6 +4,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { setTimeout as pause } from "node:timers/promises";
+const port = process.env.CAE_PORT ?? "4198";
+const baseURL = `http://127.0.0.1:${port}`;
 const artifactDir = path.resolve(
   process.env.CAE_ARTIFACT_DIR ??
     `../outputs/prototype-review-20261022/v0.2-${Date.now()}`,
@@ -17,7 +19,7 @@ const server = spawn(
     "--host",
     "127.0.0.1",
     "--port",
-    "4173",
+    port,
     "--strictPort",
   ],
   { stdio: "pipe" },
@@ -41,14 +43,14 @@ try {
   for (let i = 0; i < 60; i++) {
     if (server.exitCode !== null) throw new Error(serverOutput);
     try {
-      if ((await fetch("http://127.0.0.1:4173")).ok) break;
+      if ((await fetch(baseURL)).ok) break;
     } catch {
       /* preview server is still starting */
     }
     await pause(200);
   }
   browser = await chromium.launch({
-    channel: "chrome",
+    channel: process.env.CAE_BROWSER === "chromium" ? undefined : "chrome",
     headless: true,
     args: ["--enable-webgl", "--use-gl=angle", "--use-angle=swiftshader"],
   });
@@ -70,17 +72,22 @@ try {
       ? page
           .getByLabel("Ribbon 功能区")
           .getByRole("button", { name, exact: true })
-      : page.getByRole("button", { name, exact: true });
+      : ["创建分析步", "创建设计域"].includes(name)
+        ? page
+            .locator("dialog[open]")
+            .getByRole("button", { name, exact: true })
+        : page.getByRole("button", { name, exact: true });
   const field = (name) => page.getByRole("textbox", { name, exact: true });
   const dialog = () => page.locator("dialog[open]");
   const shot = (name) =>
     page.screenshot({ path: path.join(artifactDir, name + ".png") });
-  await page.goto("http://127.0.0.1:4173");
+  await page.goto(baseURL);
   await check("主界面与 WebGL 初始化", async () => {
     await expect(
       page.getByRole("heading", { name: "当前模型没有部件" }),
     ).toHaveCount(0);
     await expect(page.locator("canvas")).toBeVisible();
+    await expect(button("等轴测")).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText("1,084 顶点")).toBeVisible();
     await expect(page.getByRole("alert")).toHaveCount(0);
   });
@@ -310,7 +317,7 @@ try {
     );
     await button("显示三角面边线").click();
     await button("等轴测").click();
-    await button("原型说明").click();
+    await button("帮助").click();
     await page.keyboard.press("Escape");
     await expect(dialog()).toHaveCount(0);
   });
@@ -656,6 +663,67 @@ try {
     assert.deepEqual(names, ["Initial", "Review-step", "Append-check"]);
     await shot("fixed-step-order");
   });
+  await check("Figma 基线：树选中对象优先于分析步上下文", async () => {
+    for (const [selected, contextStep] of [["Review-step", "Append-check"], ["Append-check", "Review-step"]]) {
+      await page.getByRole("treeitem", { name: selected, exact: true }).click();
+      await page.getByRole("combobox", { name: "当前分析步" }).selectOption(contextStep);
+      await button("编辑分析步").click();
+      await expect(field("分析步名称")).toHaveValue(selected);
+      await button("取消").click();
+    }
+    await page.getByRole("treeitem", { name: "Initial", exact: true }).click();
+    await expect(button("编辑分析步")).toHaveAttribute("aria-disabled", "true");
+  });
+  await check("Figma 基线：重置确认与拾取保护", async () => {
+    const reset = page.getByTitle("恢复初始演示", { exact: true });
+    await button("节点集合").click();
+    await button("拾取节点").click();
+    await expect(reset).toBeDisabled();
+    await button("取消拾取").click();
+    await button("取消").click();
+    await reset.click();
+    await button("保留当前会话").click();
+    await expect(page.getByRole("treeitem", { name: "Append-check", exact: true })).toBeVisible();
+    await reset.click();
+    await button("确认恢复").click();
+    await expect(page.getByRole("treeitem", { name: "Append-check", exact: true })).toHaveCount(0);
+  });
+  await check("Figma 基线：页签及菜单键盘闭环", async () => {
+    const modelTab = page.getByRole("tab", { name: "模型", exact: true });
+    await modelTab.focus(); await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("tab", { name: "结果", exact: true })).toBeFocused();
+    await page.keyboard.press("Home"); await expect(modelTab).toBeFocused();
+    for (const trigger of [page.getByTitle("创建对象菜单"), page.getByLabel("创建命令下拉菜单", { exact: true })]) {
+      await trigger.focus(); await page.keyboard.press("Enter");
+      await expect(page.getByRole("menuitem", { name: "创建节点集合", exact: true })).toBeFocused();
+      await page.keyboard.press("ArrowDown");
+      await expect(page.getByRole("menuitem", { name: "创建分析步", exact: true })).toBeFocused();
+      await page.keyboard.press("Escape"); await expect(trigger).toBeFocused();
+    }
+  });
+  await check("Figma 基线：壳实体条件页签与草稿", async () => {
+    await button("设计域").click();
+    await page.getByRole("tab", { name: "脱模", exact: true }).click();
+    await page.getByRole("radio", { name: "壳", exact: true }).check();
+    await expect(page.getByRole("tab", { name: "脱模", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "挤压", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "基础", exact: true })).toHaveAttribute("aria-selected", "true");
+    await shot("figma-domain-shell");
+    await page.getByRole("radio", { name: "实体", exact: true }).check();
+    await expect(page.getByRole("tab", { name: "脱模", exact: true })).toBeVisible();
+    await button("取消").click();
+  });
+  await check("Figma 基线：旋转取消预设状态，缩放保留预设", async () => {
+    const front = page.getByRole("button", { name: "前", exact: true });
+    await front.click();
+    await page.getByTitle("放大模型", { exact: true }).click();
+    await expect(front).toHaveAttribute("aria-pressed", "true");
+    const box = await page.locator("canvas").boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down(); await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 50, { steps: 10 }); await page.mouse.up();
+    await expect(front).toHaveAttribute("aria-pressed", "false");
+    await page.getByRole("button", { name: "等轴测", exact: true }).click();
+  });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();
     await expect(
@@ -673,11 +741,12 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 });
   await shot("workspace-final");
   const report = {
-    date: "2026-10-23",
+    date: "2026-10-25",
     browser: await browser.version(),
+    browserChannel: process.env.CAE_BROWSER ?? "chrome",
     runtime: process.version,
     platform: process.platform,
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: baseURL,
     scope: process.env.CAE_CHECKS ?? "full",
     checks,
     errors,

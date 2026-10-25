@@ -6,6 +6,8 @@
   vector-effect: non-scaling-stroke;
 }
 .icon polygon,
+.icon polyline,
+.icon rect,
 .icon path,
 .icon circle,
 .icon ellipse {
@@ -13,36 +15,62 @@
   fill: none;
 }
 
-/* Iso box tones */
+/* Iso box tones: gradient faces with flat-token fallbacks; tonal outlines. */
+.icon .geo polygon {
+  stroke: var(--ci-geo-ink);
+  stroke-opacity: 0.8;
+}
+/* Lit front vertical edge. */
+.icon .edge {
+  stroke: var(--ci-paper);
+  stroke-width: 0.9;
+  opacity: 0.55;
+}
+.icon .pale .edge {
+  opacity: 0.9;
+}
+.icon .bevel {
+  stroke: var(--ci-paper);
+  stroke-width: 0.9;
+  opacity: 0.85;
+}
+.icon:not([data-fine]) .bevel {
+  display: none;
+}
+.icon .ground {
+  fill: var(--cig-ground);
+  stroke: none;
+}
 .geo .f1 {
-  fill: var(--ci-geo-1);
+  fill: var(--cig-geo-t, var(--ci-geo-1));
 }
 .geo .f2 {
-  fill: var(--ci-geo-2);
+  fill: var(--cig-geo-l, var(--ci-geo-2));
 }
 .geo .f3 {
-  fill: var(--ci-geo-3);
+  fill: var(--cig-geo-r, var(--ci-geo-3));
 }
 .acc .f1 {
-  fill: var(--ci-acc-1);
+  fill: var(--cig-acc-t, var(--ci-acc-1));
 }
 .acc .f2 {
-  fill: var(--ci-acc-2);
+  fill: var(--cig-acc-l, var(--ci-acc-2));
 }
 .acc .f3 {
-  fill: var(--ci-acc-3);
+  fill: var(--cig-acc-r, var(--ci-acc-3));
 }
 .icon .acc polygon {
   stroke: var(--ci-acc-ink);
+  stroke-opacity: 0.85;
 }
 .pale .f1 {
-  fill: var(--ci-pale-1);
+  fill: var(--cig-pale-t, var(--ci-pale-1));
 }
 .pale .f2 {
-  fill: var(--ci-pale-2);
+  fill: var(--cig-pale-l, var(--ci-pale-2));
 }
 .pale .f3 {
-  fill: var(--ci-pale-3);
+  fill: var(--cig-pale-r, var(--ci-pale-3));
 }
 .icon .pale polygon {
   stroke: var(--ci-line);
@@ -62,10 +90,11 @@
   stroke: var(--ci-line);
   stroke-width: 0.8;
 }
+/* Mesh lines read as a light wireframe over the shaded faces. */
 .icon .grid {
-  stroke: var(--ci-ink);
-  stroke-width: 0.75;
-  opacity: 0.55;
+  stroke: var(--ci-paper);
+  stroke-width: 0.8;
+  opacity: 0.8;
 }
 .icon .hidden {
   stroke: var(--ci-line);
@@ -74,7 +103,7 @@
 
 /* Nodes / seeds */
 .icon .node {
-  fill: var(--ci-acc-3);
+  fill: var(--cig-node, var(--ci-acc-3));
   stroke: var(--ci-paper);
   stroke-width: 1;
 }
@@ -85,11 +114,7 @@
 
 /* Material */
 .icon .matFill {
-  fill: var(--ci-mat-1);
-  stroke: none;
-}
-.icon .matShade {
-  fill: var(--ci-mat-2);
+  fill: var(--cig-mat, var(--ci-mat-1));
   stroke: none;
 }
 .icon .matOutline {
@@ -105,30 +130,35 @@
   stroke: var(--ci-mat-ink);
 }
 .icon .matFront {
-  fill: var(--ci-mat-1);
+  fill: var(--cig-mat-l, var(--ci-mat-1));
   stroke: var(--ci-mat-ink);
 }
 
 /* Analysis */
 .icon .anaSoft {
-  fill: var(--ci-ana-1);
+  fill: var(--cig-ana, var(--ci-ana-1));
   stroke: none;
+}
+.icon .stepA,
+.icon .stepB,
+.icon .stepC {
+  stroke: var(--ci-ana-ink);
+}
+.icon .stepA {
+  fill: var(--ci-ana-1);
+}
+.icon .stepB {
+  fill: color-mix(in srgb, var(--ci-ana-1), var(--ci-ana-ink) 45%);
+}
+.icon .stepC {
+  fill: var(--cig-ana-s, var(--ci-ana-ink));
 }
 .icon .anaLine {
   stroke: var(--ci-ana-ink);
   stroke-width: 2.2;
 }
-.icon .anaArrow {
-  stroke: var(--ci-ana-ink);
-  stroke-width: 1.6;
-}
-.icon .anaDot {
-  fill: var(--ci-paper);
-  stroke: var(--ci-ana-ink);
-  stroke-width: 1.4;
-}
 .icon .target {
-  fill: var(--ci-acc-3);
+  fill: var(--cig-node, var(--ci-acc-3));
   stroke: var(--ci-paper);
   stroke-width: 1.2;
 }
@@ -149,10 +179,12 @@
 
 /* Element */
 .icon .tetA {
-  fill: var(--ci-geo-1);
+  fill: var(--cig-geo-t, var(--ci-geo-1));
+  stroke: var(--ci-geo-ink);
 }
 .icon .tetB {
-  fill: var(--ci-geo-3);
+  fill: var(--cig-geo-r, var(--ci-geo-3));
+  stroke: var(--ci-geo-ink);
 }
 
 /* View axes */
@@ -175,12 +207,12 @@
 
 /* Action badge */
 .icon .badge {
-  fill: var(--ci-badge);
+  fill: var(--cig-badge, var(--ci-badge));
   stroke: var(--ci-badge-ring, var(--surface));
   stroke-width: 1.6;
 }
 .icon .badgeDanger {
-  fill: var(--ci-badge-danger);
+  fill: var(--cig-badge-danger, var(--ci-badge-danger));
 }
 .icon .badgeGlyph {
   stroke: var(--ci-paper);
@@ -190,35 +222,55 @@
   stroke: var(--ci-ink);
 }
 
-/* Workspace panel toggles: light frame, tinted pane, one accent mark. */
+/* Workspace panel toggles: white window, lit blue pane, white content marks. */
 .icon .pnlBody {
   fill: var(--ci-paper);
   stroke: none;
 }
 .icon .pnlPane {
-  fill: var(--ci-geo-2);
+  fill: var(--cig-geo-l, var(--ci-geo-2));
   stroke: none;
 }
-.icon .pnlDivider {
-  stroke: var(--ci-line);
-}
+.icon .pnlDivider,
 .icon .pnlFrame {
-  stroke: var(--ci-ink);
+  stroke: var(--ci-geo-ink);
+  stroke-opacity: 0.85;
   fill: none;
 }
 .icon .pnlMark {
-  stroke: var(--ci-ink);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke: var(--ci-paper);
+  stroke-width: 1.2;
 }
-.icon .pnlNode {
-  fill: var(--ci-acc-3);
+
+/* Viewport tools: orientation cubes, zoom lens, triangulated wireframe. */
+.icon polygon.vface {
   stroke: none;
 }
-.icon .pnlPrompt {
-  stroke: var(--ci-ana-ink);
+/* Single-face views: the viewed face takes one strong blue regardless of side. */
+.icon polygon.vlit {
+  fill: var(--cig-geo-l, var(--ci-geo-2));
+}
+.icon .cubeEdge {
+  stroke: var(--ci-geo-ink);
+  stroke-opacity: 0.8;
+}
+.icon .lens {
+  fill: var(--cig-geo-t, var(--ci-geo-1));
+  stroke: var(--ci-geo-ink);
   stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+}
+.icon .lensHandle {
+  stroke: var(--ci-geo-ink);
+  stroke-width: 3.4;
+}
+.icon .lensMark {
+  stroke: var(--ci-geo-3);
+  stroke-width: 1.8;
+}
+.icon .wireBox polygon {
+  stroke: var(--ci-geo-3);
+}
+.icon .wire {
+  stroke: var(--ci-geo-3);
+  stroke-width: 0.9;
 }

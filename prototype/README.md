@@ -73,3 +73,23 @@ npm run preview -- --host 127.0.0.1
 ```sh
 CAE_ARTIFACT_DIR=../outputs/prototype-review-20261023/customer-fixes-rerun npm run test:e2e
 ```
+
+## 2026-10-25 Figma 视觉基线修复
+
+采用用户指定的 Figma Make 修改版（`Rg541Gmdpb4zk4iQXppxQd`）导出源码中的配色、紧凑 Ribbon、等轴测图标和右侧视图工具条。原始压缩包、来源记录和回归截图位于 `../outputs/prototype-review-20261025/figma-baseline-fixes/`。
+
+修复树选择与分析步上下文冲突时编辑错对象、选择中误重置、菜单焦点与页签方向键、自由旋转后预设按钮仍选中等问题。恢复初始演示统一确认；“单选”改为符合累积行为的“点选”。壳隐藏脱模和挤压，保存壳不会带入实体脱模约束；未确认字段不猜测实现。
+
+运行：`npm run dev -- --host 127.0.0.1 --port 4199`。浏览器回归使用独立预览端口 4198，可通过 `CAE_PORT` 更改；`CAE_ARTIFACT_DIR` 指定新的证据目录。真实 Windows 工程能力、浮动停靠与专业选择算法仍未接入。
+
+Figma 基线阶段验证：typecheck、lint、11 项 Vitest 状态测试、build 和 Chromium 32 项浏览器回归通过。证据目录为上述输出下 `verified/`；此前的截图超时和焦点竞争失败记录另行保留。通过 `CAE_BROWSER=chromium npm run test:e2e` 可复现该浏览器配置，默认仍检查本机 Chrome。
+
+
+### 同日截图反馈修订
+
+- Ribbon 文字统一灰色，悬停和选中统一浅蓝底；视图区方向面板与操作条右对齐，组间保持 12px，短窗口横排。
+- 文件菜单文字与箭头间距为 4px；上下文下拉框统一箭头与右侧 8px 留白。
+- 移除标题栏右侧品牌文字、问号及 Ribbon 信息按钮；说明从帮助菜单进入。
+- 增量验证：Ribbon/布局阶段 7 项相关浏览器检查、菜单/下拉框阶段 4 项相关浏览器检查通过；最终右对齐调整构建通过。证据分别位于本地 `outputs/prototype-review-20261025/ribbon-feedback/` 和 `menu-select-feedback/`。上面的 32 项全量结果属于 Figma 基线阶段，并非最终样式版再次全量执行。
+
+`outputs/` 按仓库规则仅保留在本地，不随代码推送。

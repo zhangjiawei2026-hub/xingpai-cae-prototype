@@ -8,6 +8,7 @@ export function createViewport(
   container: HTMLElement,
   onPick: (id: number) => void,
   onDirection?: (axes: { x: number; y: number }[]) => void,
+  onOrbit?: () => void,
 ) {
   const scene = new THREE.Scene();
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -207,7 +208,12 @@ export function createViewport(
     }
   };
   renderer.domElement.addEventListener("pointerup", pick);
-  controls.addEventListener("change", render);
+  const previousRotation = camera.quaternion.clone();
+  controls.addEventListener("change", () => {
+    if (previousRotation.angleTo(camera.quaternion) > 0.00001) onOrbit?.();
+    previousRotation.copy(camera.quaternion);
+    render();
+  });
   resize();
   view("iso");
   return {

@@ -1,3 +1,4 @@
+import { moveFocus } from "../../components/keyboard";
 import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -27,6 +28,8 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useStore();
   const treeRef = useRef<HTMLDivElement>(null);
   const focusedId = useRef("");
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuTrigger = useRef<HTMLElement | null>(null);
   const model = state.models[state.model],
     empty = state.model === "Model-Empty";
   const [tab, setTab] = useState("model"),
@@ -44,9 +47,18 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
     command?: Command;
   } | null>(null);
   useEffect(() => {
+    if (menu)
+      menuRef.current
+        ?.querySelector<HTMLButtonElement>("button:not(:disabled)")
+        ?.focus();
+  }, [menu]);
+  useEffect(() => {
     const close = () => setMenu(null),
       escape = (e: KeyboardEvent) => {
-        if (e.key === "Escape") close();
+        if (e.key === "Escape" && menu) {
+          close();
+          menuTrigger.current?.focus();
+        }
       };
     document.addEventListener("click", close);
     document.addEventListener("keydown", escape);
@@ -54,7 +66,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
       document.removeEventListener("click", close);
       document.removeEventListener("keydown", escape);
     };
-  }, []);
+  }, [menu]);
   const groups: Group[] = [
     {
       id: "parts",
@@ -80,7 +92,12 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
         ...model.steps.map((v) => ({ id: v.id, name: v.name })),
       ],
     },
-    { id: "interactions", label: "相互作用", icon: "interaction", children: [] },
+    {
+      id: "interactions",
+      label: "相互作用",
+      icon: "interaction",
+      children: [],
+    },
     { id: "loads", label: "载荷", icon: "load", children: [] },
     { id: "boundaries", label: "边界条件", icon: "boundary", children: [] },
     {
@@ -136,10 +153,16 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
   });
   return (
     <aside className={s.sidebar} aria-label="模型导航">
-      <div className={s.treeTabs} role="tablist" aria-label="导航树类型">
+      <div
+        className={s.treeTabs}
+        role="tablist"
+        aria-label="导航树类型"
+        onKeyDown={(e) => moveFocus(e, "tab")}
+      >
         <button
           role="tab"
           aria-selected={tab === "model"}
+          tabIndex={tab === "model" ? 0 : -1}
           aria-controls="tree-panel"
           id="model-tab"
           onClick={() => setTab("model")}
@@ -149,6 +172,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
         <button
           role="tab"
           aria-selected={tab === "result"}
+          tabIndex={tab === "result" ? 0 : -1}
           aria-controls="tree-panel"
           id="result-tab"
           onClick={() => setTab("result")}
@@ -193,9 +217,12 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
               <button
                 id="tree-menu-trigger"
                 title="创建对象菜单"
+                disabled={empty || !!state.command}
+                aria-haspopup="menu"
                 aria-expanded={!!menu}
                 onClick={(e) => {
                   e.stopPropagation();
+                  menuTrigger.current = e.currentTarget;
                   const r = e.currentTarget.getBoundingClientRect();
                   setMenu({ x: r.left, y: r.bottom });
                 }}
@@ -279,12 +306,15 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                       className={s.treeRow}
                       onContextMenu={(e) => {
                         e.preventDefault();
-                        if (group.command && !empty)
+                        if (group.command && !empty && !state.command) {
+                          menuTrigger.current =
+                            e.currentTarget.querySelector("button");
                           setMenu({
                             x: e.clientX,
                             y: e.clientY,
                             command: group.command,
                           });
+                        }
                       }}
                     >
                       <button
@@ -459,6 +489,15 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
           }}
           role="menu"
           aria-label="创建对象"
+          ref={menuRef}
+          onKeyDown={(e) => {
+            moveFocus(e, "menuitem");
+            if (e.key === "Tab") {
+              e.preventDefault();
+              setMenu(null);
+              menuTrigger.current?.focus();
+            }
+          }}
         >
           {(
             [
@@ -474,9 +513,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                 key={i.command}
                 disabled={empty}
                 onClick={() => {
-                  rememberDialogTrigger(
-                    document.getElementById("tree-menu-trigger"),
-                  );
+                  rememberDialogTrigger(menuTrigger.current);
                   dispatch({ type: "open", command: i.command });
                 }}
               >

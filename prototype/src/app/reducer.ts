@@ -200,6 +200,6 @@ export function reducer(state: WorkState, action: Action): WorkState {
     case "notice":
       return { ...state, notice: action.value };
     case "reset":
-      return initialState();
+      return state.command || state.selection ? state : initialState();
   }
 }

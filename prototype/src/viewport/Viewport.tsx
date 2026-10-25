@@ -1,51 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Maximize,
-  RotateCcw,
-  Plus,
-  Minus,
-  Box,
-  Grid2X2,
-  Check,
-  X,
-} from "lucide-react";
+import { Box, Check, X } from "lucide-react";
+import { CAEIcon, type CAEIconName } from "../components/CAEIcon";
 import { useStore } from "../app/Store";
 import { createViewport } from "./adapter";
 import type { ViewMode } from "./adapter";
 import s from "./Viewport.module.css";
 import { workspaceContext } from "../features/workspace/context";
 
-/** Orientation glyph: iso cube with the viewed face highlighted. */
-function ViewFaceIcon({ face }: { face: ViewMode }) {
-  const faces = {
-    top: "M12 3.5 19.5 7.25 12 11 4.5 7.25Z",
-    front: "M4.5 7.25 12 11v9.5l-7.5-3.75Z",
-    right: "M12 11l7.5-3.75v9.5L12 20.5Z",
-  };
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.3"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {(Object.keys(faces) as (keyof typeof faces)[]).map((k) => (
-        <path
-          key={k}
-          d={faces[k]}
-          className={
-            face === "iso" || face === k ? s.faceOn : s.faceOff
-          }
-          data-face={k}
-        />
-      ))}
-    </svg>
-  );
-}
+const viewIcon: Record<ViewMode, CAEIconName> = {
+  iso: "viewIso",
+  top: "viewTop",
+  front: "viewFront",
+  right: "viewRight",
+};
 
 export function Viewport() {
   const { state, dispatch } = useStore();
@@ -53,7 +20,7 @@ export function Viewport() {
     adapter = useRef<ReturnType<typeof createViewport> | null>(null);
   const [error, setError] = useState(""),
     [wire, setWire] = useState(true),
-    [view, setView] = useState<ViewMode>("iso");
+    [view, setView] = useState<ViewMode | null>("iso");
   const [counts, setCounts] = useState({ nodes: 0, elements: 0 });
   const axes = useRef<SVGSVGElement>(null);
   const context = workspaceContext(state);
@@ -73,8 +40,10 @@ export function Viewport() {
             axis?.querySelector("text")?.setAttribute("y", String(y - 4));
           });
         },
+        () => setView(null),
       );
       setCounts(adapter.current.counts);
+      setView("iso");
     } catch {
       setError(
         "三维视图不可用。请使用支持 WebGL 的浏览器；仍可通过下方列表体验选择。",
@@ -115,52 +84,60 @@ export function Viewport() {
             {context.moduleLabel} / {context.label}：{context.value}
           </small>
         </div>
-        <div className={s.tools} aria-label="视图工具">
-          <button title="等轴测视图" onClick={() => changeView("iso")}>
-            <RotateCcw size={16} />
-          </button>
-          <button title="适合窗口" onClick={() => adapter.current?.fit()}>
-            <Maximize size={16} />
-          </button>
-          <i />
-          <button title="放大模型" onClick={() => adapter.current?.zoom(0.85)}>
-            <Plus size={17} />
-          </button>
-          <button title="缩小模型" onClick={() => adapter.current?.zoom(1.15)}>
-            <Minus size={17} />
-          </button>
-          <i />
-          <button
-            title="显示三角面边线"
-            aria-pressed={wire}
-            className={wire ? s.active : ""}
-            onClick={() => {
-              setWire(!wire);
-              adapter.current?.setWireframe(!wire);
-            }}
-          >
-            <Grid2X2 size={16} />
-          </button>
-        </div>
-        <div className={s.navigator} aria-label="视图方向">
-          {(
-            [
-              { value: "top", label: "顶", title: "顶视图" },
-              { value: "iso", label: "等轴测", title: "等轴测视图" },
-              { value: "front", label: "前", title: "前视图" },
-              { value: "right", label: "右", title: "右视图" },
-            ] as const
-          ).map((v) => (
-            <button
-              key={v.value}
-              aria-label={v.label}
-              title={v.title}
-              onClick={() => changeView(v.value)}
-              aria-pressed={view === v.value}
-            >
-              <ViewFaceIcon face={v.value} />
+        <div className={s.viewControls} role="group" aria-label="视图导航工具">
+          <div className={s.navigator} aria-label="视图方向">
+            {(
+              [
+                { value: "top", label: "顶", title: "顶视图" },
+                { value: "iso", label: "等轴测", title: "等轴测视图" },
+                { value: "front", label: "前", title: "前视图" },
+                { value: "right", label: "右", title: "右视图" },
+              ] as const
+            ).map((v) => (
+              <button
+                key={v.value}
+                aria-label={v.label}
+                title={v.title}
+                onClick={() => changeView(v.value)}
+                aria-pressed={view === v.value}
+              >
+                <CAEIcon name={viewIcon[v.value]} size={20} />
+              </button>
+            ))}
+          </div>
+          <div className={s.tools} aria-label="视图工具">
+            <button title="等轴测视图" onClick={() => changeView("iso")}>
+              <CAEIcon name="iso" size={20} />
             </button>
-          ))}
+            <button title="适合窗口" onClick={() => adapter.current?.fit()}>
+              <CAEIcon name="fit" size={20} />
+            </button>
+            <i />
+            <button
+              title="放大模型"
+              onClick={() => adapter.current?.zoom(0.85)}
+            >
+              <CAEIcon name="zoomIn" size={20} />
+            </button>
+            <button
+              title="缩小模型"
+              onClick={() => adapter.current?.zoom(1.15)}
+            >
+              <CAEIcon name="zoomOut" size={20} />
+            </button>
+            <i />
+            <button
+              title="显示三角面边线"
+              aria-pressed={wire}
+              className={wire ? s.active : ""}
+              onClick={() => {
+                setWire(!wire);
+                adapter.current?.setWireframe(!wire);
+              }}
+            >
+              <CAEIcon name="wireframe" size={20} />
+            </button>
+          </div>
         </div>
         {error && (
           <div className={s.empty} role="alert">
@@ -224,7 +201,7 @@ export function Viewport() {
                 }
               </span>
               <button aria-pressed="true" title="逐项点选，可累积多个演示对象">
-                单选 · 已激活
+                点选 · 已激活
               </button>
               {["框选", "几何面关联", "角度关联", "集合选择"].map((method) => (
                 <button key={method} disabled title="专业选择算法未接入">

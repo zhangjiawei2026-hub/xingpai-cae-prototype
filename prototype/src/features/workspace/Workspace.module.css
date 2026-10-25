@@ -12,8 +12,9 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  color: #e8f0fb;
-  background: var(--blue);
+  color: #e6eefb;
+  background: var(--nav-title-bg);
+  border-bottom: 1px solid #17305a;
   padding: 0 18px;
 }
 .brand {
@@ -26,20 +27,20 @@
   display: flex;
 }
 .brand b {
-  color: #ffffff;
+  color: var(--nav-title-ink);
   font-family: "Segoe UI", sans-serif;
   font-size: 17px;
   letter-spacing: 0.4px;
   font-weight: 650;
 }
 .brand b span {
-  color: #e0ebfa;
+  color: #cfe0fa;
   font-weight: 400;
 }
 .brand i {
   height: 16px;
   width: 1px;
-  background: rgb(255 255 255 / 28%);
+  background: rgb(255 255 255 / 25%);
   margin-left: 15px;
 }
 .projectName {
@@ -51,30 +52,15 @@
   font:
     10px "PingFang SC",
     sans-serif;
-  color: #e0ebfa;
+  color: #cfe0fa;
 }
 .titleBadge {
-  color: #e8f0fb;
-  background: rgb(255 255 255 / 12%);
-  border: 1px solid rgb(255 255 255 / 30%);
+  color: #ffffff;
+  background: rgb(255 255 255 / 14%);
+  border: 1px solid rgb(255 255 255 / 32%);
   padding: 2px 6px;
   font-size: 9px;
   border-radius: 3px;
-}
-.titleRight {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  color: #eef4fc;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-.titleRight button {
-  border: 0;
-  background: transparent;
-  color: #ffffff;
-  padding: 0;
 }
 .menubar {
   height: 29px;
@@ -83,8 +69,8 @@
   gap: 5px;
   padding: 0 15px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel-soft);
+  border-bottom: 1px solid var(--nav-line);
+  background: var(--nav-menu-bg);
   font-size: 11px;
 }
 .menubar > button,
@@ -101,15 +87,21 @@
   position: relative;
 }
 .fileMenu summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--menu-caret-gap);
   cursor: pointer;
   list-style: none;
+}
+.fileMenu summary:hover,
+.fileMenu[open] summary {
+  background: var(--blue-soft);
 }
 .fileMenu summary::-webkit-details-marker {
   display: none;
 }
 .fileMenu summary svg {
-  margin-left: 8px;
-  vertical-align: middle;
+  margin: 0;
 }
 .fileMenu > div {
   position: absolute;
@@ -165,9 +157,9 @@
   display: flex;
   align-items: stretch;
   padding: 0 17px;
-  background: var(--paper);
+  background: var(--nav-tab-bg);
   gap: 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--nav-line);
 }
 .modules button {
   position: relative;
@@ -185,7 +177,7 @@
   color: var(--ink-soft);
 }
 .modules button[aria-current="page"] {
-  color: var(--blue);
+  background: var(--blue-soft);
   font-weight: 600;
 }
 .modules button[aria-current="page"] small {
@@ -198,46 +190,40 @@
   bottom: -1px;
   height: var(--tab-underline);
   background: var(--blue);
-  left: 0;
-  right: 0;
+  left: 8px;
+  right: 8px;
+  border-radius: 2px 2px 0 0;
 }
 .modules button:hover {
-  background: var(--surface);
+  background: var(--blue-soft);
 }
 .ribbon {
   --ci-badge-ring: #f8fafc;
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
-  height: 88px;
+  height: 72px;
   overflow-x: auto;
   overflow-y: hidden;
-  background: linear-gradient(180deg, #fcfdfe 0%, #f4f7fa 100%);
-  border-bottom: 1px solid var(--control-border);
-  box-shadow: inset 0 1px 0 #ffffff;
-  padding: 6px 10px 6px 14px;
+  background: #f6f8fb;
+  border-bottom: 1px solid var(--nav-line);
+  padding: 4px 8px 4px 10px;
 }
 .ribbonGroup {
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 0 12px;
+  padding: 0 8px;
   flex-shrink: 0;
 }
 .ribbonGroup::after {
   content: "";
   position: absolute;
   right: 0;
-  top: 6px;
-  bottom: 6px;
+  top: 8px;
+  bottom: 8px;
   width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    var(--control-border) 18%,
-    var(--control-border) 82%,
-    transparent
-  );
+  background: var(--control-border);
 }
 .ribbonGroup:first-child {
   padding-left: 0;
@@ -247,22 +233,22 @@
   min-height: 0;
   display: flex;
   align-items: stretch;
-  gap: 4px;
+  gap: 2px;
 }
 .largeCommand {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 6px;
-  padding: 7px 8px 5px;
-  min-width: 60px;
+  gap: 3px;
+  padding: 5px 6px 3px;
+  min-width: 52px;
   background: none;
   border: 1px solid transparent;
   border-radius: 5px;
   font-size: 11px;
   line-height: 14px;
-  color: var(--ink-control);
+  color: var(--ink-secondary);
   white-space: nowrap;
   position: relative;
   transition:
@@ -273,17 +259,9 @@
 .largeCommand > svg {
   transition: transform 160ms ease;
 }
-.largeCommand.featured {
-  color: var(--blue);
-  font-weight: 600;
-}
 .largeCommand:hover:not(:disabled) {
   border-color: var(--selected-border);
-  background: var(--paper);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--shadow) 8%, transparent);
-}
-.largeCommand:hover:not(:disabled) > svg {
-  transform: translateY(-1px);
+  background: var(--blue-soft);
 }
 .largeCommand:active:not(:disabled) {
   background: var(--blue-soft);
@@ -298,18 +276,18 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  gap: 1px;
 }
 .smallCommands button {
   display: flex;
   align-items: center;
-  gap: 7px;
-  height: 28px;
-  padding: 3px 9px 3px 6px;
+  gap: 6px;
+  height: 25px;
+  padding: 2px 8px 2px 5px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: none;
-  color: var(--ink-control);
+  color: var(--ink-secondary);
   white-space: nowrap;
   font-size: 11px;
   transition:
@@ -322,10 +300,9 @@
 }
 .smallCommands button[aria-pressed="true"] {
   background: var(--blue-soft);
-  color: var(--blue);
 }
 .smallCommands button:hover:not(:disabled) {
-  background: var(--paper);
+  background: var(--blue-soft);
   border-color: var(--selected-border);
 }
 .ribbon button:disabled {
@@ -342,8 +319,8 @@
   color: var(--ink-secondary);
 }
 .ribbon button[data-pending]:not(:disabled):hover {
-  background: color-mix(in srgb, var(--paper) 70%, transparent);
-  border-color: var(--line);
+  background: var(--blue-soft);
+  border-color: var(--selected-border);
   box-shadow: none;
 }
 .ribbon button[data-pending]:not(:disabled):hover > svg {
@@ -351,18 +328,6 @@
 }
 .demoCommands::after {
   display: none;
-}
-.ribbonHelp {
-  margin: auto 3px auto auto;
-  border: 0;
-  border-radius: 4px;
-  background: none;
-  color: var(--ink-soft);
-  padding: 6px;
-}
-.ribbonHelp:hover:not(:disabled) {
-  background: var(--blue-soft);
-  color: var(--blue);
 }
 .contextbar {
   height: 40px;
@@ -382,13 +347,18 @@
   color: var(--muted);
 }
 .contextbar select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='m2 4 4 4 4-4' stroke='%2365798f' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--select-arrow-inset) center;
+  background-size: var(--select-arrow-size) var(--select-arrow-size);
   height: 25px;
   width: 142px;
   border: 1px solid var(--view-bright);
-  background: var(--paper);
+  background-color: var(--paper);
   border-radius: 3px;
   font: 11px var(--font-data);
-  padding: 0 8px;
+  padding: 0 var(--select-arrow-space) 0 var(--space);
   color: var(--ink-control);
 }
 .contextbar label:nth-of-type(2) select {
@@ -506,12 +476,14 @@
 }
 .treeSearch {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 6px;
   color: var(--viewport-ink);
   border: 1px solid var(--line);
   border-radius: 3px;
-  margin: 13px 12px;
+  background: var(--paper);
+  margin: 10px 12px 4px;
   padding: 6px 8px;
 }
 .treeSearch input {
@@ -864,20 +836,17 @@
   .contextHint {
     display: none;
   }
-  .ribbonHelp {
-    display: none;
-  }
 }
 @media (max-height: 760px) {
   .log {
     height: 95px;
   }
   .ribbon {
-    height: 82px;
+    height: 68px;
   }
   .largeCommand {
-    padding-top: 5px;
-    gap: 4px;
+    padding-top: 4px;
+    gap: 2px;
   }
   .treeRow {
     height: 27px;
@@ -887,8 +856,8 @@
   }
 }
 .commandDropdown {
-  width: 18px;
-  height: 56px;
+  width: 16px;
+  height: 48px;
   align-self: center;
   border: 1px solid transparent;
   background: none;

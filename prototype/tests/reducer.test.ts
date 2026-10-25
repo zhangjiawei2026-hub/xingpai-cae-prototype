@@ -15,6 +15,14 @@ const add: Action = {
   value: { id: "new", name: "Set-review", nodes: [1, 2] },
 };
 describe("工作区状态边界", () => {
+  it("命令和拾取期间拒绝重置，结束命令后允许恢复", () => {
+    const editing = open();
+    expect(reducer(editing, { type: "reset" })).toBe(editing);
+    const picking = reducer(editing, { type: "pick", session });
+    expect(reducer(picking, { type: "reset" })).toBe(picking);
+    const saved = reducer(editing, add);
+    expect(reducer(saved, { type: "reset" }).models).toEqual(initialState().models);
+  });
   it("拾取取消不生成对象，且不修改进入时传入的选择", () => {
     const picking = reducer(open(), { type: "pick", session });
     const changed = reducer(picking, { type: "toggle", id: 2 });

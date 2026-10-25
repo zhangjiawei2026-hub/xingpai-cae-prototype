@@ -21,6 +21,13 @@
   --space: 8px;
   --icon-small: 17px;
   --icon-large: 29px;
+  /* 2026-10-25 用户反馈调整：视图控件外距与组间距，原型设计值。 */
+  --viewport-tools-inset: 20px;
+  --viewport-tools-gap: 12px;
+  --menu-caret-gap: 4px;
+  --select-arrow-size: 12px;
+  --select-arrow-inset: 8px;
+  --select-arrow-space: 28px;
   --z-menu: 30;
   --z-dialog: 50;
   --ink-secondary: #65798f;
@@ -31,6 +38,12 @@
   --panel-soft: #f2f5f9;
   --selected-border: #bed0e8;
   --titlebar: #253345;
+  --nav-title-bg: #1f3d6e;
+  --nav-title-ink: #ffffff;
+  --nav-menu-bg: #eff4fb;
+  --nav-tab-bg: #ffffff;
+  --nav-line: #d3deed;
+  --nav-ink: #4d6483;
   --title-line: #506176;
   --view-panel: #202e3d;
   --view-raised: #293d50;
@@ -50,31 +63,33 @@
   --tab-pad: 12px;
   --tab-underline: 2px;
 
-  /* Professional CAE icon palette (prototype design values). */
+  /* Professional CAE icon palette (prototype design values): vivid lit faces, light from upper left. */
   --ci-ink: #34506f;
   --ci-line: #7f97b1;
+  --ci-shade: #1b3150; /* gradient darkening + ground shadow */
+  --ci-geo-ink: #1d4796; /* tonal outline for primary geometry */
   --ci-paper: #ffffff;
-  --ci-geo-1: #f1f7fe;
-  --ci-geo-2: #cfe0f5;
-  --ci-geo-3: #a6c4e8;
-  --ci-pale-1: #fafcfe;
-  --ci-pale-2: #e9eff6;
-  --ci-pale-3: #dbe4ee;
-  --ci-acc-1: #fff0d6;
-  --ci-acc-2: #fbcf86;
-  --ci-acc-3: #f0a33a;
-  --ci-acc-ink: #b9720f;
-  --ci-mat-1: #e7e2fc;
-  --ci-mat-2: #bfb3f1;
-  --ci-mat-ink: #5b4fa8;
-  --ci-ana-1: #cdece6;
-  --ci-ana-ink: #188a80;
-  --ci-force: #df5f2c;
-  --ci-force-soft: #fde3d6;
+  --ci-geo-1: #e6f0ff;
+  --ci-geo-2: #82b1f6;
+  --ci-geo-3: #3f78de;
+  --ci-pale-1: #f6f9fc;
+  --ci-pale-2: #d9e3ef;
+  --ci-pale-3: #b4c4d8;
+  --ci-acc-1: #fff3d9;
+  --ci-acc-2: #ffc35c;
+  --ci-acc-3: #f28a12;
+  --ci-acc-ink: #b2600a;
+  --ci-mat-1: #ece6ff;
+  --ci-mat-2: #9f8cf5;
+  --ci-mat-ink: #5139c2;
+  --ci-ana-1: #bfeee5;
+  --ci-ana-ink: #0f9484;
+  --ci-force: #f0582a;
+  --ci-force-soft: #ffe0d2;
   --ci-axis-x: #d9534a;
   --ci-axis-y: #3a9d5d;
   --ci-axis-z: #3c74d6;
-  --ci-badge: #2f6fd6;
+  --ci-badge: #2b6ff0;
   --ci-badge-danger: #cf4636;
 
   font-size: 12px;

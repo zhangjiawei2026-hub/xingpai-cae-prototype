@@ -1,3 +1,4 @@
+import { moveFocus } from "../../components/keyboard";
 import { useEffect, useState } from "react";
 import { MousePointer2 } from "lucide-react";
 import { useStore } from "../../app/Store";
@@ -38,6 +39,11 @@ export function DomainDialog() {
     if (result.target === "direction") setDirection(result.ids);
     dispatch({ type: "consumeResult" });
   }, [state.selectionResult, dispatch]);
+  const tabs =
+    regionType === "solid"
+      ? ["基础", "最大尺寸", "脱模", "挤压", "对称", "重复"]
+      : ["基础", "最大尺寸", "对称", "重复"];
+  const activeDraw = regionType === "solid" && drawEnabled;
   const pick = (target: SelectionSession["target"], ids: number[]) =>
     dispatch({
       type: "pick",
@@ -82,7 +88,7 @@ export function DomainDialog() {
                 return setError("本演示中设计域名称需唯一。");
               if (!elements.length)
                 return setError("请先选择至少一个演示单元作为优化区域。");
-              if (drawEnabled && (!base.length || !direction.length))
+              if (activeDraw && (!base.length || !direction.length))
                 return setError("已激活脱模约束，请选择基准点与第一点。");
               dispatch({
                 type: "addDomain",
@@ -93,12 +99,12 @@ export function DomainDialog() {
                   elements,
                   minSize,
                   maxSize,
-                  drawEnabled,
-                  drawMaxSize: drawEnabled ? drawMaxSize : "",
+                  drawEnabled: activeDraw,
+                  drawMaxSize: activeDraw ? drawMaxSize : "",
                   multiEnabled,
                   multiType,
-                  base: drawEnabled ? base : [],
-                  direction: drawEnabled ? direction : [],
+                  base: activeDraw ? base : [],
+                  direction: activeDraw ? direction : [],
                 },
               });
             }}
@@ -126,7 +132,10 @@ export function DomainDialog() {
               type="radio"
               name="region"
               checked={regionType === "shell"}
-              onChange={() => setRegionType("shell")}
+              onChange={() => {
+                setRegionType("shell");
+                setTab("基础");
+              }}
             />
             壳
           </label>
@@ -144,32 +153,31 @@ export function DomainDialog() {
       <FormRow label="优化区域">
         {pickButton("elements", elements, "拾取单元")}
       </FormRow>
-      <div className={s.tabs} role="tablist" aria-label="设计域配置">
-        {["基础", "最大尺寸", "脱模", "挤压", "对称", "重复"].map(
-          (value, index) => (
-            <button
-              key={value}
-              role="tab"
-              id={`domain-tab-${index}`}
-              aria-controls="domain-panel"
-              aria-selected={tab === value}
-              tabIndex={tab === value ? 0 : -1}
-              disabled={index > 2}
-              title={index > 2 ? "本轮仅展示入口，字段依赖待确认" : undefined}
-              onClick={() => setTab(value)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                  e.preventDefault();
-                  const next = (index + (e.key === "ArrowRight" ? 1 : 2)) % 3;
-                  setTab(["基础", "最大尺寸", "脱模"][next]);
-                  document.getElementById(`domain-tab-${next}`)?.focus();
-                }
-              }}
-            >
-              {value}
-            </button>
-          ),
-        )}
+      <div
+        className={s.tabs}
+        role="tablist"
+        aria-label="设计域配置"
+        onKeyDown={(e) => moveFocus(e, "tab")}
+      >
+        {tabs.map((value, index) => (
+          <button
+            key={value}
+            role="tab"
+            id={`domain-tab-${index}`}
+            aria-controls="domain-panel"
+            aria-selected={tab === value}
+            tabIndex={tab === value ? 0 : -1}
+            disabled={!["基础", "最大尺寸", "脱模"].includes(value)}
+            title={
+              !["基础", "最大尺寸", "脱模"].includes(value)
+                ? "本轮仅展示入口，字段依赖待确认"
+                : undefined
+            }
+            onClick={() => setTab(value)}
+          >
+            {value}
+          </button>
+        ))}
       </div>
       <div
         role="tabpanel"

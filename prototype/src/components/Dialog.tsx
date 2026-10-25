@@ -32,10 +32,15 @@ export function Dialog({
     return () => {
       requestAnimationFrame(() => {
         const target = origin.current;
+        // A later user action may already have focused another command/menu.
+        // The deferred restoration must not steal that newer focus.
+        const active = document.activeElement;
+        if (active instanceof HTMLElement && active !== document.body &&
+            active.isConnected && active !== target) return;
         if (
           target?.isConnected &&
           target !== document.body &&
-          !target.matches(":disabled")
+          !target.matches(":disabled") && target.getClientRects().length > 0
         )
           target.focus();
         else document.getElementById("tree-menu-trigger")?.focus();

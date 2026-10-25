@@ -1,3 +1,5 @@
+import { rememberDialogTrigger } from "../../components/dialogFocus";
+import { moveFocus } from "../../components/keyboard";
 import { useEffect, useRef, useState } from "react";
 import {
   Box,
@@ -7,7 +9,6 @@ import {
   RefreshCcw,
   Terminal,
   Info,
-  CircleHelp,
   ChevronsUpDown,
   FolderOpen,
 } from "lucide-react";
@@ -54,13 +55,14 @@ function Help({ close }: { close: () => void }) {
           数据仅保留在本次会话，刷新后恢复初始状态。模型和选择 ID
           为程序生成的显示网格，未接入真实 FEM 数据或求解器。
         </p>
-        <p>灰色功能暂未覆盖；专业图标为语义占位。Windows 桌面集成尚未验证。</p>
+        <p>标记为未接入的命令仅提供原因说明；专业图标待确认。Windows 桌面集成尚未验证。</p>
       </div>
     </Dialog>
   );
 }
 export function Workspace() {
   const { state, dispatch } = useStore();
+  const [resetPending, setResetPending] = useState(false);
   const [treeVisible, setTreeVisible] = useState(true),
     [logVisible, setLogVisible] = useState(true),
     [help, setHelp] = useState(false),
@@ -100,26 +102,18 @@ export function Workspace() {
           安装支架<small> / 工作区</small>
         </span>
         <span className={s.titleBadge}>交互原型</span>
-        <div className={s.titleRight}>
-          <span>星派科技</span>
-          <button
-            disabled={!!state.command}
-            onClick={() => setHelp(true)}
-            aria-label="原型说明"
-          >
-            <CircleHelp size={16} />
-          </button>
-        </div>
       </header>
       <div className={s.menubar}>
         <details className={s.fileMenu}>
           <summary>
-            文件 <ChevronDown size={10} />
+            <span>文件</span><ChevronDown size={10} aria-hidden="true" />
           </summary>
           <div>
             <button
-              onClick={() => {
-                dispatch({ type: "reset" });
+              disabled={!!state.command}
+              onClick={(e) => {
+                rememberDialogTrigger(e.currentTarget.closest("details")?.querySelector("summary") ?? null);
+                setResetPending(true);
                 document
                   .querySelector("details[open]")
                   ?.removeAttribute("open");
@@ -141,7 +135,8 @@ export function Workspace() {
         <span className={s.menuDivider} />
         <button
           title="恢复初始演示"
-          onClick={() => dispatch({ type: "reset" })}
+          disabled={!!state.command}
+          onClick={() => setResetPending(true)}
         >
           <RefreshCcw size={13} />
         </button>
@@ -177,7 +172,6 @@ export function Workspace() {
         onToggleLog={() => setLogVisible(!logVisible)}
         treeVisible={treeVisible}
         logVisible={logVisible}
-        onHelp={() => setHelp(true)}
       />
       <div className={s.contextbar}>
         {!treeVisible && (
@@ -303,10 +297,15 @@ export function Workspace() {
           {logVisible && (
             <section className={s.log} aria-label="信息窗口">
               <header>
-                <div role="tablist" aria-label="信息类型">
+                <div
+                  role="tablist"
+                  aria-label="信息类型"
+                  onKeyDown={(e) => moveFocus(e, "tab")}
+                >
                   <button
                     role="tab"
                     aria-selected={logTab === "messages"}
+                    tabIndex={logTab === "messages" ? 0 : -1}
                     onClick={() => setLogTab("messages")}
                   >
                     <Terminal size={13} />
@@ -315,6 +314,7 @@ export function Workspace() {
                   <button
                     role="tab"
                     aria-selected={logTab === "guide"}
+                    tabIndex={logTab === "guide" ? 0 : -1}
                     onClick={() => setLogTab("guide")}
                   >
                     操作指引
@@ -374,6 +374,32 @@ export function Workspace() {
       {state.command === "step" && <StepDialog />}
       {state.command === "domain" && <DomainDialog />}
       {help && <Help close={() => setHelp(false)} />}
+      {resetPending && (
+        <Dialog
+          title="恢复初始演示？" subtitle="清除本次会话修改"
+          onDismiss={() => setResetPending(false)}
+          footer={
+            <>
+              <button autoFocus onClick={() => setResetPending(false)}>
+                保留当前会话
+              </button>
+              <button
+                className={formStyles.primary}
+                onClick={() => {
+                  dispatch({ type: "reset" });
+                  setResetPending(false);
+                }}
+              >
+                确认恢复
+              </button>
+            </>
+          }
+        >
+          <p>
+            本次会话中新建和修改的节点集合、分析步与设计域将被清除。此操作不可撤销。
+          </p>
+        </Dialog>
+      )}
     </div>
   );
 }

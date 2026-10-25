@@ -1,4 +1,5 @@
-import { ChevronDown, Info } from "lucide-react";
+import { moveFocus } from "../../components/keyboard";
+import { ChevronDown } from "lucide-react";
 import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { useState } from "react";
 import { useStore } from "../../app/Store";
@@ -89,7 +90,6 @@ export function Ribbon({
   onToggleLog,
   treeVisible,
   logVisible,
-  onHelp,
 }: {
   onFit: () => void;
   onIso: () => void;
@@ -97,7 +97,6 @@ export function Ribbon({
   onToggleLog: () => void;
   treeVisible: boolean;
   logVisible: boolean;
-  onHelp: () => void;
 }) {
   const { state, dispatch } = useStore();
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
@@ -108,9 +107,7 @@ export function Ribbon({
     item.command === "nodeSet"
       ? model.sets.find((v) => v.id === state.selectedTree)
       : item.command === "step"
-        ? model.steps.find(
-            (v) => v.id === state.selectedTree || v.name === state.step,
-          )
+        ? model.steps.find((v) => v.id === state.selectedTree)
         : item.command === "domain"
           ? model.domains.find((v) => v.id === state.selectedTree)
           : undefined;
@@ -126,14 +123,10 @@ export function Ribbon({
   });
   return (
     <div className={s.ribbon} aria-label="Ribbon 功能区">
-      <div
-        className={s.ribbonGroup}
-        role="group"
-        aria-label="创建与编辑"
-      >
+      <div className={s.ribbonGroup} role="group" aria-label="创建与编辑">
         <div className={s.ribbonItems}>
           <button
-            className={`${s.largeCommand} ${item.command ? s.featured : ""}`}
+            className={s.largeCommand}
             {...(item.command
               ? {
                   disabled: locked,
@@ -220,11 +213,7 @@ export function Ribbon({
           </div>
         </div>
       </div>
-      <div
-        className={s.ribbonGroup}
-        role="group"
-        aria-label="视图"
-      >
+      <div className={s.ribbonGroup} role="group" aria-label="视图">
         <div className={s.ribbonItems}>
           <button className={s.largeCommand} onClick={onFit}>
             <CAEIcon name="fit" size={32} />
@@ -243,11 +232,7 @@ export function Ribbon({
           </div>
         </div>
       </div>
-      <div
-        className={s.ribbonGroup}
-        role="group"
-        aria-label="工作区"
-      >
+      <div className={s.ribbonGroup} role="group" aria-label="工作区">
         <div className={s.ribbonItems}>
           <div className={s.smallCommands}>
             <button aria-pressed={treeVisible} onClick={onToggleTree}>
@@ -286,14 +271,6 @@ export function Ribbon({
           ))}
         </div>
       </div>
-      <button
-        className={s.ribbonHelp}
-        disabled={!!state.command}
-        onClick={onHelp}
-        title="查看原型说明"
-      >
-        <Info size={17} />
-      </button>
       <div
         id="ribbon-command-menu"
         popover="auto"
@@ -301,17 +278,16 @@ export function Ribbon({
         aria-label="Ribbon 创建命令"
         className={s.contextMenu}
         style={{ left: menuAnchor.x, top: menuAnchor.y, margin: 0 }}
+        onToggle={(e) => {
+          if (e.newState === "open")
+            e.currentTarget.querySelector<HTMLButtonElement>("button")?.focus();
+        }}
         onKeyDown={(e) => {
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          moveFocus(e, "menuitem");
+          if (e.key === "Escape" || e.key === "Tab") {
             e.preventDefault();
-            const buttons = [...e.currentTarget.querySelectorAll("button")];
-            const index = buttons.indexOf(
-              document.activeElement as HTMLButtonElement,
-            );
-            buttons[
-              (index + (e.key === "ArrowDown" ? 1 : buttons.length - 1)) %
-                buttons.length
-            ]?.focus();
+            e.currentTarget.hidePopover();
+            document.getElementById("ribbon-menu-trigger")?.focus();
           }
         }}
       >

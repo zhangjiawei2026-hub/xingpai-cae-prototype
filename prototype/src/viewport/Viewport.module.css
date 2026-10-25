@@ -85,10 +85,17 @@
   font-size: 10px;
   color: var(--view-dim);
 }
-.tools {
+/* Navigation and actions share one anchor; spacing follows panel sizes. */
+.viewControls {
   position: absolute;
-  right: 19px;
-  top: 128px;
+  right: var(--viewport-tools-inset);
+  top: var(--viewport-tools-inset);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--viewport-tools-gap);
+}
+.tools {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -101,6 +108,9 @@
 .tools button {
   width: 28px;
   height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   background: none;
   border: 0;
   color: var(--viewport-ink);
@@ -117,9 +127,6 @@
   margin: 2px;
 }
 .navigator {
-  position: absolute;
-  top: 21px;
-  right: 19px;
   display: grid;
   grid-template-columns: repeat(2, 28px);
   gap: 4px;
@@ -148,16 +155,6 @@
   background: var(--view-hover);
   color: var(--blue);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 55%, transparent);
-}
-.faceOff {
-  fill: transparent;
-}
-.faceOn {
-  fill: color-mix(in srgb, var(--cyan) 48%, transparent);
-}
-.navigator button[aria-pressed="true"] .faceOn {
-  fill: color-mix(in srgb, var(--cyan) 75%, transparent);
-  stroke: var(--cyan);
 }
 .axes {
   position: absolute;
@@ -289,11 +286,13 @@
     top: 15px;
   }
 }
-/* 短窗口及浏览器放大后，将视图工具横排，避免底部按钮被裁切。 */
+/* 短窗口沿顶部横排，保留两组控件的相同间距。 */
 @media (max-height: 780px) {
+  .viewControls {
+    flex-direction: row;
+    align-items: flex-start;
+  }
   .tools {
-    top: auto;
-    bottom: 44px;
     flex-direction: row;
   }
   .tools i {
@@ -302,4 +301,6 @@
   }
 }
 
-.picklist { flex-wrap: wrap; }
+.picklist {
+  flex-wrap: wrap;
+}
