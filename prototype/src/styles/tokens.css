@@ -31,6 +31,16 @@
   --select-arrow-size: 12px;
   --select-arrow-inset: 8px;
   --select-arrow-space: 28px;
+  /* 2026-10-28 shared select design values, including the expanded picker. */
+  --select-height: var(--control-height);
+  --select-font-size: 12px;
+  --select-menu-row: 30px;
+  --select-menu-font-size: 12px;
+  --select-check-size: 14px;
+  --select-menu-padding: 4px;
+  --select-menu-radius: 4px;
+  --select-menu-max-height: 280px;
+  --select-menu-shadow: 0 4px 18px #20345024, 0 1px 3px #20345012;
   --z-menu: 30;
   --z-dialog: 50;
   --ink-secondary: #65798f;

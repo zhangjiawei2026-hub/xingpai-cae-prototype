@@ -873,6 +873,44 @@ try {
     await expect(field("载荷场引用")).toHaveValue("Field-review");
     await button("取消").click();
   });
+  await check("统一下拉：展开层、键盘选择、禁用项与弹窗 Esc", async () => {
+    await page.reload();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    assert(await page.evaluate(() => CSS.supports("appearance", "base-select")), "当前验证浏览器应支持可设计的原生下拉");
+    const selects = ["当前模型", "当前部件", "目录树停靠位置", "模型树样式", "消息停靠位置", "选择对象类型"];
+    for (const [i, label] of selects.entries()) {
+      const select = page.getByRole("combobox", { name: label, exact: true });
+      const value = await select.inputValue();
+      await select.click();
+      await expect(select).toHaveJSProperty("disabled", false);
+      assert(await select.evaluate(el => el.matches(":open")), `${label}应展开`);
+      await shot(`dropdown-${i}`);
+      await page.keyboard.press("Escape");
+      assert(await select.evaluate(el => !el.matches(":open")), `${label}应在 Esc 后关闭`);
+      await expect(select).toBeFocused(); await expect(select).toHaveValue(value);
+    }
+    const entity = page.getByRole("combobox", { name: "选择对象类型", exact: true });
+    await entity.click(); await page.keyboard.press("End"); await page.keyboard.press("Enter");
+    await expect(entity).toHaveValue("Node");
+    await entity.click(); await page.keyboard.press("Home"); await page.keyboard.press("Enter");
+    await expect(entity).toHaveValue("Element");
+    await button("分析步").click(); await button("继续").click();
+    const stabilization = page.getByRole("combobox", { name: "自动稳定", exact: true });
+    await stabilization.click(); await shot("dropdown-dialog");
+    await page.keyboard.press("Escape"); await expect(dialog()).toBeVisible();
+    await expect(stabilization).toBeFocused();
+    await stabilization.click(); await page.keyboard.press("End"); await page.keyboard.press("Enter");
+    await expect(stabilization).toHaveValue("damping"); await expect(field("稳定参数值")).toBeVisible();
+    await button("取消").click();
+    await button("节点集合").click();
+    await expect(page.getByRole("combobox", { name: "节点集合对象类型" })).toBeDisabled();
+    await button("取消").click();
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.evaluate(() => { document.documentElement.style.zoom = "1.25"; });
+    await entity.click(); await shot("dropdown-125-percent"); await page.keyboard.press("Escape");
+    await page.evaluate(() => { document.documentElement.style.zoom = ""; });
+    await page.setViewportSize({ width: 1440, height: 900 });
+  });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();
     await expect(

@@ -1,0 +1,140 @@
+/* One shared treatment for all single-value selects. Keep native semantics,
+   focus, type-ahead and keyboard selection; unsupported engines retain the
+   native picker and use the same closed control design. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: var(--select-height);
+  min-height: 0;
+  min-width: var(--select-min-width, 0px);
+  padding: 0 var(--select-arrow-space) 0 8px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='m2.5 4.5 3.5 3.5 3.5-3.5' stroke='%2365798f' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right var(--select-arrow-inset) center;
+  background-repeat: no-repeat;
+  background-size: var(--select-arrow-size);
+  color: var(--ink-control);
+  font-family: inherit;
+  font-size: var(--select-font-size);
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+select:not([multiple]):not([size]):hover:not(:disabled) {
+  border-color: var(--selected-border);
+  background-color: var(--surface);
+}
+
+select:not([multiple]):not([size]):is(:open, :focus-visible) {
+  border-color: var(--blue);
+  background-color: var(--paper);
+  outline: 2px solid var(--selected-border);
+  outline-offset: 1px;
+}
+
+select:not([multiple]):not([size]):disabled {
+  background-color: var(--panel-soft);
+  color: var(--ink-soft);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+
+@supports (appearance: base-select) {
+  select:not([multiple]):not([size]),
+  select:not([multiple]):not([size])::picker(select) {
+    appearance: base-select;
+  }
+
+  select:not([multiple]):not([size]) {
+    padding-right: 8px;
+    background-image: none;
+  }
+
+  select:not([multiple]):not([size])::picker-icon {
+    content: "";
+    flex: 0 0 var(--select-arrow-size);
+    width: var(--select-arrow-size);
+    height: var(--select-arrow-size);
+    margin-left: auto;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='m2.5 4.5 3.5 3.5 3.5-3.5' stroke='black' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    color: var(--ink-secondary);
+  }
+
+  select:not([multiple]):not([size]):open::picker-icon {
+    rotate: 180deg;
+    color: var(--blue);
+  }
+
+  select:not([multiple]):not([size])::picker(select) {
+    min-inline-size: anchor-size(self-inline);
+    max-inline-size: min(360px, calc(100vw - 24px));
+    max-block-size: min(var(--select-menu-max-height), 50dvh);
+    margin-block: 4px;
+    padding: var(--select-menu-padding);
+    border: 1px solid var(--selected-border);
+    border-radius: var(--select-menu-radius);
+    background: var(--paper);
+    box-shadow: var(--select-menu-shadow);
+    color: var(--ink);
+    font: var(--select-menu-font-size) / 1.4 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  select:not([multiple]):not([size]) option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: var(--select-menu-row);
+    padding: 6px 9px;
+    border: 0;
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink-control);
+    font: var(--select-menu-font-size) / 1.4 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  select:not([multiple]):not([size]) option:is(:hover, :focus-visible):not(:disabled) {
+    background: var(--panel-soft);
+    outline: none;
+  }
+
+  select:not([multiple]):not([size]) option:checked {
+    background: var(--blue-soft);
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  select:not([multiple]):not([size]) option:checked:is(:hover, :focus-visible) {
+    background: var(--blue-soft);
+    outline: 1px solid var(--selected-border);
+    outline-offset: -1px;
+  }
+
+  select:not([multiple]):not([size]) option::checkmark {
+    content: "";
+    display: block;
+    order: 1;
+    flex: 0 0 var(--select-check-size);
+    width: var(--select-check-size);
+    height: var(--select-check-size);
+    margin-left: auto;
+    color: var(--blue);
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m3.25 8.25 3 3 6.5-6.5' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  select:not([multiple]):not([size]) option:disabled {
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: not-allowed;
+  }
+}

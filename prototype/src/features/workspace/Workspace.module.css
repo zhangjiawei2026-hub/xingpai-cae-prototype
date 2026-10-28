@@ -358,19 +358,7 @@
   color: var(--muted);
 }
 .contextbar select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='m2 4 4 4 4-4' stroke='%2365798f' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--select-arrow-inset) center;
-  background-size: var(--select-arrow-size) var(--select-arrow-size);
-  height: 25px;
   width: 142px;
-  border: 1px solid var(--view-bright);
-  background-color: var(--paper);
-  border-radius: 3px;
-  font: 11px var(--font-data);
-  padding: 0 var(--select-arrow-space) 0 var(--space);
-  color: var(--ink-control);
 }
 .contextbar label:nth-of-type(2) select {
   width: 128px;
@@ -1044,7 +1032,8 @@
 
 /* Customer review 2026-10-28: compact desktop proportions; prototype decisions. */
 .projectSwitch { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11px; }
-.projectSwitch select { height: 25px; min-width: 145px; border: 1px solid var(--control-border); background: var(--paper); color: var(--ink); border-radius: 3px; }
+.projectSwitch, .contextbar { --select-height: 25px; --select-font-size: 11px; }
+.projectSwitch { --select-min-width: 145px; }
 .menuSession { margin-left: 16px; }
 .ribbon { height: 88px; }
 .ribbonGroup::before { content: attr(aria-label); order: 2; height: 17px; text-align: center; color: var(--muted); font-size: 10px; line-height: 17px; }
@@ -1056,7 +1045,8 @@
 .moduleBar[data-module-style="tabs"] .modules button { border-radius: 3px 3px 0 0; }
 .moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { background: var(--paper); box-shadow: inset 0 2px var(--blue); border-bottom-color: var(--paper); }
 .treeHeading { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 10px; background: var(--panel-soft); border-bottom: 1px solid var(--line); font-size: 11px; }
-.treeHeading select { font-size: 10px; max-width: 108px; border: 1px solid var(--line); background: var(--paper); }
+.treeHeading select { max-width: 108px; }
+.treeHeading { --select-height: 22px; --select-font-size: 11px; }
 .sidebar[data-tree-style="compact"] .treeRow { height: 24px; }
 .sidebar[data-tree-style="compact"] .treeChild { height: 24px; padding-left: 42px; }
 .sidebar[data-tree-style="compact"] .treeLine { left: 27px; }
