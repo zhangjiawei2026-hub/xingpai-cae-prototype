@@ -68,7 +68,7 @@ try {
   });
   page.setDefaultTimeout(30000);
   const button = (name) =>
-    ["节点集合", "分析步", "设计域"].includes(name)
+    ["节点集合", "分析步", "设计域", "模型树", "信息窗口"].includes(name)
       ? page
           .getByLabel("Ribbon 功能区")
           .getByRole("button", { name, exact: true })
@@ -76,7 +76,9 @@ try {
         ? page
             .locator("dialog[open]")
             .getByRole("button", { name, exact: true })
-        : page.getByRole("button", { name, exact: true });
+        : ["放大模型", "缩小模型"].includes(name)
+          ? page.locator('[aria-label="视图工具"]').getByRole("button", { name, exact: true })
+          : page.getByRole("button", { name, exact: true });
   const field = (name) => page.getByRole("textbox", { name, exact: true });
   const dialog = () => page.locator("dialog[open]");
   const shot = (name) =>
@@ -205,9 +207,10 @@ try {
     await shot("step-type");
     await button("继续").click();
     await expect(field("分析类型")).toHaveValue("静力，通用");
-    await page.getByRole("radio", { name: "手动", exact: true }).check();
+    await page.getByRole("tab", { name: "增量", exact: true }).click();
+    await page.getByRole("radio", { name: "固定", exact: true }).check();
     await field("初始增量尺寸").fill("0.25");
-    await field("最大迭代次数").fill("20");
+    await field("最大增量数").fill("20");
     await button("上一步").click();
     await expect(field("分析步名称")).toHaveValue("Review-step");
     await button("继续").click();
@@ -294,7 +297,7 @@ try {
       page.getByRole("treeitem", { name: "Initial", exact: true }),
     ).toHaveCount(0);
     await field("搜索模型树").fill("");
-    const splitter = page.getByRole("separator");
+    const splitter = page.getByRole("separator", { name: "调整模型树宽度" });
     await splitter.focus();
     await page.keyboard.press("ArrowRight");
     await expect(splitter).toHaveAttribute("aria-valuenow", "263");
@@ -428,7 +431,7 @@ try {
                   ? "无优化任务"
                   : "Task-1"
                 : model;
-          await expect(page.getByTestId("viewport-context")).toContainText(
+          await expect(page.getByTestId("workspace-context")).toContainText(
             expected,
           );
           if (
@@ -438,7 +441,7 @@ try {
             await page
               .getByRole("combobox", { name: "当前分析步" })
               .selectOption("Review-step");
-            await expect(page.getByTestId("viewport-context")).toContainText(
+            await expect(page.getByTestId("workspace-context")).toContainText(
               "Review-step",
             );
             await page
@@ -512,7 +515,7 @@ try {
         });
       const baseline = await canvasShot();
       for (const entry of [
-        page.locator('[title="适合窗口"]'),
+        page.locator('[aria-label="视图工具"] [title="适合窗口"]'),
         page
           .getByLabel("Ribbon 功能区")
           .getByRole("button", { name: "适合窗口", exact: true }),
@@ -716,13 +719,159 @@ try {
   await check("Figma 基线：旋转取消预设状态，缩放保留预设", async () => {
     const front = page.getByRole("button", { name: "前", exact: true });
     await front.click();
-    await page.getByTitle("放大模型", { exact: true }).click();
+    await page.locator('[aria-label="视图工具"]').getByTitle("放大模型", { exact: true }).click();
     await expect(front).toHaveAttribute("aria-pressed", "true");
     const box = await page.locator("canvas").boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down(); await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 50, { steps: 10 }); await page.mouse.up();
     await expect(front).toHaveAttribute("aria-pressed", "false");
     await page.getByRole("button", { name: "等轴测", exact: true }).click();
+  });
+  await check("标签样式对比与新增常用工具栏", async () => {
+    await page.reload();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const toolbar = page.getByRole("toolbar", { name: "常用工具栏" });
+    const styles = ["线条", "页签", "色块"];
+    for (const style of styles) {
+      await page.getByRole("radio", { name: style, exact: true }).check();
+      await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "优化", exact: true }).click();
+      await expect(page.getByRole("combobox", { name: "当前优化任务" })).toBeVisible();
+      await expect(toolbar).toBeVisible();
+      await shot(`module-style-${style}`);
+      await page.locator("[data-module-style]").screenshot({ path: path.join(artifactDir, `module-strip-${style}.png`) });
+    }
+    for (const [label, heading] of [["创建节点集合", "创建节点集合"], ["创建分析步", "创建分析步"], ["创建设计域", "创建设计域"]]) {
+      await toolbar.getByRole("button", { name: label, exact: true }).click();
+      await expect(dialog().getByRole("heading", { name: heading, exact: true })).toBeVisible();
+      await expect(toolbar.getByRole("button", { name: "创建节点集合", exact: true })).toBeDisabled();
+      await button("取消").click();
+      await expect(toolbar.getByRole("button", { name: label, exact: true })).toBeFocused();
+    }
+    await toolbar.getByRole("button", { name: "模型树", exact: true }).click();
+    await expect(button("模型树")).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByRole("complementary", { name: "模型导航" })).toHaveCount(0);
+    await button("模型树").click();
+    await expect(toolbar.getByRole("button", { name: "模型树", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "前", exact: true }).click();
+    await toolbar.getByRole("button", { name: "等轴测视图", exact: true }).click();
+    await expect(page.getByRole("button", { name: "等轴测", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await toolbar.getByRole("button", { name: "放大模型", exact: true }).click();
+    await toolbar.getByRole("button", { name: "缩小模型", exact: true }).click();
+    await toolbar.getByRole("button", { name: "适合窗口", exact: true }).click();
+    await toolbar.getByRole("button", { name: "适合窗口", exact: true }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(toolbar.getByRole("button", { name: "等轴测视图", exact: true })).toBeFocused();
+    for (const [width,height] of [[1280,720],[1920,1080]]) {
+      await page.setViewportSize({width,height});
+      for (const style of styles) {
+        await page.getByRole("radio", {name:style,exact:true}).check();
+        const nav = page.getByRole("navigation", {name:"分析模块"});
+        await expect(nav.getByRole("button", {name:"部件",exact:true})).toBeInViewport();
+        await expect(nav.getByRole("button", {name:"优化",exact:true})).toBeInViewport();
+        assert(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth));
+      }
+      await shot(`module-toolbar-${width}`);
+    }
+    await page.getByRole("combobox", {name:"当前模型"}).selectOption("Model-Empty");
+    await expect(toolbar.getByRole("button", {name:"创建节点集合",exact:true})).toBeDisabled();
+    await page.getByRole("combobox", {name:"当前模型"}).selectOption("Model-1");
+    await page.getByRole("radio", {name:"线条",exact:true}).check();
+    await page.setViewportSize({width:1440,height:900});
+  });
+  await check("客户意见：文件菜单、项目切换与选择工具清空", async () => {
+    await page.reload();
+    const moduleBar = page.locator("[data-module-style]");
+    await moduleBar.locator("summary").click();
+    await expect(moduleBar.getByRole("button", { name: "打开文件 · 未接入" })).toBeDisabled();
+    await moduleBar.locator("summary").click();
+    await page.getByRole("combobox", { name: "当前模型", exact: true }).selectOption("Model-Empty");
+    await expect(page.getByRole("heading", { name: "当前模型没有部件" })).toBeVisible();
+    await page.getByRole("combobox", { name: "当前模型", exact: true }).selectOption("Model-1");
+    const tools = page.getByRole("group", { name: "视图区选择工具", exact: true });
+    await expect(tools.getByRole("button", { name: "点选显示网格" })).toHaveAttribute("aria-pressed", "false");
+    await button("节点集合").click();
+    await dialog().getByRole("button", { name: "拾取节点", exact: true }).click();
+    await page.getByRole("button", { name: "选择Node 1", exact: true }).click();
+    await page.getByRole("button", { name: "选择Node 2", exact: true }).click();
+    await expect(tools.getByLabel("已选数量")).toHaveText("2");
+    await tools.getByRole("button", { name: "清除全部选择" }).click();
+    await expect(page.getByTestId("pick-count")).toHaveText("已选 0 项");
+    await expect(tools.getByRole("combobox", { name: "选择对象类型" })).toBeDisabled();
+    await button("取消拾取").click(); await button("取消").click();
+  });
+  await check("客户意见：面板四边停靠、尺寸与载荷草稿", async () => {
+    await page.reload();
+    await page.getByRole("button", { name: "AI 对话", exact: true }).click();
+    for (const side of ["right", "top", "bottom", "left"]) {
+      await page.getByRole("combobox", { name: "目录树停靠位置" }).selectOption(side);
+      await expect(page.getByRole("complementary", { name: "模型导航" })).toBeVisible();
+      await expect(page.locator("canvas")).toBeVisible();
+    }
+    const separator = page.getByRole("separator", { name: "调整模型树宽度" });
+    await separator.focus(); await page.keyboard.press("ArrowRight");
+    await expect(separator).toHaveAttribute("aria-valuenow", "263");
+    await page.getByRole("combobox", { name: "目录树停靠位置" }).selectOption("right");
+    const viewBox = await page.locator("canvas").boundingBox();
+    assert(viewBox.width > 600 && viewBox.height > 200, "同侧面板应堆叠并保留视图区");
+    await page.getByRole("combobox", { name: "目录树停靠位置" }).selectOption("left");
+    await page.getByRole("combobox", { name: "模型树样式" }).selectOption("compact");
+    await shot("customer-dock-tree");
+    await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "载荷", exact: true }).click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await field("载荷名称").fill("Customer-load");
+    await field("CF1").fill("12.5");
+    await shot("customer-load");
+    await button("保存载荷草稿").click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await expect(field("CF1")).toHaveValue("12.5");
+    await field("CF1").fill("99"); await button("取消").click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await expect(field("CF1")).toHaveValue("12.5"); await button("取消").click();
+  });
+  await check("客户 HTML：稳定参数、增量模式、其他页与载荷场草稿", async () => {
+    await page.reload();
+    await button("分析步").click();
+    await field("分析步名称").fill("Reference-step");
+    await button("继续").click();
+    await page.getByRole("combobox", { name: "自动稳定", exact: true }).selectOption("energy");
+    await field("稳定参数值").fill("0.002");
+    await page.getByRole("checkbox", { name: "包含绝热加热效应" }).check();
+    await page.getByRole("tab", { name: "增量", exact: true }).click();
+    await expect(field("最小增量尺寸")).toBeEnabled();
+    await field("初始增量尺寸").fill("0.1");
+    await field("最小增量尺寸").fill("0.01");
+    await page.getByRole("radio", { name: "固定", exact: true }).check();
+    await expect(field("最小增量尺寸")).toBeDisabled();
+    await expect(field("初始增量尺寸")).toBeEnabled();
+    await page.getByRole("tab", { name: "其他", exact: true }).click();
+    await page.getByRole("combobox", { name: "外推", exact: true }).selectOption("linear");
+    await page.getByRole("combobox", { name: "矩阵存储", exact: true }).selectOption("symmetric");
+    await shot("reference-step-other");
+    await button("创建分析步").click();
+    await page.getByRole("treeitem", { name: "Reference-step", exact: true }).dblclick();
+    await button("继续").click();
+    await expect(field("稳定参数值")).toHaveValue("0.002");
+    await shot("reference-step-basic");
+    await page.getByRole("tab", { name: "基本", exact: true }).focus();
+    await page.keyboard.press("End");
+    await expect(page.getByRole("tab", { name: "其他", exact: true })).toBeFocused();
+    await expect(page.getByRole("combobox", { name: "外推", exact: true })).toHaveValue("linear");
+    await button("取消").click();
+    await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "载荷", exact: true }).click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await page.getByRole("combobox", { name: "载荷分布" }).selectOption("field");
+    await field("载荷场引用").fill("Field-review");
+    await page.getByRole("combobox", { name: "载荷幅值" }).selectOption("step");
+    await shot("reference-load-field");
+    await button("保存载荷草稿").click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await expect(field("载荷场引用")).toHaveValue("Field-review");
+    await page.getByRole("combobox", { name: "载荷分布" }).selectOption("uniform");
+    await expect(field("载荷场引用")).toHaveCount(0);
+    await button("取消").click();
+    await page.getByRole("button", { name: "编辑载荷", exact: true }).click();
+    await expect(field("载荷场引用")).toHaveValue("Field-review");
+    await button("取消").click();
   });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();
@@ -741,7 +890,7 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 });
   await shot("workspace-final");
   const report = {
-    date: "2026-10-25",
+    date: new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Shanghai" }),
     browser: await browser.version(),
     browserChannel: process.env.CAE_BROWSER ?? "chrome",
     runtime: process.version,

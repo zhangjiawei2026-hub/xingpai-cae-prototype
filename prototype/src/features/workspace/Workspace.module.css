@@ -151,15 +151,26 @@
   color: var(--ink-soft);
   font-size: 10px;
 }
+.moduleBar {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 0;
+  height: var(--module-bar-height);
+  background: var(--nav-tab-bg);
+  border-bottom: 1px solid var(--nav-line);
+}
 .modules {
-  height: 42px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
   flex-shrink: 0;
   display: flex;
   align-items: stretch;
   padding: 0 17px;
   background: var(--nav-tab-bg);
   gap: 0;
-  border-bottom: 1px solid var(--nav-line);
 }
 .modules button {
   position: relative;
@@ -188,7 +199,7 @@
   content: "";
   position: absolute;
   bottom: -1px;
-  height: var(--tab-underline);
+  height: var(--module-indicator-height);
   background: var(--blue);
   left: 8px;
   right: 8px;
@@ -872,3 +883,198 @@
 .domainChildren {
   padding-left: 16px;
 }
+
+/* Module-style alternatives share the same height and business context. */
+.moduleBar[data-module-style="tabs"] .modules {
+  gap: 3px;
+  padding-top: 5px;
+  background: var(--panel-soft);
+}
+.moduleBar[data-module-style="tabs"] .modules button {
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: -1px;
+}
+.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] {
+  color: var(--nav-title-bg);
+  background: var(--blue-soft);
+  border-color: var(--selected-border);
+  border-bottom-color: var(--blue-soft);
+  box-shadow: inset 0 3px var(--nav-title-bg);
+}
+.moduleBar[data-module-style="tabs"] .modules button:hover:not(:disabled) {
+  color: var(--nav-title-bg);
+  border-color: var(--selected-border);
+}
+.moduleBar[data-module-style="segment"] .modules {
+  align-items: center;
+  gap: 0;
+}
+.moduleBar[data-module-style="segment"] .modules button {
+  height: 28px;
+  border: 1px solid var(--control-border);
+  margin-left: -1px;
+}
+.moduleBar[data-module-style="segment"] .modules button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.moduleBar[data-module-style="segment"] .modules button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.moduleBar[data-module-style="segment"] .modules button[aria-current="page"] {
+  color: var(--paper);
+  background: var(--blue);
+  border-color: var(--blue);
+  z-index: 1;
+}
+.moduleBar[data-module-style="block"] .modules {
+  align-items: center;
+  gap: 4px;
+}
+.moduleBar[data-module-style="block"] .modules button {
+  height: 30px;
+  border-radius: 4px;
+}
+.moduleBar[data-module-style="block"] .modules button[aria-current="page"] {
+  color: var(--paper);
+  background: var(--blue);
+}
+.moduleBar:not([data-module-style="line"]) .modules button::after {
+  display: none;
+}
+.styleCompare {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  padding: 0 16px;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  background: var(--paper);
+}
+.styleOptions {
+  display: flex;
+  gap: 3px;
+}
+.styleOptions label {
+  position: relative;
+  cursor: pointer;
+}
+.styleOptions input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.styleOptions span {
+  display: block;
+  padding: 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--ink-secondary);
+}
+.styleOptions input:checked + span {
+  background: var(--blue-soft);
+  border-color: var(--selected-border);
+}
+.styleOptions input:focus-visible + span {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+.styleOptions label:hover span {
+  background: var(--blue-soft);
+}
+.styleOptions input:disabled + span {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.quickToolbar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: var(--quick-toolbar-height);
+  gap: 8px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--nav-line);
+  background: var(--paper);
+  overflow-x: auto;
+}
+.toolbarLabel {
+  color: var(--muted);
+  font-size: 10px;
+  margin-right: 2px;
+}
+.quickGroup {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.quickGroup + .quickGroup {
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
+}
+.quickToolbar button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+}
+.quickToolbar button:hover:not(:disabled),
+.quickToolbar button[aria-pressed="true"] {
+  background: var(--blue-soft);
+  border-color: var(--selected-border);
+}
+.quickToolbar button:disabled {
+  opacity: 0.4;
+}
+@media (max-width: 1150px) {
+  .styleCompare {
+    padding-inline: 8px;
+    gap: 4px;
+  }
+  .styleOptions span {
+    padding-inline: 5px;
+  }
+}
+
+/* Customer review 2026-10-28: compact desktop proportions; prototype decisions. */
+.projectSwitch { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.projectSwitch select { height: 25px; min-width: 145px; border: 1px solid var(--control-border); background: var(--paper); color: var(--ink); border-radius: 3px; }
+.menuSession { margin-left: 16px; }
+.ribbon { height: 88px; }
+.ribbonGroup::before { content: attr(aria-label); order: 2; height: 17px; text-align: center; color: var(--muted); font-size: 10px; line-height: 17px; }
+.contextbar { height: 33px; }
+.modules { flex: 0 1 auto; padding-inline: 8px; }
+.modules button { padding-inline: 13px; font-size: 12px; }
+.styleCompare { margin-left: auto; }
+.moduleBar[data-module-style="tabs"] .modules { padding-top: 3px; gap: 1px; }
+.moduleBar[data-module-style="tabs"] .modules button { border-radius: 3px 3px 0 0; }
+.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { background: var(--paper); box-shadow: inset 0 2px var(--blue); border-bottom-color: var(--paper); }
+.treeHeading { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 10px; background: var(--panel-soft); border-bottom: 1px solid var(--line); font-size: 11px; }
+.treeHeading select { font-size: 10px; max-width: 108px; border: 1px solid var(--line); background: var(--paper); }
+.sidebar[data-tree-style="compact"] .treeRow { height: 24px; }
+.sidebar[data-tree-style="compact"] .treeChild { height: 24px; padding-left: 42px; }
+.sidebar[data-tree-style="compact"] .treeLine { left: 27px; }
+.sidebar[data-tree-style="compact"] .treeChild[aria-selected="true"] { background: var(--blue); color: white; }
+.layoutTools { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 10px; }
+.layoutTools select { font-size: 10px; background: var(--paper); border: 1px solid var(--line); height: 24px; }
+.workarea[data-tree-side="right"] > .treeWrapper { order: 3; }
+.workarea[data-tree-side="right"] > .splitter { order: 2; }
+.center[data-log-side="top"] > .log { order: -1; }
+.center[data-log-side="right"] { flex-direction: row; }
+.center[data-log-side="right"] > .log { width: 260px; height: auto; resize: horizontal; overflow: auto; }
+.log { resize: vertical; overflow: auto; min-height: 85px; max-height: 45vh; }
+
+.moduleBar > .fileMenu { align-self: stretch; flex-shrink: 0; margin-left: 10px; }
+.moduleBar > .fileMenu summary { height: 100%; padding-inline: 14px; color: var(--blue); }
+.moduleBar > .fileMenu > div { top: 100%; }
+
+/* Recovered customer ANSA HTML: outlined tabs, gray inactive surface, open selected bottom. */
+.moduleBar[data-module-style="tabs"] { background: var(--panel-soft); }
+.moduleBar[data-module-style="tabs"] .modules button { background: var(--panel-soft); border: 1px solid var(--control-border); border-bottom: 0; }
+.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { border-color: var(--blue); background: var(--paper); color: var(--blue); box-shadow: none; }

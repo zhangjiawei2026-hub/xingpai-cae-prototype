@@ -304,3 +304,11 @@
 .picklist {
   flex-wrap: wrap;
 }
+
+.selectionToolbar { position: absolute; z-index: 2; top: 16px; left: 18px; display: flex; align-items: center; height: 30px; background: var(--paper); border: 1px solid var(--selected-border); border-radius: 4px; box-shadow: 0 2px 8px #20345014; color: var(--ink); }
+.selectionToolbar select { border: 0; background: transparent; height: 28px; padding: 0 8px; font-size: 11px; color: var(--ink); }
+.selectionToolbar > span { min-width: 20px; color: var(--blue); font-size: 11px; }
+.selectionToolbar > button, .selectionToolbar summary { padding: 5px 8px; border: 0; border-left: 1px solid var(--line); background: transparent; cursor: pointer; list-style: none; }
+.selectionToolbar summary::-webkit-details-marker { display: none; }
+.selectionToolbar details > div { position: absolute; top: 34px; left: 0; padding: 8px; background: var(--paper); border: 1px solid var(--line); width: 195px; box-shadow: 0 4px 16px #20345020; }
+.selectionToolbar details button, .selectionToolbar strong { display: block; padding: 7px; font-size: 11px; border: 0; background: none; }

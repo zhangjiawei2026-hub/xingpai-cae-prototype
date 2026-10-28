@@ -24,6 +24,9 @@
   /* 2026-10-25 用户反馈调整：视图控件外距与组间距，原型设计值。 */
   --viewport-tools-inset: 20px;
   --viewport-tools-gap: 12px;
+  --module-bar-height: 32px;
+  --module-indicator-height: 4px;
+  --quick-toolbar-height: 30px;
   --menu-caret-gap: 4px;
   --select-arrow-size: 12px;
   --select-arrow-inset: 8px;
@@ -79,11 +82,11 @@
   --ci-acc-2: #ffc35c;
   --ci-acc-3: #f28a12;
   --ci-acc-ink: #b2600a;
-  --ci-mat-1: #ece6ff;
-  --ci-mat-2: #9f8cf5;
-  --ci-mat-ink: #5139c2;
-  --ci-ana-1: #bfeee5;
-  --ci-ana-ink: #0f9484;
+  --ci-mat-1: #e6f0ff;
+  --ci-mat-2: #82b1f6;
+  --ci-mat-ink: #1d4796;
+  --ci-ana-1: #c7ddfa;
+  --ci-ana-ink: #346fce;
   --ci-force: #f0582a;
   --ci-force-soft: #ffe0d2;
   --ci-axis-x: #d9534a;

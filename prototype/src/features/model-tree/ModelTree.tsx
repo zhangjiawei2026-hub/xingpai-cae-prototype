@@ -32,6 +32,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
   const menuTrigger = useRef<HTMLElement | null>(null);
   const model = state.models[state.model],
     empty = state.model === "Model-Empty";
+  const [treeStyle, setTreeStyle] = useState("original");
   const [tab, setTab] = useState("model"),
     [search, setSearch] = useState(""),
     [expanded, setExpanded] = useState([
@@ -152,7 +153,8 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
     if (current) focusedId.current = current.dataset.id ?? "";
   });
   return (
-    <aside className={s.sidebar} aria-label="模型导航">
+    <aside className={s.sidebar} aria-label="模型导航" data-tree-style={treeStyle}>
+      <div className={s.treeHeading}><strong>目录树</strong><select aria-label="模型树样式" value={treeStyle} onChange={e => setTreeStyle(e.target.value)}><option value="original">现有方案</option><option value="compact">紧凑方案</option></select></div>
       <div
         className={s.treeTabs}
         role="tablist"

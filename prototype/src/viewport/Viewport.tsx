@@ -5,7 +5,7 @@ import { useStore } from "../app/Store";
 import { createViewport } from "./adapter";
 import type { ViewMode } from "./adapter";
 import s from "./Viewport.module.css";
-import { workspaceContext } from "../features/workspace/context";
+import type { EntityType } from "../types/domain";
 
 const viewIcon: Record<ViewMode, CAEIconName> = {
   iso: "viewIso",
@@ -21,16 +21,25 @@ export function Viewport() {
   const [error, setError] = useState(""),
     [wire, setWire] = useState(true),
     [view, setView] = useState<ViewMode | null>("iso");
+  const [inspectionActive, setInspectionActive] = useState(false);
   const [counts, setCounts] = useState({ nodes: 0, elements: 0 });
   const axes = useRef<SVGSVGElement>(null);
-  const context = workspaceContext(state);
+  const [inspection, setInspection] = useState<{ model: string; entity: EntityType; ids: number[] }>({ model: state.model, entity: "Element", ids: [] });
+  const inspectIds = inspection.model === state.model ? inspection.ids : [];
+  const pickHandler = useRef<(id: number) => void>(() => {});
+  useEffect(() => {
+    pickHandler.current = id => {
+      if (state.selection) dispatch({ type: "toggle", id });
+      else setInspection(previous => ({ ...previous, model: state.model, ids: previous.model !== state.model ? [id] : previous.ids.includes(id) ? previous.ids.filter(value => value !== id) : [...previous.ids, id] }));
+    };
+  }, [state.selection, state.model, dispatch]);
   const selection = state.selection;
   useEffect(() => {
     if (!host.current) return;
     try {
       adapter.current = createViewport(
         host.current,
-        (id) => dispatch({ type: "toggle", id }),
+        (id) => pickHandler.current(id),
         (directions) => {
           directions.forEach(({ x, y }, index) => {
             const axis = axes.current?.children[index];
@@ -53,10 +62,10 @@ export function Viewport() {
   }, [dispatch]);
   useEffect(() => {
     adapter.current?.setSelection(
-      selection?.entity ?? null,
-      selection?.ids ?? [],
+      selection?.entity ?? (inspectionActive && !state.command ? inspection.entity : null),
+      selection?.ids ?? (inspection.model === state.model ? inspection.ids : []),
     );
-  }, [selection]);
+  }, [selection, inspection, inspectionActive, state.command, state.model]);
   useEffect(() => {
     adapter.current?.setVisible(state.model !== "Model-Empty");
   }, [state.model]);
@@ -75,14 +84,14 @@ export function Viewport() {
       </header>
       <div className={s.stage}>
         <div ref={host} className={s.canvas} data-testid="viewport" />
-        <div className={s.caption}>
-          <span>{state.model}</span>
-          <strong>
-            {state.model === "Model-Empty" ? "空工作区" : "安装支架"}
-          </strong>
-          <small data-testid="viewport-context">
-            {context.moduleLabel} / {context.label}：{context.value}
-          </small>
+        <div className={s.selectionToolbar} role="group" aria-label="视图区选择工具">
+          <select aria-label="选择对象类型" disabled={!!selection || state.model === "Model-Empty" || !!state.command} value={selection?.entity ?? inspection.entity} onChange={e => setInspection({ model: state.model, entity: e.target.value as EntityType, ids: [] })}>
+            <option value="Element">Element · 单元</option><option value="Node">Node · 节点</option><option disabled>Nset · 节点集合（未接入）</option><option disabled>Elset · 单元集合（未接入）</option>
+          </select>
+          <button aria-label="点选显示网格" aria-pressed={!!selection || inspectionActive} disabled={!!selection || !!state.command || state.model === "Model-Empty"} onClick={() => setInspectionActive(!inspectionActive)}>点选</button>
+          <span aria-label="已选数量" aria-live="polite">{(selection?.ids ?? inspectIds).length}</span>
+          <details><summary aria-label="更多选择方式">···</summary><div><strong>{selection || inspectionActive ? "点选 · 已激活" : "点选 · 未激活"}</strong>{["框选", "几何面关联", "角度关联"].map(method => <button key={method} disabled title="专业选择算法未接入">{method} · 未接入</button>)}</div></details>
+          <button title="清除全部选择" aria-label="清除全部选择" disabled={!(selection?.ids ?? inspectIds).length} onClick={() => { if (selection) selection.ids.forEach(id => dispatch({ type: "toggle", id })); else setInspection({ ...inspection, ids: [] }); }}><X size={14} /></button>
         </div>
         <div className={s.viewControls} role="group" aria-label="视图导航工具">
           <div className={s.navigator} aria-label="视图方向">

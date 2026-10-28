@@ -15,6 +15,14 @@ export interface NodeSet {
   nodes: number[];
 }
 export interface AnalysisStep {
+  stabilization?: "none" | "energy" | "damping";
+  stabilizationValue?: string;
+  adiabatic?: boolean;
+  extrapolation?: string;
+  matrix?: string;
+  unsymmetric?: boolean;
+  description?: string;
+  period?: string;
   id: string;
   name: string;
   procedure: string;

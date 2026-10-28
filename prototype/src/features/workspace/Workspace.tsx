@@ -2,7 +2,6 @@ import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { moveFocus } from "../../components/keyboard";
 import { useEffect, useRef, useState } from "react";
 import {
-  Box,
   ChevronDown,
   Check,
   FileBox,
@@ -13,7 +12,9 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { useStore } from "../../app/Store";
-import { MODULES, MODULE_LABELS } from "../../data/demo";
+import { DockLayout } from "./DockLayout";
+import { ModuleBar } from "./ModuleBar";
+import { QuickToolbar, type ViewAction } from "./QuickToolbar";
 import { CAEIcon } from "../../components/CAEIcon";
 import { Ribbon } from "../ribbon/Ribbon";
 import { ModelTree } from "../model-tree/ModelTree";
@@ -23,6 +24,7 @@ import { StepDialog } from "../analysis-step/StepDialog";
 import { DomainDialog } from "../design-domain/DomainDialog";
 import { Dialog, formStyles } from "../../components/Dialog";
 import s from "./Workspace.module.css";
+import { LoadDialog, type LoadDraft } from "../load/LoadDialog";
 import { workspaceContext } from "./context";
 function Help({ close }: { close: () => void }) {
   return (
@@ -55,18 +57,23 @@ function Help({ close }: { close: () => void }) {
           数据仅保留在本次会话，刷新后恢复初始状态。模型和选择 ID
           为程序生成的显示网格，未接入真实 FEM 数据或求解器。
         </p>
-        <p>标记为未接入的命令仅提供原因说明；专业图标待确认。Windows 桌面集成尚未验证。</p>
+        <p>
+          标记为未接入的命令仅提供原因说明；专业图标待确认。Windows
+          桌面集成尚未验证。
+        </p>
       </div>
     </Dialog>
   );
 }
 export function Workspace() {
   const { state, dispatch } = useStore();
+  const [loadOpen, setLoadOpen] = useState(false);
+  const [loads, setLoads] = useState<Record<string, LoadDraft>>({});
+  const [aiVisible, setAiVisible] = useState(false);
   const [resetPending, setResetPending] = useState(false);
   const [treeVisible, setTreeVisible] = useState(true),
     [logVisible, setLogVisible] = useState(true),
     [help, setHelp] = useState(false),
-    [treeWidth, setTreeWidth] = useState(253),
     [logTab, setLogTab] = useState("messages");
   const logEnd = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -84,47 +91,23 @@ export function Workspace() {
     return () => window.removeEventListener("keydown", handler);
   }, [state.selection, dispatch]);
   const context = workspaceContext(state);
-  const fit = () =>
-    document.querySelector<HTMLButtonElement>('[title="适合窗口"]')?.click();
+  const viewAction = (action: ViewAction) => {
+    const title = {
+      fit: "适合窗口",
+      iso: "等轴测视图",
+      zoomIn: "放大模型",
+      zoomOut: "缩小模型",
+    }[action];
+    document
+      .querySelector<HTMLButtonElement>(
+        `[aria-label="视图工具"] button[title="${title}"]`,
+      )
+      ?.click();
+  };
   return (
     <div className={s.app}>
-      <header className={s.titlebar}>
-        <div className={s.brand}>
-          <span className={s.brandmark}>
-            <Box size={19} strokeWidth={1.7} />
-          </span>
-          <b>
-            SiPESC<span>.PRE</span>
-          </b>
-          <i />
-        </div>
-        <span className={s.projectName}>
-          安装支架<small> / 工作区</small>
-        </span>
-        <span className={s.titleBadge}>交互原型</span>
-      </header>
       <div className={s.menubar}>
-        <details className={s.fileMenu}>
-          <summary>
-            <span>文件</span><ChevronDown size={10} aria-hidden="true" />
-          </summary>
-          <div>
-            <button
-              disabled={!!state.command}
-              onClick={(e) => {
-                rememberDialogTrigger(e.currentTarget.closest("details")?.querySelector("summary") ?? null);
-                setResetPending(true);
-                document
-                  .querySelector("details[open]")
-                  ?.removeAttribute("open");
-              }}
-            >
-              恢复初始演示
-            </button>
-            <button disabled>导入模型 · 未接入</button>
-            <button disabled>保存工程 · 未接入</button>
-          </div>
-        </details>
+
         <button disabled title="首轮编辑命令通过 Ribbon 提供">
           编辑
         </button>
@@ -145,46 +128,8 @@ export function Workspace() {
           演示工程<span>/</span>
           <span>{state.model}</span>
         </span>
-        <span className={s.menuSession}>
-          本次会话 <Check size={11} />
-        </span>
-      </div>
-      <nav className={s.modules} aria-label="分析模块">
-        {MODULES.map((module, index) => (
-          <button
-            key={module}
-            disabled={!!state.command}
-            aria-current={state.module === module ? "page" : undefined}
-            onClick={() => dispatch({ type: "module", value: module })}
-          >
-            <span>{MODULE_LABELS[index]}</span>
-          </button>
-        ))}
-      </nav>
-      <Ribbon
-        onFit={fit}
-        onIso={() =>
-          document
-            .querySelector<HTMLButtonElement>('[title="等轴测视图"]')
-            ?.click()
-        }
-        onToggleTree={() => setTreeVisible(!treeVisible)}
-        onToggleLog={() => setLogVisible(!logVisible)}
-        treeVisible={treeVisible}
-        logVisible={logVisible}
-      />
-      <div className={s.contextbar}>
-        {!treeVisible && (
-          <button
-            className={s.iconButton}
-            title="展开模型树"
-            onClick={() => setTreeVisible(true)}
-          >
-            <CAEIcon name="treePanel" size={16} />
-          </button>
-        )}
-        <label>
-          <span>模型</span>
+        <label className={s.projectSwitch}>
+          <span>项目 / 模型</span>
           <select
             aria-label="当前模型"
             value={state.model}
@@ -196,6 +141,67 @@ export function Workspace() {
             ))}
           </select>
         </label>
+        <span className={s.menuSession}>
+          本次会话 <Check size={11} />
+        </span>
+      </div>
+      <ModuleBar fileMenu={
+        <details className={s.fileMenu}>
+          <summary>
+            <span>文件</span>
+            <ChevronDown size={10} aria-hidden="true" />
+          </summary>
+          <div>
+            <button
+              disabled={!!state.command}
+              onClick={(e) => {
+                rememberDialogTrigger(
+                  e.currentTarget
+                    .closest("details")
+                    ?.querySelector("summary") ?? null,
+                );
+                setResetPending(true);
+                document
+                  .querySelector("details[open]")
+                  ?.removeAttribute("open");
+              }}
+            >
+              恢复初始演示
+            </button>
+            <button disabled>打开文件 · 未接入</button>
+            <button disabled>保存工程 · 未接入</button>
+            <button disabled>另存为 · 未接入</button>
+          </div>
+        </details>
+      } />
+      <Ribbon
+        onLoad={() => setLoadOpen(true)}
+        onFit={() => viewAction("fit")}
+        onIso={() => viewAction("iso")}
+        onToggleTree={() => setTreeVisible(!treeVisible)}
+        onToggleLog={() => setLogVisible(!logVisible)}
+        treeVisible={treeVisible}
+        logVisible={logVisible}
+      />
+      <QuickToolbar
+        onView={viewAction}
+        treeVisible={treeVisible}
+        logVisible={logVisible}
+        onToggleTree={() => setTreeVisible(!treeVisible)}
+        onToggleLog={() => setLogVisible(!logVisible)}
+      />
+      <div className={s.contextbar} data-testid="workspace-context">
+        {!treeVisible && (
+          <button
+            className={s.iconButton}
+            title="展开模型树"
+            onClick={() => setTreeVisible(true)}
+          >
+            <CAEIcon name="treePanel" size={16} />
+          </button>
+        )}
+        <span>{context.moduleLabel}</span>
+        {context.kind === "model" && <span>{state.model}</span>}
         {context.kind === "part" && (
           <label>
             <span>部件</span>
@@ -247,54 +253,9 @@ export function Workspace() {
           </span>
           {state.selection && <b>{state.selection.ids.length} 项</b>}
         </div>
-        <span className={s.contextHint}>上下文工作区</span>
+        <button className={s.iconButton} aria-pressed={aiVisible} onClick={() => setAiVisible(!aiVisible)}>AI 对话</button>
       </div>
-      <div className={s.workarea}>
-        {treeVisible && (
-          <div style={{ width: treeWidth }} className={s.treeWrapper}>
-            <ModelTree onClose={() => setTreeVisible(false)} />
-          </div>
-        )}
-        {treeVisible && (
-          <div
-            role="separator"
-            aria-label="调整模型树宽度"
-            aria-valuenow={treeWidth}
-            aria-valuemin={210}
-            aria-valuemax={390}
-            aria-orientation="vertical"
-            tabIndex={0}
-            className={s.splitter}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                e.preventDefault();
-                setTreeWidth(
-                  Math.max(
-                    210,
-                    Math.min(
-                      390,
-                      treeWidth + (e.key === "ArrowRight" ? 10 : -10),
-                    ),
-                  ),
-                );
-              }
-            }}
-            onPointerDown={(e) =>
-              e.currentTarget.setPointerCapture(e.pointerId)
-            }
-            onPointerMove={(e) => {
-              if (e.currentTarget.hasPointerCapture(e.pointerId))
-                setTreeWidth(Math.max(210, Math.min(390, e.clientX)));
-            }}
-            onPointerUp={(e) => {
-              if (e.currentTarget.hasPointerCapture(e.pointerId))
-                e.currentTarget.releasePointerCapture(e.pointerId);
-            }}
-          />
-        )}
-        <div className={s.center}>
-          <Viewport />
-          {logVisible && (
+      <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} /> : null} viewport={<Viewport />} log={logVisible ? (
             <section className={s.log} aria-label="信息窗口">
               <header>
                 <div
@@ -350,9 +311,7 @@ export function Workspace() {
                 <div ref={logEnd} />
               </div>
             </section>
-          )}
-        </div>
-      </div>
+      ) : null} ai={aiVisible ? <div className={s.helpText} style={{ padding: 16 }}><strong>AI 对话</strong><p>AI 服务尚未接入。可拖动标题栏调整面板位置。</p><textarea aria-label="AI 问题" placeholder="AI 服务尚未接入" disabled /><button disabled>发送</button></div> : null} />
       <footer className={s.statusbar}>
         <span className={s.ready}>
           <i />
@@ -373,10 +332,12 @@ export function Workspace() {
       {state.command === "nodeSet" && <NodeSetDialog />}
       {state.command === "step" && <StepDialog />}
       {state.command === "domain" && <DomainDialog />}
+      {loadOpen && <LoadDialog initial={loads[state.model]} close={() => setLoadOpen(false)} save={value => { setLoads({ ...loads, [state.model]: value }); setLoadOpen(false); dispatch({ type: "notice", value: `[演示] 已保存载荷草稿 ${value.name}，仅本次会话有效` }); }} />}
       {help && <Help close={() => setHelp(false)} />}
       {resetPending && (
         <Dialog
-          title="恢复初始演示？" subtitle="清除本次会话修改"
+          title="恢复初始演示？"
+          subtitle="清除本次会话修改"
           onDismiss={() => setResetPending(false)}
           footer={
             <>
@@ -387,6 +348,7 @@ export function Workspace() {
                 className={formStyles.primary}
                 onClick={() => {
                   dispatch({ type: "reset" });
+                  setLoads({});
                   setResetPending(false);
                 }}
               >

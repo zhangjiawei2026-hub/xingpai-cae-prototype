@@ -84,6 +84,7 @@ const primary: Record<
   },
 };
 export function Ribbon({
+  onLoad,
   onFit,
   onIso,
   onToggleTree,
@@ -91,6 +92,7 @@ export function Ribbon({
   treeVisible,
   logVisible,
 }: {
+  onLoad: () => void;
   onFit: () => void;
   onIso: () => void;
   onToggleTree: () => void;
@@ -135,7 +137,7 @@ export function Ribbon({
                     item.command &&
                     dispatch({ type: "open", command: item.command }),
                 }
-              : unavailable(item.label))}
+              : state.module === "Load" ? { disabled: locked, onClick: onLoad, title: "编辑载荷" } : unavailable(item.label))}
           >
             <CAEIcon
               name={item.icon}
@@ -143,7 +145,7 @@ export function Ribbon({
               badge="add"
               hiddenNodes={item.icon === "nodes" ? [3] : undefined}
             />
-            <span>{item.label}</span>
+            <span>{state.module === "Load" ? "编辑载荷" : item.label}</span>
           </button>
           <div className={s.smallCommands}>
             {item.small.map(({ label, icon, badge }, i) => (
@@ -188,7 +190,7 @@ export function Ribbon({
       <div
         className={s.ribbonGroup}
         role="group"
-        aria-label="网格工具 · 待接入"
+        aria-label="网格工具"
       >
         <div className={s.ribbonItems}>
           <button
