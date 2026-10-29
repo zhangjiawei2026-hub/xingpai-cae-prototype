@@ -18,9 +18,6 @@
   color: var(--ink-control);
   flex-shrink: 0;
 }
-.context > svg {
-  color: var(--blue);
-}
 .context > span:first-of-type {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -32,8 +29,8 @@
   white-space: nowrap;
   font-size: 11px;
   color: var(--ink-control);
-  background: var(--blue-soft);
-  box-shadow: inset 0 0 0 1px var(--selected-border);
+  background: var(--panel-soft);
+  box-shadow: inset 0 0 0 1px var(--control-border);
   padding: 2px 6px;
   border-radius: var(--radius);
 }
@@ -63,23 +60,39 @@
   background: var(--blue-soft);
   border: 1px solid var(--selected-border);
   border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.mark img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
 }
 .status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 16px;
+  padding: 3px 8px;
+  width: fit-content;
+  max-width: 100%;
   font-size: 11px;
   color: var(--selection-ink);
+  background: var(--selection-bg);
+  border: 1px solid var(--selection-border);
+  border-radius: var(--radius);
 }
 .status > svg {
   color: var(--selection-ink);
+  flex-shrink: 0;
 }
 .hint {
   font-size: 11px;
   line-height: 1.7;
   color: var(--ink-control);
-  margin: 5px 0 18px;
+  margin: 8px 0 18px;
 }
 .suggestions h3 {
   font-size: 11px;
@@ -90,10 +103,10 @@
 .suggestions > button {
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
   text-align: left;
   gap: 8px;
-  padding: 9px 8px;
+  padding: 8px;
   margin-bottom: 6px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -101,49 +114,49 @@
   color: var(--ink);
   cursor: pointer;
   font: inherit;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease;
 }
-.suggestions > button > svg:first-child {
-  color: var(--blue);
+.suggestions > button > :global(svg),
+.suggestions > button > :global(.icon),
+.suggestions > button > svg:last-of-type {
+  flex-shrink: 0;
 }
-.suggestions > button > svg:last-child {
-  color: var(--ink-control);
+.suggestions > button > svg:last-of-type {
+  margin-top: 4px;
+  color: var(--ink-secondary);
 }
 .suggestions > button:hover {
   border-color: var(--selected-border);
   background: var(--blue-soft);
 }
-.suggestions > button:hover > svg:last-child,
-.suggestions > button:active > svg:last-child {
+.suggestions > button:hover > svg:last-of-type,
+.suggestions > button:active > svg:last-of-type,
+.suggestions > button[aria-pressed="true"] > svg:last-of-type {
   color: var(--blue);
 }
-.suggestions > button:active {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue-soft) 62%, var(--selected-border));
-}
+.suggestions > button:active,
 .suggestions > button[aria-pressed="true"] {
-  border-color: var(--blue);
+  border-color: var(--selected-border);
   background: var(--blue-soft);
 }
-.suggestions > button[aria-pressed="true"] > svg:last-child {
-  color: var(--blue);
-}
-.suggestions > button > svg {
-  flex-shrink: 0;
-}
-.suggestions > button > span {
+.suggestionCopy {
   flex: 1;
+  min-width: 0;
 }
-.suggestions small {
+.suggestionCopy strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.suggestionCopy small {
   display: block;
   font-size: 11px;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--ink-control);
-  margin-top: 4px;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .composer {
   flex-shrink: 0;
@@ -171,7 +184,7 @@
   gap: 5px;
 }
 .draftHeader > span svg {
-  color: var(--blue);
+  color: var(--ink-control);
 }
 .clear {
   display: flex;
@@ -192,7 +205,7 @@
 }
 .clear:disabled {
   opacity: 1;
-  color: var(--ink-secondary);
+  color: var(--ink-faint);
   cursor: not-allowed;
 }
 .composer textarea {
@@ -225,16 +238,16 @@
 }
 .send:disabled {
   opacity: 1;
-}
-.send[data-feedback="idle"] {
   color: var(--ink-control);
   background: var(--panel-soft);
   border-color: var(--control-border);
 }
+/* 发送始终禁用：图标色与工具条禁用控件一致，不单独用警示棕 */
+.send[data-feedback="idle"],
 .send[data-feedback="held"] {
-  color: var(--selection-ink);
-  background: var(--selection-bg);
-  border-color: var(--selection-border);
+  color: var(--ink-control);
+  background: var(--panel-soft);
+  border-color: var(--control-border);
 }
 .composer[data-feedback="held"] .reason {
   color: var(--selection-ink);
@@ -284,7 +297,7 @@
   }
   .intro p,
   .hint,
-  .suggestions small {
+  .suggestionCopy small {
     display: none;
   }
   .mark {
@@ -292,13 +305,21 @@
     height: 28px;
   }
   .mark svg {
-    width: 17px;
+    width: 16px;
+  }
+  .mark img {
+    width: 20px;
+    height: 20px;
   }
   .status {
     margin: 8px 0 12px;
   }
   .suggestions > button {
     padding: 6px 8px;
+    align-items: center;
+  }
+  .suggestions > button > svg:last-of-type {
+    margin-top: 0;
   }
   .composer textarea {
     height: 48px;

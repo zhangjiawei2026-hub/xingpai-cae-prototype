@@ -1008,10 +1008,9 @@ try {
     await expect(send).toBeDisabled();
     await expect(send).toHaveAttribute("data-feedback", "idle");
     assert.equal(await send.evaluate((el) => getComputedStyle(el).opacity), "1");
-    assert.equal(
-      await suggestion.locator("svg").first().evaluate((el) => getComputedStyle(el).color),
-      "rgb(52, 111, 206)",
-    );
+    const mark = panel.locator('img[src="/assistant-icons/assistant-mark.png"]');
+    await expect(mark).toBeVisible();
+    assert.equal(await mark.evaluate((el) => el.naturalWidth > 0 && el.naturalHeight > 0), true);
     assert.equal(
       await panel.getByText("AI 服务未连接", { exact: true }).evaluate((el) => getComputedStyle(el).color),
       "rgb(113, 80, 24)",
@@ -1022,8 +1021,8 @@ try {
     await expect(panel.getByRole("textbox", { name: "AI 问题" })).toHaveValue("如何创建节点集合并检查选择结果？");
     await expect(send).toBeDisabled();
     await expect(send).toHaveAttribute("data-feedback", "held");
-    assert.equal(await send.evaluate((el) => getComputedStyle(el).color), "rgb(113, 80, 24)");
-    assert.equal(await send.evaluate((el) => getComputedStyle(el).backgroundColor), "rgb(252, 233, 197)");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).color), "rgb(70, 96, 127)");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).backgroundColor), "rgb(242, 245, 249)");
     assert.equal(await send.evaluate((el) => getComputedStyle(el).opacity), "1");
     await expect(panel.getByRole("button", { name: "清空问题草稿" })).toBeEnabled();
     await shot("ai-panel-selected");

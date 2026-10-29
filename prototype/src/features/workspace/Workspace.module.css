@@ -886,25 +886,29 @@
 
 /* Module-style alternatives share the same height and business context. */
 .moduleBar[data-module-style="tabs"] .modules {
-  gap: 3px;
-  padding-top: 5px;
-  background: var(--panel-soft);
+  gap: 2px;
+  padding-top: 4px;
+  background: transparent;
 }
 .moduleBar[data-module-style="tabs"] .modules button {
   border: 1px solid transparent;
+  border-bottom: 0;
   border-radius: 6px 6px 0 0;
-  margin-bottom: -1px;
+  z-index: 0;
 }
 .moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] {
-  color: var(--nav-title-bg);
-  background: var(--blue-soft);
+  z-index: 1;
+  color: var(--blue);
+  font-weight: 600;
+  background: var(--paper);
   border-color: var(--selected-border);
-  border-bottom-color: var(--blue-soft);
-  box-shadow: inset 0 3px var(--nav-title-bg);
+  border-bottom: 0;
+  box-shadow: inset 0 2px 0 var(--blue);
 }
-.moduleBar[data-module-style="tabs"] .modules button:hover:not(:disabled) {
-  color: var(--nav-title-bg);
-  border-color: var(--selected-border);
+.moduleBar[data-module-style="tabs"] .modules button:hover:not(:disabled):not([aria-current="page"]) {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 70%, var(--panel-soft));
+  border-color: var(--control-border);
 }
 .moduleBar[data-module-style="segment"] .modules {
   align-items: center;
@@ -1053,9 +1057,8 @@
 .modules { flex: 0 1 auto; padding-inline: 8px; }
 .modules button { padding-inline: 13px; font-size: 12px; }
 .styleCompare { margin-left: auto; }
-.moduleBar[data-module-style="tabs"] .modules { padding-top: 3px; gap: 1px; }
-.moduleBar[data-module-style="tabs"] .modules button { border-radius: 3px 3px 0 0; }
-.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { background: var(--paper); box-shadow: inset 0 2px var(--blue); border-bottom-color: var(--paper); }
+.moduleBar[data-module-style="tabs"] .modules { padding-top: 3px; gap: 2px; }
+.moduleBar[data-module-style="tabs"] .modules button { border-radius: 5px 5px 0 0; }
 .treeHeading { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 10px; background: var(--panel-soft); border-bottom: 1px solid var(--line); font-size: 11px; }
 .treeHeading select { max-width: 108px; }
 .treeHeading { --select-height: 22px; --select-font-size: 11px; }
@@ -1084,9 +1087,45 @@
 .moduleBar > .fileMenu summary { height: 100%; padding-inline: 14px; color: var(--blue); }
 .moduleBar > .fileMenu > div { top: 100%; }
 
-/* Recovered customer ANSA HTML: outlined tabs, gray inactive surface, open selected bottom. */
-.moduleBar[data-module-style="tabs"] { background: var(--panel-soft); }
-.moduleBar[data-module-style="tabs"] .modules button { background: var(--panel-soft); border: 1px solid var(--control-border); border-bottom: 0; }
-.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { border-color: var(--blue); background: var(--paper); color: var(--blue); box-shadow: none; }
+/* Tabs: hairline is inset on the strip (survives overflow-y:hidden); selected paper fill covers it. */
+.moduleBar[data-module-style="tabs"] {
+  background: var(--panel-soft);
+  border-bottom: 0;
+}
+.moduleBar[data-module-style="tabs"] .modules {
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--selected-border);
+}
+.moduleBar[data-module-style="tabs"] .modules button {
+  background: transparent;
+  color: var(--ink-secondary);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+.moduleBar[data-module-style="tabs"] .modules button:not([aria-current="page"]) {
+  background: color-mix(in srgb, var(--panel-soft) 85%, var(--control-border));
+  border-color: var(--control-border);
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--selected-border);
+}
+.moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] {
+  z-index: 2;
+  color: var(--blue);
+  font-weight: 600;
+  background: var(--paper);
+  border: 1px solid var(--selected-border);
+  border-bottom: 0;
+  box-shadow: inset 0 2px 0 var(--blue);
+}
+.moduleBar[data-module-style="tabs"] + .ribbon {
+  background: var(--paper);
+  border-top: 0;
+}
+/* fileMenu / styleCompare also sit on the strip — keep their bottom seam */
+.moduleBar[data-module-style="tabs"] > .fileMenu,
+.moduleBar[data-module-style="tabs"] > .styleCompare {
+  box-shadow: inset 0 -1px 0 var(--selected-border);
+}
 
 .fileMenu > div hr { border: 0; border-top: 1px solid var(--line); margin: 4px; }
