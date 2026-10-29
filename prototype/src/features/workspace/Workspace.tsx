@@ -257,7 +257,7 @@ export function Workspace() {
           </span>
           {state.selection && <b>{state.selection.ids.length} 项</b>}
         </div>
-        <button className={s.iconButton} aria-pressed={aiVisible} onClick={() => setAiVisible(!aiVisible)}>AI 对话</button>
+        <button className={`${s.iconButton} ${s.aiToggle}`} aria-pressed={aiVisible} onClick={() => setAiVisible(!aiVisible)}>AI 对话</button>
       </div>
       <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} viewState={treeView} onViewChange={changes => setTreeView(previous => ({ ...previous, ...changes }))} /> : null} viewport={<Viewport />} log={logVisible ? (
             <section className={s.log} aria-label="信息窗口">

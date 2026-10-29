@@ -1,46 +1,327 @@
-.panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--surface); color: var(--ink); font-size: 12px; container-type: size; }
-.context { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--paper); color: var(--ink-secondary); flex-shrink: 0; }
-.context > span:first-of-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-data); }
-.module { margin-left: auto; white-space: nowrap; font-size: 11px; background: var(--panel-soft); padding: 2px 6px; border-radius: var(--radius); }
-.body { flex: 1; min-height: 0; overflow: auto; padding: 20px 12px 12px; }
-.intro h2 { font-size: 15px; margin: 10px 0 5px; font-weight: 600; }
-.intro p { margin: 0; color: var(--ink-secondary); line-height: 1.6; }
-.mark { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; color: var(--blue); background: var(--blue-soft); border: 1px solid var(--selected-border); border-radius: 8px; }
-.status { display: flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 11px; color: var(--ink-secondary); }
-.status > span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.hint { font-size: 11px; line-height: 1.7; color: var(--ink-secondary); margin: 5px 0 18px; }
-.suggestions h3 { font-size: 11px; font-weight: 400; color: var(--ink-secondary); margin: 0 0 8px; }
-.suggestions > button { display: flex; width: 100%; align-items: center; text-align: left; gap: 8px; padding: 9px 8px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); color: var(--ink-control); cursor: pointer; font: inherit; }
-.suggestions > button:hover { border-color: var(--selected-border); background: var(--blue-soft); }
-.suggestions > button > svg { flex-shrink: 0; }
-.suggestions > button > span { flex: 1; }
-.suggestions small { display: block; font-size: 11px; line-height: 1.5; color: var(--ink-secondary); margin-top: 4px; }
-.composer { flex-shrink: 0; margin: 8px; padding: 8px; border: 1px solid var(--control-border); border-radius: 6px; background: var(--paper); }
-.composer:focus-within { border-color: var(--blue); }
-.draftHeader, .composerFooter { display: flex; align-items: center; justify-content: space-between; gap: 4px; color: var(--ink-secondary); font-size: 10px; }
-.draftHeader > span { display: flex; align-items: center; gap: 5px; }
-.draftHeader button { display: flex; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--ink-secondary); width: 24px; height: 24px; cursor: pointer; }
-.draftHeader button:disabled { opacity: .4; cursor: default; }
-.composer textarea { display: block; width: 100%; height: var(--ai-input-height); resize: none; border: 0; background: transparent; padding: 6px 0; color: var(--ink); font: inherit; line-height: 1.6; outline: none; }
-.composer textarea::placeholder { color: var(--muted); }
-.send { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-soft); color: var(--ink-soft); cursor: not-allowed; }
-.reason { margin: 6px 0 0; font-size: 10px; color: var(--ink-secondary); }
-.panel button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  container-type: size;
+}
+.context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-control);
+  flex-shrink: 0;
+}
+.context > span:first-of-type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-data);
+}
+.module {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--ink-control);
+  background: var(--panel-soft);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 12px 12px;
+}
+.intro h2 {
+  font-size: 15px;
+  margin: 10px 0 5px;
+  font-weight: 600;
+}
+.intro p {
+  margin: 0;
+  color: var(--ink-control);
+  line-height: 1.6;
+}
+.mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border: 1px solid var(--selected-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.mark img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 3px 8px;
+  width: fit-content;
+  max-width: 100%;
+  font-size: 11px;
+  color: var(--selection-ink);
+  background: var(--selection-bg);
+  border: 1px solid var(--selection-border);
+  border-radius: var(--radius);
+}
+.status > svg {
+  color: var(--selection-ink);
+  flex-shrink: 0;
+}
+.hint {
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink-control);
+  margin: 8px 0 18px;
+}
+.suggestions h3 {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-control);
+  margin: 0 0 8px;
+}
+.suggestions > button {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  text-align: left;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+.suggestions > button > :global(svg),
+.suggestions > button > :global(.icon),
+.suggestions > button > svg:last-of-type {
+  flex-shrink: 0;
+}
+.suggestions > button > svg:last-of-type {
+  margin-top: 4px;
+  color: var(--ink-secondary);
+}
+.suggestions > button:hover {
+  border-color: var(--selected-border);
+  background: var(--blue-soft);
+}
+.suggestions > button:hover > svg:last-of-type,
+.suggestions > button:active > svg:last-of-type,
+.suggestions > button[aria-pressed="true"] > svg:last-of-type {
+  color: var(--blue);
+}
+.suggestions > button:active,
+.suggestions > button[aria-pressed="true"] {
+  border-color: var(--selected-border);
+  background: var(--blue-soft);
+}
+.suggestionCopy {
+  flex: 1;
+  min-width: 0;
+}
+.suggestionCopy strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.suggestionCopy small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ink-control);
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.composer {
+  flex-shrink: 0;
+  margin: 8px;
+  padding: 8px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--paper);
+}
+.composer:focus-within {
+  border-color: var(--blue);
+}
+.draftHeader,
+.composerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  color: var(--ink-control);
+  font-size: 10px;
+}
+.draftHeader > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.draftHeader > span svg {
+  color: var(--ink-control);
+}
+.clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--ink-control);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+.clear:hover:not(:disabled),
+.clear:active:not(:disabled) {
+  color: var(--error);
+  background: var(--error-bg);
+}
+.clear:disabled {
+  opacity: 1;
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+.composer textarea {
+  display: block;
+  width: 100%;
+  height: var(--ai-input-height);
+  resize: none;
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+  outline: none;
+}
+.composer textarea::placeholder {
+  color: var(--ink-control);
+}
+.send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+  color: var(--ink-control);
+  cursor: not-allowed;
+}
+.send:disabled {
+  opacity: 1;
+  color: var(--ink-control);
+  background: var(--panel-soft);
+  border-color: var(--control-border);
+}
+/* 发送始终禁用：图标色与工具条禁用控件一致，不单独用警示棕 */
+.send[data-feedback="idle"],
+.send[data-feedback="held"] {
+  color: var(--ink-control);
+  background: var(--panel-soft);
+  border-color: var(--control-border);
+}
+.composer[data-feedback="held"] .reason {
+  color: var(--selection-ink);
+}
+.reason {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: var(--ink-control);
+}
+.panel button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
 @container (max-height: 280px) {
-  .body { display: none; }
-  .context { padding-block: 4px; }
-  .composer { flex: 1; min-height: 0; overflow: auto; margin: 4px 8px; padding: 4px 8px; }
-  .composer textarea { height: 36px; }
-  .reason { display: none; }
+  .body {
+    display: none;
+  }
+  .context {
+    padding-block: 4px;
+  }
+  .composer {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    margin: 4px 8px;
+    padding: 4px 8px;
+  }
+  .composer textarea {
+    height: 36px;
+  }
+  .reason {
+    display: none;
+  }
 }
 @container (min-height: 281px) and (max-height: 480px) {
-  .body { padding: 10px 12px; }
-  .intro { display: flex; align-items: center; gap: 8px; }
-  .intro h2 { font-size: 13px; margin: 0; }
-  .intro p, .hint, .suggestions small { display: none; }
-  .mark { width: 28px; height: 28px; }
-  .mark svg { width: 17px; }
-  .status { margin: 8px 0 12px; }
-  .suggestions > button { padding: 6px 8px; }
-  .composer textarea { height: 48px; }
+  .body {
+    padding: 10px 12px;
+  }
+  .intro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .intro h2 {
+    font-size: 13px;
+    margin: 0;
+  }
+  .intro p,
+  .hint,
+  .suggestionCopy small {
+    display: none;
+  }
+  .mark {
+    width: 28px;
+    height: 28px;
+  }
+  .mark svg {
+    width: 16px;
+  }
+  .mark img {
+    width: 20px;
+    height: 20px;
+  }
+  .status {
+    margin: 8px 0 12px;
+  }
+  .suggestions > button {
+    padding: 6px 8px;
+    align-items: center;
+  }
+  .suggestions > button > svg:last-of-type {
+    margin-top: 0;
+  }
+  .composer textarea {
+    height: 48px;
+  }
 }

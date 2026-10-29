@@ -996,6 +996,44 @@ try {
     await expect(page.getByTestId("pick-count")).toHaveText("已选 1 项");
     await button("取消拾取").click(); await button("取消").click();
   });
+  await check("AI 面板：图标色、选中草稿与发送反馈", async () => {
+    await page.reload();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const toggle = page.getByRole("button", { name: "AI 对话", exact: true });
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    const panel = page.getByRole("region", { name: "AI 辅助面板" });
+    const send = panel.getByRole("button", { name: "发送问题", exact: true });
+    const suggestion = panel.getByRole("button", { name: /如何创建节点集合/ });
+    await expect(send).toBeDisabled();
+    await expect(send).toHaveAttribute("data-feedback", "idle");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).opacity), "1");
+    const mark = panel.locator('img[src="/assistant-icons/assistant-mark.png"]');
+    await expect(mark).toBeVisible();
+    assert.equal(await mark.evaluate((el) => el.naturalWidth > 0 && el.naturalHeight > 0), true);
+    assert.equal(
+      await panel.getByText("AI 服务未连接", { exact: true }).evaluate((el) => getComputedStyle(el).color),
+      "rgb(113, 80, 24)",
+    );
+    await suggestion.click();
+    await expect(suggestion).toHaveAttribute("aria-pressed", "true");
+    await expect(panel.getByRole("button", { name: /创建分析步时/ })).toHaveAttribute("aria-pressed", "false");
+    await expect(panel.getByRole("textbox", { name: "AI 问题" })).toHaveValue("如何创建节点集合并检查选择结果？");
+    await expect(send).toBeDisabled();
+    await expect(send).toHaveAttribute("data-feedback", "held");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).color), "rgb(70, 96, 127)");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).backgroundColor), "rgb(242, 245, 249)");
+    assert.equal(await send.evaluate((el) => getComputedStyle(el).opacity), "1");
+    await expect(panel.getByRole("button", { name: "清空问题草稿" })).toBeEnabled();
+    await shot("ai-panel-selected");
+    await panel.getByRole("button", { name: "清空问题草稿" }).click();
+    await expect(send).toHaveAttribute("data-feedback", "idle");
+    await expect(suggestion).toHaveAttribute("aria-pressed", "false");
+    await page.getByRole("combobox", { name: "AI 对话停靠位置" }).selectOption("bottom");
+    await expect(panel).toBeVisible();
+    await expect(send).toBeDisabled();
+    await shot("ai-panel-bottom");
+  });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();
     await expect(
