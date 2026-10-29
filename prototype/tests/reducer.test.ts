@@ -127,3 +127,27 @@ describe("已有对象编辑", () => {
     expect(reducer(editing, add)).toBe(editing);
   });
 });
+
+
+describe("分析步按来源位置插入", () => {
+  const step = (id: string) => ({ id, name: id, procedure: "静力，通用", nonlinear: false, increment: "auto" as const, initial: "", min: "", max: "", iterations: "" });
+  it("支持 Initial 后、中间和默认末尾插入，不修改原列表", () => {
+    let state = initialState();
+    const save = (id: string, afterId?: string) => {
+      const previous = state;
+      state = reducer(reducer(state, { type: "open", command: "step" }), { type: "addStep", value: step(id), afterId });
+      expect(previous.models["Model-1"].steps.some(s => s.id === id)).toBe(false);
+    };
+    save("A"); save("B"); save("first", "initial"); save("middle", "A");
+    expect(state.models["Model-1"].steps.map(s => s.id)).toEqual(["first", "A", "middle", "B"]);
+    expect(state.models["Model-Empty"].steps).toEqual([]);
+  });
+  it("无效插入目标被拒绝，编辑已有步骤保留位置", () => {
+    const base = reducer(reducer(initialState(), { type: "open", command: "step" }), { type: "addStep", value: step("A") });
+    const creating = reducer(base, { type: "open", command: "step" });
+    expect(reducer(creating, { type: "addStep", value: step("B"), afterId: "missing" })).toBe(creating);
+    const editing = reducer(base, { type: "open", command: "step", id: "A" });
+    const saved = reducer(editing, { type: "addStep", value: { ...step("A"), name: "Renamed" }, afterId: "missing" });
+    expect(saved.models["Model-1"].steps).toEqual([{ ...step("A"), name: "Renamed" }]);
+  });
+});

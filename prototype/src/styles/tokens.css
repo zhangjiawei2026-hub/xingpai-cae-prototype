@@ -41,6 +41,15 @@
   --select-menu-radius: 4px;
   --select-menu-max-height: 280px;
   --select-menu-shadow: 0 4px 18px #20345024, 0 1px 3px #20345012;
+  /* Follow-up customer review: outline tree and list controls, prototype values. */
+  --tree-outline-row-height: 26px;
+  --tree-expander-size: 12px;
+  --tree-outline-guide: #bbc7d5;
+  --tree-outline-selection: #e8edf3;
+  --process-list-height: 156px;
+  --selection-method-menu-width: 224px;
+  /* AI panel dimensions: prototype design decisions. */
+  --ai-input-height: 72px;
   --z-menu: 30;
   --z-dialog: 50;
   --ink-secondary: #65798f;

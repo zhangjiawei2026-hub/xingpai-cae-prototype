@@ -145,17 +145,25 @@ export function reducer(state: WorkState, action: Action): WorkState {
         (state.editingId && action.value.id !== state.editingId)
       )
         return state;
+      // IDs determine insertion; names remain editable display labels. Older
+      // callers without an insertion target keep the previous append behavior.
+      const insertAt = action.afterId === "initial"
+        ? 0
+        : action.afterId === undefined
+          ? current.steps.length
+          : current.steps.findIndex((step) => step.id === action.afterId) + 1;
+      if (!state.editingId && action.afterId !== undefined &&
+          action.afterId !== "initial" && insertAt === 0) return state;
+      const steps = state.editingId
+        ? current.steps.map((step) => step.id === state.editingId ? action.value : step)
+        : [...current.steps.slice(0, insertAt), action.value, ...current.steps.slice(insertAt)];
       return {
         ...state,
         models: {
           ...state.models,
           [state.model]: {
             ...current,
-            steps: state.editingId
-              ? current.steps.map((v) =>
-                  v.id === state.editingId ? action.value : v,
-                )
-              : [...current.steps, action.value],
+            steps,
           },
         },
         step: action.value.name,

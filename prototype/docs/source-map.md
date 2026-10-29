@@ -22,3 +22,10 @@
 对照 `../../outputs/prototype-review-20261023/customer-audit/source-domain-crop.png`（原图 `prototype-domain-notes.jpg` 的局部）恢复多材料/多截面分组，以及脱模方向最大尺寸、类型、基准点、第一点、障碍物结构。只对 SINGLE 路径保留显示网格拾取示意；其余类型和数据库入口禁用。会议 18:32–20:22 支持选择方式的视觉展示，不构成真实选择算法定义。
 
 逐项结果及新截图：`../../outputs/prototype-review-20261023/customer-fixes-2118/修复记录.md`。原审核报告及原始证据保留。
+
+
+## 2026-10-29 客户意见复核来源更新
+
+- 在线文档 https://www.kdocs.cn/l/cjPUooS2Vnbh ：重新读取布局、模型树、选择工具、比例及功能 UI；Mechanical 图片 `KC7El` 仅支持视觉参考，图像保留在 `../../outputs/prototype-review-20261028/followup-audit/source/`。
+- 本地 `../../outputs/customer-reference-recovery-20261028/ansa-step-load/ANSA分析步与载荷.html`：`slOpenCreate()` 和 `slProcedures` 支持插入位置、分类与过程清单。类型名用中文呈现，未接入类型禁用；不据此扩展求解能力。
+- 上文旧「固定追加末尾」已被会话内按 ID 插入替代；已有对象编辑仍保持位置。业务、桌面、工程验收边界见 `customer-feedback-followup-20261029.md`。

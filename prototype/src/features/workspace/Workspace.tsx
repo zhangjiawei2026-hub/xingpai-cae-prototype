@@ -12,12 +12,13 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { useStore } from "../../app/Store";
+import { AiPanel } from "../ai-chat/AiPanel";
 import { DockLayout } from "./DockLayout";
 import { ModuleBar } from "./ModuleBar";
 import { QuickToolbar, type ViewAction } from "./QuickToolbar";
 import { CAEIcon } from "../../components/CAEIcon";
 import { Ribbon } from "../ribbon/Ribbon";
-import { ModelTree } from "../model-tree/ModelTree";
+import { ModelTree, initialTreeView } from "../model-tree/ModelTree";
 import { Viewport } from "../../viewport/Viewport";
 import { NodeSetDialog } from "../node-set/NodeSetDialog";
 import { StepDialog } from "../analysis-step/StepDialog";
@@ -67,9 +68,11 @@ function Help({ close }: { close: () => void }) {
 }
 export function Workspace() {
   const { state, dispatch } = useStore();
+  const [treeView, setTreeView] = useState(initialTreeView);
   const [loadOpen, setLoadOpen] = useState(false);
   const [loads, setLoads] = useState<Record<string, LoadDraft>>({});
   const [aiVisible, setAiVisible] = useState(false);
+  const [aiDrafts, setAiDrafts] = useState<Record<string, string>>({});
   const [resetPending, setResetPending] = useState(false);
   const [treeVisible, setTreeVisible] = useState(true),
     [logVisible, setLogVisible] = useState(true),
@@ -152,6 +155,10 @@ export function Workspace() {
             <ChevronDown size={10} aria-hidden="true" />
           </summary>
           <div>
+            <button disabled>打开文件 · 未接入</button>
+            <button disabled>保存工程 · 未接入</button>
+            <button disabled>另存为 · 未接入</button>
+            <hr />
             <button
               disabled={!!state.command}
               onClick={(e) => {
@@ -168,9 +175,6 @@ export function Workspace() {
             >
               恢复初始演示
             </button>
-            <button disabled>打开文件 · 未接入</button>
-            <button disabled>保存工程 · 未接入</button>
-            <button disabled>另存为 · 未接入</button>
           </div>
         </details>
       } />
@@ -255,7 +259,7 @@ export function Workspace() {
         </div>
         <button className={s.iconButton} aria-pressed={aiVisible} onClick={() => setAiVisible(!aiVisible)}>AI 对话</button>
       </div>
-      <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} /> : null} viewport={<Viewport />} log={logVisible ? (
+      <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} viewState={treeView} onViewChange={changes => setTreeView(previous => ({ ...previous, ...changes }))} /> : null} viewport={<Viewport />} log={logVisible ? (
             <section className={s.log} aria-label="信息窗口">
               <header>
                 <div
@@ -311,7 +315,7 @@ export function Workspace() {
                 <div ref={logEnd} />
               </div>
             </section>
-      ) : null} ai={aiVisible ? <div className={s.helpText} style={{ padding: 16 }}><strong>AI 对话</strong><p>AI 服务尚未接入。可拖动标题栏调整面板位置。</p><textarea aria-label="AI 问题" placeholder="AI 服务尚未接入" disabled /><button disabled>发送</button></div> : null} />
+      ) : null} ai={aiVisible ? <AiPanel model={state.model} moduleLabel={context.moduleLabel} draft={aiDrafts[state.model] ?? ""} onDraftChange={value => setAiDrafts(previous => ({ ...previous, [state.model]: value }))} /> : null} />
       <footer className={s.statusbar}>
         <span className={s.ready}>
           <i />

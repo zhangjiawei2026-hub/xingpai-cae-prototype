@@ -658,7 +658,7 @@ try {
     }
     await page.getByRole("treeitem", { name: "Initial", exact: true }).click();
     await button("分析步").click();
-    await expect(field("插入位置")).toHaveValue("追加到分析步列表末尾（演示）");
+    await expect(page.getByRole("combobox", { name: "插入位置", exact: true }).locator("option:checked")).toHaveText("Review-step 之后");
     await field("分析步名称").fill("Append-check");
     await button("继续").click();
     await button("创建分析步").click();
@@ -910,6 +910,91 @@ try {
     await entity.click(); await shot("dropdown-125-percent"); await page.keyboard.press("Escape");
     await page.evaluate(() => { document.documentElement.style.zoom = ""; });
     await page.setViewportSize({ width: 1440, height: 900 });
+  });
+  await check("客户复核：分析步插入顺序、过程清单与编辑取消", async () => {
+    await page.reload();
+    const create = async (name, after) => {
+      await button("分析步").click(); await field("分析步名称").fill(name);
+      if (after) await page.getByRole("combobox", { name: "插入位置", exact: true }).selectOption(after);
+      await expect(page.getByRole("listbox", { name: "分析过程类型", exact: true }).locator("option")).toHaveCount(8);
+      await expect(page.getByRole("listbox", { name: "分析过程类型", exact: true }).locator("option:disabled")).toHaveCount(7);
+      if (name === "Order-A") {
+        await page.getByRole("combobox", { name: "过程分类", exact: true }).selectOption("perturbation");
+        await expect(page.getByRole("listbox", { name: "分析过程类型", exact: true }).locator("option:disabled")).toHaveCount(5);
+        await expect(button("继续")).toBeDisabled(); await shot("followup-step-perturbation");
+        await page.getByRole("combobox", { name: "过程分类", exact: true }).selectOption("general");
+      }
+      await shot("followup-step-create");
+      await button("继续").click(); await button("创建分析步").click();
+    };
+    await create("Order-A"); await create("Order-B"); await create("Order-first", "initial");
+    await button("分析步").click(); await field("分析步名称").fill("Order-middle");
+    await page.getByRole("combobox", { name: "插入位置", exact: true }).selectOption({label:"Order-A 之后"});
+    await button("继续").click(); await button("创建分析步").click();
+    const order = () => page.getByRole("tree", { name: "模型对象" }).locator('[data-parent="steps"]').allTextContents();
+    assert.deepEqual(await order(), ["Initial", "Order-first", "Order-A", "Order-middle", "Order-B"]);
+    await page.getByRole("treeitem", { name: "Order-middle", exact: true }).dblclick();
+    await expect(field("插入位置")).toHaveValue("保留当前列表位置");
+    await field("分析步名称").fill("Canceled"); await button("取消").click();
+    assert.deepEqual(await order(), ["Initial", "Order-first", "Order-A", "Order-middle", "Order-B"]);
+  });
+  await check("客户复核：目录二级不可拖拽、轮廓样式和换边保留状态", async () => {
+    await page.reload();
+    const tree = page.getByRole("complementary", { name: "模型导航" });
+    await expect(tree.getByText("目录树", { exact: true })).toHaveCount(0);
+    await page.getByRole("combobox", { name: "模型树样式" }).selectOption("compact");
+    await page.getByRole("treeitem", { name: "部件 1", exact: true }).click();
+    await field("搜索模型树").fill("Fixture");
+    await page.getByRole("combobox", { name: "目录树停靠位置" }).selectOption("right");
+    await expect(field("搜索模型树")).toHaveValue("Fixture");
+    await expect(page.getByRole("combobox", { name: "模型树样式" })).toHaveValue("compact");
+    await expect(page.getByRole("combobox", { name: "目录树停靠位置" })).toBeFocused();
+    await field("搜索模型树").fill("");
+    await expect(page.getByRole("treeitem", { name: "部件 1", exact: true })).toHaveAttribute("aria-expanded", "false");
+    await page.getByRole("tab", { name: "结果", exact: true }).click();
+    await page.getByRole("combobox", { name: "目录树停靠位置" }).selectOption("left");
+    await expect(page.getByRole("tab", { name: "结果", exact: true })).toHaveAttribute("aria-selected", "true");
+    assert(await page.getByRole("tab", { name: "结果", exact: true }).evaluate(el => !el.draggable));
+    await page.getByRole("tab", { name: "模型", exact: true }).click();
+    await page.getByRole("treeitem", { name: "部件 1", exact: true }).click();
+    await shot("followup-outline-tree");
+    await button("模型树").click(); await button("模型树").click();
+    await expect(page.getByRole("combobox", { name: "模型树样式" })).toHaveValue("compact");
+    const header = page.getByRole("combobox", { name: "目录树停靠位置" }).locator("..");
+    const target = page.locator('[data-side="right"]').first();
+    const dragBox = await header.boundingBox();
+    await page.mouse.move(dragBox.x + 35, dragBox.y + dragBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(dragBox.x + 80, dragBox.y + dragBox.height / 2, { steps: 8 });
+    await expect(page.getByText("右侧停靠", { exact: true })).toBeVisible();
+    const dropBox = await page.getByText("右侧停靠", { exact: true }).boundingBox();
+    await page.mouse.move(dropBox.x + dropBox.width / 2, dropBox.y + dropBox.height / 2, { steps: 12 });
+    await page.mouse.up();
+    await expect(page.getByRole("combobox", { name: "目录树停靠位置" })).toHaveValue("right");
+    await expect(target).toBeVisible();
+    await shot("followup-docked-right");
+  });
+  await check("客户复核：选择工具激活、已选数与更多菜单键盘闭环", async () => {
+    await page.reload();
+    const point = page.getByRole("button", { name: "点选显示网格", exact: true });
+    await expect(point).toHaveAttribute("aria-pressed", "false");
+    await page.getByRole("button", { name: "更多选择方式", exact: true }).click();
+    await expect(page.getByRole("menuitem", { name: "激活点选", exact: true })).toBeFocused();
+    await shot("followup-method-inactive");
+    await page.getByRole("menuitem", { name: "激活点选", exact: true }).click();
+    await expect(point).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "更多选择方式", exact: true }).click();
+    await expect(page.getByRole("menuitem", { name: "退出点选", exact: true })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "更多选择方式", exact: true })).toBeFocused();
+    await point.click(); await button("节点集合").click();
+    await dialog().getByRole("button", { name: "拾取节点", exact: true }).click();
+    await page.getByRole("button", { name: "选择Node 1", exact: true }).click();
+    await page.getByRole("button", { name: "更多选择方式", exact: true }).click();
+    await shot("followup-method-selection");
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("pick-count")).toHaveText("已选 1 项");
+    await button("取消拾取").click(); await button("取消").click();
   });
   await check("刷新恢复初始演示数据", async () => {
     await page.reload();

@@ -464,7 +464,7 @@
   margin-left: 4px;
 }
 .treeTabs .iconButton {
-  margin-left: auto;
+  margin-left: 0;
   color: var(--ink-soft);
 }
 .treeContent {
@@ -1047,10 +1047,18 @@
 .treeHeading { display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 10px; background: var(--panel-soft); border-bottom: 1px solid var(--line); font-size: 11px; }
 .treeHeading select { max-width: 108px; }
 .treeHeading { --select-height: 22px; --select-font-size: 11px; }
-.sidebar[data-tree-style="compact"] .treeRow { height: 24px; }
-.sidebar[data-tree-style="compact"] .treeChild { height: 24px; padding-left: 42px; }
-.sidebar[data-tree-style="compact"] .treeLine { left: 27px; }
-.sidebar[data-tree-style="compact"] .treeChild[aria-selected="true"] { background: var(--blue); color: white; }
+.treeStyleSelect { margin-left: auto; max-width: 98px; --select-height: 23px; --select-font-size: 11px; }
+/* Mechanical screenshot's visual grammar; original CAE object hierarchy remains. */
+.sidebar[data-tree-style="compact"] .treeRow { height: var(--tree-outline-row-height); padding-left: 12px; }
+.sidebar[data-tree-style="compact"] .treeChild { height: var(--tree-outline-row-height); padding-left: 49px; font-family: inherit; font-size: 11px; color: var(--ink-control); }
+.sidebar[data-tree-style="compact"] .treeLine { left: 24px; height: 100%; width: 17px; border-left: 1px dotted var(--tree-outline-guide); border-bottom: 0; }
+.sidebar[data-tree-style="compact"] .treeLine::after { content: ""; position: absolute; top: 50%; width: 16px; border-bottom: 1px dotted var(--tree-outline-guide); }
+.sidebar[data-tree-style="compact"] .treeChild:last-child .treeLine { height: 50%; }
+.sidebar[data-tree-style="compact"] .treeChild:last-child .treeLine::after { top: 100%; }
+.sidebar[data-tree-style="compact"] .treeChild[aria-selected="true"] { background: var(--tree-outline-selection); color: var(--ink); box-shadow: inset 2px 0 var(--blue); }
+.sidebar .treeRow > button > .treeExpander { display: inline-grid; place-items: center; flex: 0 0 var(--tree-expander-size); width: var(--tree-expander-size); height: var(--tree-expander-size); border: 1px solid var(--tree-outline-guide); background: var(--surface); color: var(--ink-secondary); font: 11px/1 var(--font-data); }
+.sidebar[data-tree-style="compact"] .treeRoot { border-bottom: 1px solid var(--line); margin-bottom: 6px; padding-bottom: 8px; }
+.sidebar[data-tree-style="compact"] .treeRow > button:first-child { gap: 6px; }
 .layoutTools { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 10px; }
 .layoutTools select { font-size: 10px; background: var(--paper); border: 1px solid var(--line); height: 24px; }
 .workarea[data-tree-side="right"] > .treeWrapper { order: 3; }
@@ -1068,3 +1076,5 @@
 .moduleBar[data-module-style="tabs"] { background: var(--panel-soft); }
 .moduleBar[data-module-style="tabs"] .modules button { background: var(--panel-soft); border: 1px solid var(--control-border); border-bottom: 0; }
 .moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { border-color: var(--blue); background: var(--paper); color: var(--blue); box-shadow: none; }
+
+.fileMenu > div hr { border: 0; border-top: 1px solid var(--line); margin: 4px; }

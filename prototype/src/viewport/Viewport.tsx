@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Check, X } from "lucide-react";
+import { Box, Check, X, MousePointer2, MoreHorizontal } from "lucide-react";
 import { CAEIcon, type CAEIconName } from "../components/CAEIcon";
+import { moveFocus } from "../components/keyboard";
 import { useStore } from "../app/Store";
 import { createViewport } from "./adapter";
 import type { ViewMode } from "./adapter";
@@ -21,6 +22,7 @@ export function Viewport() {
   const [error, setError] = useState(""),
     [wire, setWire] = useState(true),
     [view, setView] = useState<ViewMode | null>("iso");
+  const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
   const [inspectionActive, setInspectionActive] = useState(false);
   const [counts, setCounts] = useState({ nodes: 0, elements: 0 });
   const axes = useRef<SVGSVGElement>(null);
@@ -34,6 +36,7 @@ export function Viewport() {
     };
   }, [state.selection, state.model, dispatch]);
   const selection = state.selection;
+  const pointActive = !!selection || (inspectionActive && !state.command && state.model !== "Model-Empty");
   useEffect(() => {
     if (!host.current) return;
     try {
@@ -88,10 +91,28 @@ export function Viewport() {
           <select aria-label="选择对象类型" disabled={!!selection || state.model === "Model-Empty" || !!state.command} value={selection?.entity ?? inspection.entity} onChange={e => setInspection({ model: state.model, entity: e.target.value as EntityType, ids: [] })}>
             <option value="Element">Element · 单元</option><option value="Node">Node · 节点</option><option disabled>Nset · 节点集合（未接入）</option><option disabled>Elset · 单元集合（未接入）</option>
           </select>
-          <button aria-label="点选显示网格" aria-pressed={!!selection || inspectionActive} disabled={!!selection || !!state.command || state.model === "Model-Empty"} onClick={() => setInspectionActive(!inspectionActive)}>点选</button>
-          <span aria-label="已选数量" aria-live="polite">{(selection?.ids ?? inspectIds).length}</span>
-          <details><summary aria-label="更多选择方式">···</summary><div><strong>{selection || inspectionActive ? "点选 · 已激活" : "点选 · 未激活"}</strong>{["框选", "几何面关联", "角度关联"].map(method => <button key={method} disabled title="专业选择算法未接入">{method} · 未接入</button>)}</div></details>
+          <button aria-label="点选显示网格" aria-pressed={pointActive} title={pointActive ? "点选已激活，逐项累积选择" : "激活点选显示网格"} disabled={!!selection || !!state.command || state.model === "Model-Empty"} onClick={() => setInspectionActive(!inspectionActive)}><MousePointer2 size={13} />点选</button>
+          <span aria-label="已选数量" className={(selection?.ids ?? inspectIds).length ? s.selectedCount : ""} aria-live="polite">{(selection?.ids ?? inspectIds).length}</span>
+          <button id="selection-method-trigger" aria-label="更多选择方式" aria-haspopup="menu" popoverTarget="selection-method-menu" onClick={event => {
+            const box = event.currentTarget.getBoundingClientRect();
+            setMenuAnchor({ x: Math.max(8, Math.min(box.left, window.innerWidth - 232)), y: box.bottom + 208 < window.innerHeight ? box.bottom + 4 : Math.max(8, box.top - 208) });
+          }}><MoreHorizontal size={15} /></button>
           <button title="清除全部选择" aria-label="清除全部选择" disabled={!(selection?.ids ?? inspectIds).length} onClick={() => { if (selection) selection.ids.forEach(id => dispatch({ type: "toggle", id })); else setInspection({ ...inspection, ids: [] }); }}><X size={14} /></button>
+        </div>
+        <div id="selection-method-menu" popover="auto" role="menu" tabIndex={-1} aria-label="选择方式菜单" className={s.methodMenu} style={{ left: menuAnchor.x, top: menuAnchor.y }}
+          onToggle={event => { if (event.newState === "open") (event.currentTarget.querySelector<HTMLButtonElement>("button:not(:disabled)") ?? event.currentTarget).focus(); }}
+          onKeyDown={event => {
+            moveFocus(event, "menuitem");
+            if (event.key === "Escape" || event.key === "Tab") {
+              event.preventDefault(); event.stopPropagation(); event.currentTarget.hidePopover();
+              document.getElementById("selection-method-trigger")?.focus();
+            }
+          }}>
+          <p>选择方式 <span>{selection ? "字段选择中" : pointActive ? "已激活" : "未激活"}</span></p>
+          <button role="menuitem" aria-label={pointActive ? "退出点选" : "激活点选"} disabled={!!selection || !!state.command || state.model === "Model-Empty"} onClick={event => {
+            setInspectionActive(!inspectionActive); event.currentTarget.closest<HTMLElement>("[popover]")?.hidePopover(); document.getElementById("selection-method-trigger")?.focus();
+          }}><MousePointer2 size={14} /><span>点选</span>{pointActive && <Check size={14} aria-label="已激活" />}</button>
+          {["框选", "几何面关联", "角度关联", "集合选择"].map(method => <button role="menuitem" key={method} disabled title="专业选择算法未接入"><span>{method}</span><small>未接入</small></button>)}
         </div>
         <div className={s.viewControls} role="group" aria-label="视图导航工具">
           <div className={s.navigator} aria-label="视图方向">

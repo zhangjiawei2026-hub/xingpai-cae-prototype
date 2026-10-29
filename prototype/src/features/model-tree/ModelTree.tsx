@@ -24,7 +24,21 @@ interface Group {
   command?: Command;
   children: { id: string; name: string }[];
 }
-export function ModelTree({ onClose }: { onClose: () => void }) {
+export interface TreeViewState {
+  style: "original" | "compact";
+  tab: "model" | "result";
+  search: string;
+  expanded: string[];
+}
+export const initialTreeView = (): TreeViewState => ({
+  style: "original", tab: "model", search: "",
+  expanded: ["parts", "sets", "steps", "optimization", "task"],
+});
+export function ModelTree({ onClose, viewState, onViewChange }: {
+  onClose: () => void;
+  viewState: TreeViewState;
+  onViewChange: (changes: Partial<TreeViewState>) => void;
+}) {
   const { state, dispatch } = useStore();
   const treeRef = useRef<HTMLDivElement>(null);
   const focusedId = useRef("");
@@ -32,16 +46,10 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
   const menuTrigger = useRef<HTMLElement | null>(null);
   const model = state.models[state.model],
     empty = state.model === "Model-Empty";
-  const [treeStyle, setTreeStyle] = useState("original");
-  const [tab, setTab] = useState("model"),
-    [search, setSearch] = useState(""),
-    [expanded, setExpanded] = useState([
-      "parts",
-      "sets",
-      "steps",
-      "optimization",
-      "task",
-    ]);
+  const { style: treeStyle, tab, search, expanded } = viewState;
+  const setTab = (tab: TreeViewState["tab"]) => onViewChange({ tab });
+  const setSearch = (search: string) => onViewChange({ search });
+  const setExpanded = (expanded: string[]) => onViewChange({ expanded });
   const [menu, setMenu] = useState<{
     x: number;
     y: number;
@@ -154,7 +162,6 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
   });
   return (
     <aside className={s.sidebar} aria-label="模型导航" data-tree-style={treeStyle}>
-      <div className={s.treeHeading}><strong>目录树</strong><select aria-label="模型树样式" value={treeStyle} onChange={e => setTreeStyle(e.target.value)}><option value="original">现有方案</option><option value="compact">紧凑方案</option></select></div>
       <div
         className={s.treeTabs}
         role="tablist"
@@ -181,6 +188,9 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
         >
           结果
         </button>
+        <select className={s.treeStyleSelect} aria-label="模型树样式" value={treeStyle} onChange={e => onViewChange({ style: e.target.value as TreeViewState["style"] })}>
+          <option value="original">现有方案</option><option value="compact">轮廓方案</option>
+        </select>
         <button className={s.iconButton} title="收起模型树" onClick={onClose}>
           <X size={13} />
         </button>
@@ -333,7 +343,7 @@ export function ModelTree({ onClose }: { onClose: () => void }) {
                           )
                         }
                       >
-                        {open ? (
+                        {treeStyle === "compact" ? <span className={s.treeExpander} aria-hidden="true">{open ? "−" : "+"}</span> : open ? (
                           <ChevronDown size={12} />
                         ) : (
                           <ChevronRight size={12} />

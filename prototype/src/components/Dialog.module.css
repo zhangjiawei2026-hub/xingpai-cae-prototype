@@ -338,3 +338,11 @@
 .radios[role="tablist"] { gap: 0; margin: 12px 0; border-bottom: 1px solid var(--line); }
 .radios[role="tablist"] button { padding: 7px 16px; border: 0; background: var(--panel-soft); color: var(--ink-secondary); }
 .radios[role="tablist"] button[aria-selected="true"] { background: var(--blue-soft); color: var(--blue); box-shadow: inset 0 -2px var(--blue); }
+
+.dialog .processList {
+  width: 100%; height: var(--process-list-height); padding: 4px;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--control-border);
+}
+.processList option { padding: 5px 8px; font-size: 11px; }
+.processList option:checked { background: var(--blue-soft); color: var(--blue); }
+.processList option:disabled { color: var(--ink-soft); }

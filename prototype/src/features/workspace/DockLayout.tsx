@@ -8,7 +8,7 @@ export function DockLayout({ tree, log, viewport, ai }: { tree: ReactNode; log: 
   const [sizes, setSizes] = useState<Record<PanelId, number>>({ tree: 253, log: 140, ai: 260 });
   const [dragging, setDragging] = useState<PanelId | null>(null);
   const panels = [{ id: "tree" as const, title: "目录树", content: tree }, { id: "log" as const, title: "消息", content: log }, { id: "ai" as const, title: "AI 对话", content: ai }];
-  const move = (id: PanelId, side: Side) => { setLocations(previous => ({ ...previous, [id]: side })); setSizes(previous => ({ ...previous, [id]: side === "left" || side === "right" ? 253 : 180 })); setDragging(null); };
+  const move = (id: PanelId, side: Side) => { setLocations(previous => ({ ...previous, [id]: side })); setSizes(previous => ({ ...previous, [id]: side === "left" || side === "right" ? 253 : 180 })); setDragging(null); requestAnimationFrame(() => document.querySelector<HTMLSelectElement>(`select[aria-label="${{tree:"目录树",log:"消息",ai:"AI 对话"}[id]}停靠位置"]`)?.focus()); };
   return <div className={s.layout}>
     <main className={s.viewport}>{viewport}</main>
     {(Object.keys(labels) as Side[]).map(side => <div key={side} className={s.zone} data-side={side}>

@@ -84,7 +84,7 @@ export type Action =
   | { type: "pickConfirm" }
   | { type: "consumeResult" }
   | { type: "addSet"; value: NodeSet }
-  | { type: "addStep"; value: AnalysisStep }
+  | { type: "addStep"; value: AnalysisStep; afterId?: string }
   | { type: "addDomain"; value: DesignDomain }
   | { type: "notice"; value: string }
   | { type: "reset" };

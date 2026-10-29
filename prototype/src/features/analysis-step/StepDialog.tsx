@@ -1,12 +1,16 @@
 import { moveFocus } from "../../components/keyboard";
 import { useState } from "react";
-import { Check } from "lucide-react";
 import { useStore } from "../../app/Store";
 import { Dialog, FormRow, formStyles as s } from "../../components/Dialog";
 export function StepDialog() {
   const { state, dispatch } = useStore();
   const model = state.models[state.model];
   const existing = model.steps.find((v) => v.id === state.editingId);
+  const [afterId, setAfterId] = useState(model.steps.at(-1)?.id ?? "initial");
+  const [category, setCategory] = useState("general");
+  const procedures = category === "general"
+    ? ["动态温度位移，显式", "地应力", "热传导", "质量扩散", "土壤", "静力，通用", "静力，Riks", "黏弹性"]
+    : ["屈曲", "频率", "静力，线性摄动", "稳态动力学，直接法", "子结构生成"];
   const [extra, setExtra] = useState({
     stabilization: existing?.stabilization ?? "none",
     stabilizationValue: existing?.stabilizationValue ?? "",
@@ -65,12 +69,14 @@ export function StepDialog() {
           <button onClick={() => dispatch({ type: "close" })}>取消</button>
           <button
             className={s.primary}
+            disabled={phase === 1 && category !== "general"}
             onClick={() => {
               if (!validate()) return;
               if (phase === 1) setPhase(2);
               else
                 dispatch({
                   type: "addStep",
+                  afterId: existing ? undefined : afterId,
                   value: {
                     id: existing?.id ?? crypto.randomUUID(),
                     name: name.trim(),
@@ -105,32 +111,27 @@ export function StepDialog() {
       {phase === 1 ? (
         <>
           <FormRow label="插入位置">
-            <input
-              readOnly
-              aria-label="插入位置"
-              value={
-                existing
-                  ? "保留当前列表位置（演示）"
-                  : "追加到分析步列表末尾（演示）"
-              }
-            />
+            {existing ? <input readOnly aria-label="插入位置" value="保留当前列表位置" /> : (
+              <select aria-label="插入位置" value={afterId} onChange={e => setAfterId(e.target.value)}>
+                <option value="initial">Initial 之后</option>
+                {model.steps.map(step => <option key={step.id} value={step.id}>{step.name} 之后</option>)}
+              </select>
+            )}
           </FormRow>
           <FormRow label="过程分类">
-            <select aria-label="过程分类">
-              <option>通用分析过程</option>
+            <select aria-label="过程分类" value={category} onChange={e => setCategory(e.target.value)}>
+              <option value="general">通用分析过程</option>
+              <option value="perturbation">线性摄动 · 类型预览</option>
             </select>
           </FormRow>
           <p className={s.hint}>分析过程类型</p>
-          <div className={s.procedure}>
-            <button aria-pressed="true">
-              <Check size={13} /> 静力，通用
-            </button>
-            <button disabled title="本轮未覆盖其他分析类型">
-              其他分析类型 · 待补充
-            </button>
-          </div>
+          <select className={s.processList} size={6} aria-label="分析过程类型" value={category === "general" ? "静力，通用" : ""} onChange={() => {}}>
+            {procedures.map(type => (
+              <option key={type} value={type} disabled={type !== "静力，通用"}>{type}{type !== "静力，通用" ? " · 参数未接入" : ""}</option>
+            ))}
+          </select>
           <p className={s.hint}>
-            当前仅覆盖来源中可辨识的代表类型。此步骤不会开始求解。
+            名称和列表顺序参照客户 HTML。仅静力，通用支持参数草稿；新步骤在所选步骤之后插入，不执行求解。
           </p>
         </>
       ) : (
