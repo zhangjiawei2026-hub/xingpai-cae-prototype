@@ -118,6 +118,14 @@ export function Workspace() {
         <button disabled={!!state.command} onClick={() => setHelp(true)}>
           帮助
         </button>
+        <a
+          className={s.referenceLink}
+          href={`${import.meta.env.BASE_URL}reference/results-reference.html`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          结果模块参考
+        </a>
         <span className={s.menuDivider} />
         <button
           title="恢复初始演示"

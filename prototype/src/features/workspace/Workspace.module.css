@@ -126,6 +126,14 @@
 .fileMenu > div button:hover:not(:disabled) {
   background: var(--blue-soft);
 }
+.referenceLink {
+  padding: 4px 8px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+.referenceLink:hover {
+  background: var(--blue-soft);
+}
 .menuDivider {
   height: 12px;
   width: 1px;
