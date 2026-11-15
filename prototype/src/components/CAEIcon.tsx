@@ -29,6 +29,9 @@ export type CAEIconName =
   | "viewTop"
   | "viewFront"
   | "viewRight"
+  | "viewBack"
+  | "viewLeft"
+  | "viewBottom"
   | "zoomIn"
   | "zoomOut"
   | "wireframe"
@@ -152,7 +155,7 @@ const Dot = ({ at, r = 2.4 }: { at: P; r?: number }) => (
 
 type CubeFace = "top" | "front" | "right";
 /** View-orientation cube: the viewed face(s) are lit blue, the rest stay pale. */
-function ViewCube({ lit }: { lit: CubeFace[] }) {
+function ViewCube({ lit, reverse = false }: { lit: CubeFace[]; reverse?: boolean }) {
   const v = iso(16, 4.5, 11, 12);
   const faces: [CubeFace, "f1" | "f2" | "f3", P[]][] = [
     ["top", "f1", [v.top, v.r, v.f, v.l]],
@@ -164,7 +167,7 @@ function ViewCube({ lit }: { lit: CubeFace[] }) {
       {faces.map(([k, f, p]) => (
         <g key={k} className={lit.includes(k) ? c.geo : c.pale}>
           <polygon
-            className={`${c[f]} ${c.vface} ${lit.length === 1 && lit[0] === k ? c.vlit : ""}`}
+            className={`${c[f]} ${c.vface} ${lit.length === 1 && lit[0] === k ? c.vlit : ""} ${reverse && lit.includes(k) ? c.rearFace : ""}`}
             points={pts(...p)}
           />
         </g>
@@ -788,6 +791,12 @@ function glyph(
       return <ViewCube lit={["front"]} />;
     case "viewRight":
       return <ViewCube lit={["right"]} />;
+    case "viewBack":
+      return <ViewCube lit={["front"]} reverse />;
+    case "viewLeft":
+      return <ViewCube lit={["right"]} reverse />;
+    case "viewBottom":
+      return <ViewCube lit={["top"]} reverse />;
     case "zoomIn":
     case "zoomOut":
       return (

@@ -1,9 +1,10 @@
 .ribbon {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 1px;
   border-bottom: 1px solid var(--line);
   background: var(--panel-soft);
   flex: 0 0 auto;
-  overflow-x: auto;
   padding: 3px 5px 0;
   font-size: 11px;
   --select-height: 24px;
@@ -15,6 +16,7 @@
   flex-direction: column;
   border-right: 1px solid var(--line);
   min-width: 0;
+  max-width: 100%;
 }
 .group:last-child {
   border-right: 0;
@@ -160,6 +162,13 @@
 .ribbon[data-result-kind="topology"] .group:first-child { flex-basis: 230px; }
 .ribbon[data-result-kind="topology"] .group:nth-child(3) { flex-basis: 140px; }
 .ribbon[data-result-kind="topology"] .group:nth-child(5) { flex-basis: 124px; }
+@media (max-width: 1160px) {
+  .ribbon .group { flex-grow: 0; }
+  .controls { min-height: 0; }
+}
+@media (max-width: 1120px) {
+  .layouts { grid-template-columns: repeat(4, 27px); padding: 2px 0; }
+}
 .topologySourceFields {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

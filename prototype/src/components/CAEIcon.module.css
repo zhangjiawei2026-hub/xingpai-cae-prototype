@@ -242,6 +242,8 @@
   stroke-width: 1.2;
 }
 
+.icon .rearFace { fill-opacity: 0.45; stroke-dasharray: 2 1.3; }
+
 /* Viewport tools: orientation cubes, zoom lens, triangulated wireframe. */
 .icon polygon.vface {
   stroke: none;

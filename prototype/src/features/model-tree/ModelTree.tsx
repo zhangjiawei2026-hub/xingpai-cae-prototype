@@ -34,8 +34,9 @@ export const initialTreeView = (): TreeViewState => ({
   style: "original", tab: "model", search: "",
   expanded: ["parts", "sets", "steps", "optimization", "task"],
 });
-export function ModelTree({ onClose, viewState, onViewChange }: {
+export function ModelTree({ onClose, onOpenResults, viewState, onViewChange }: {
   onClose: () => void;
+  onOpenResults: () => void;
   viewState: TreeViewState;
   onViewChange: (changes: Partial<TreeViewState>) => void;
 }) {
@@ -208,8 +209,11 @@ export function ModelTree({ onClose, viewState, onViewChange }: {
             <p>
               当前原型未连接求解器。
               <br />
-              切换到模型树体验配置流程。
+              可以打开工作台示意结果体验查看流程。
             </p>
+            <button className={s.iconButton} onClick={onOpenResults} disabled={!!state.command}>
+              查看示意结果
+            </button>
           </div>
         ) : (
           <>

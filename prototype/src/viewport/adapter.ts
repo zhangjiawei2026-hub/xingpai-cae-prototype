@@ -3,7 +3,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { makeBracket } from "./bracket";
 import type { EntityType } from "../types/domain";
 
-export type ViewMode = "iso" | "front" | "top" | "right";
+export type ViewMode = "iso" | "front" | "back" | "left" | "right" | "top" | "bottom";
+export type ModelDisplay = "solid" | "wire" | "edges";
 export function createViewport(
   container: HTMLElement,
   onPick: (id: number) => void,
@@ -167,7 +168,10 @@ export function createViewport(
       ...({
         iso: [8.5, 6.4, 10.2],
         front: [0, 0, 1],
+        back: [0, 0, -1],
+        left: [-1, 0, 0],
         top: [0, 1, 0.00001],
+        bottom: [0, -1, 0.00001],
         right: [1, 0, 0],
       }[mode] as [number, number, number]),
     );
@@ -227,13 +231,14 @@ export function createViewport(
       highlights.visible = visible;
       render();
     },
-    setWireframe(visible: boolean) {
+    setDisplay(mode: ModelDisplay) {
       group.children.forEach((object) => {
+        if (object instanceof THREE.Mesh) object.visible = mode !== "wire";
         if (
           object instanceof THREE.LineSegments &&
           object.geometry instanceof THREE.WireframeGeometry
         )
-          object.visible = visible;
+          object.visible = mode !== "solid";
       });
       render();
     },

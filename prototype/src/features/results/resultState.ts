@@ -215,6 +215,11 @@ export function useResultReview(active: boolean) {
         : previous,
     );
   }, []);
+  const exitProbe = useCallback(() => {
+    setResult((previous) =>
+      previous.probe ? { ...previous, probe: false } : previous,
+    );
+  }, []);
   useEffect(() => {
     if (active) return pause;
   }, [active, pause]);
@@ -280,7 +285,7 @@ export function useResultReview(active: boolean) {
     change,
     choose,
     stop,
-    pause,
+    exitProbe,
     rotatePlayback,
     addMarker,
     clearMarkers,

@@ -37,6 +37,7 @@
 | treePanel | 模型树面板开关 | 本轮 SVG 占位；待确认 |
 | logPanel | 信息窗口面板开关 | 本轮 SVG 占位；待确认 |
 | viewIso / viewTop / viewFront / viewRight | 视图方向（立方体，观察面为蓝，其余面浅灰；等轴测三面全亮） | 本轮 SVG 占位；待确认 |
+| viewBack / viewLeft / viewBottom | 相反方向使用淡蓝面与虚线边区分 | 按 R18 标准视图入口补齐的原型图标 |
 | zoomIn / zoomOut | 视口放大/缩小（放大镜） | 本轮 SVG 占位；待确认 |
 | wireframe | 显示三角面边线（三角剖分立方体） | 本轮 SVG 占位；待确认 |
 | box | 旧名称，等同 part | 兼容别名 |
