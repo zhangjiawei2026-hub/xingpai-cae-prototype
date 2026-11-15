@@ -74,57 +74,105 @@
   font-size: 11px;
 }
 .menubar > button,
-.fileMenu summary {
-  padding: 4px 10px;
-  border: 0;
-  background: none;
-  color: var(--ink-secondary);
-}
-.menubar > button:hover {
-  background: var(--blue-soft);
-}
-.fileMenu {
-  position: relative;
-}
-.fileMenu summary {
+.menuTrigger {
   display: inline-flex;
   align-items: center;
   gap: var(--menu-caret-gap);
-  cursor: pointer;
-  list-style: none;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--ink-secondary);
+  white-space: nowrap;
 }
-.fileMenu summary:hover,
-.fileMenu[open] summary {
+.menubar > button:hover:not(:disabled),
+.menuTrigger:hover:not(:disabled),
+.menuTrigger[aria-expanded="true"] {
   background: var(--blue-soft);
 }
-.fileMenu summary::-webkit-details-marker {
-  display: none;
+.mainMenu {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
-.fileMenu summary svg {
-  margin: 0;
+.menuSlot {
+  position: relative;
 }
-.fileMenu > div {
+.menuPopup {
   position: absolute;
   z-index: var(--z-menu);
-  top: 25px;
+  top: calc(100% + 2px);
   left: 0;
-  width: 188px;
+  width: 234px;
+  max-height: min(480px, 75dvh);
+  overflow: auto;
   padding: 5px;
   background: var(--paper);
   border: 1px solid var(--line);
   box-shadow: 0 6px 20px color-mix(in srgb, var(--view-grid) 14.9%, transparent);
   border-radius: 4px;
 }
-.fileMenu > div button {
+.menuPopup[data-wide]:not([hidden]) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 2px 8px;
+  width: min(448px, 64vw);
+}
+.menuPopup > div {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+.menuPopup > div:last-child {
+  border-bottom: 0;
+}
+.menuGroupLabel {
   display: block;
+  padding: 3px 7px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.menuPopup button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
   text-align: left;
-  border: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
   background: none;
   width: 100%;
-  padding: 9px;
+  min-height: 27px;
+  padding: 4px 6px;
+  color: var(--ink);
 }
-.fileMenu > div button:hover:not(:disabled) {
+.menuPopup button:disabled {
+  color: var(--muted);
+  opacity: 0.85;
+}
+.menuPopup button small {
+  margin-left: auto;
+  font-size: 10px;
+  text-align: end;
+  color: var(--muted);
+}
+.menuPopup button svg {
+  flex-shrink: 0;
+}
+.menuPopup button[aria-checked="true"] {
+  color: var(--blue);
+  border-color: var(--line);
+}
+.menuPopup button:hover:not(:disabled) {
   background: var(--blue-soft);
+}
+.modelViewport:not([hidden]) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.modelViewport > section {
+  flex: 1;
 }
 .menuDivider {
   height: 12px;
@@ -995,6 +1043,7 @@
 }
 .quickGroup {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 3px;
 }
@@ -1035,7 +1084,12 @@
 .projectSwitch, .contextbar { --select-height: 25px; --select-font-size: 11px; }
 .projectSwitch { --select-min-width: 145px; }
 .menuSession { margin-left: 16px; }
-.ribbon { height: 88px; }
+.ribbon { min-height: 88px; height: auto; }
+.ribbonItems { min-height: 62px; }
+.largeColumn > button { height: 100%; }
+.smallCommands:has(> :nth-child(3)) button { height: 20px; }
+.ribbon button[data-reference]:disabled { color: var(--muted); }
+.ribbon button[data-reference]:disabled > svg { filter: none; opacity: 0.72; }
 .ribbonGroup::before { content: attr(aria-label); order: 2; height: 17px; text-align: center; color: var(--muted); font-size: 10px; line-height: 17px; }
 .contextbar { height: 33px; }
 .modules { flex: 0 1 auto; padding-inline: 8px; }
@@ -1068,13 +1122,8 @@
 .center[data-log-side="right"] > .log { width: 260px; height: auto; resize: horizontal; overflow: auto; }
 .log { resize: vertical; overflow: auto; min-height: 85px; max-height: 45vh; }
 
-.moduleBar > .fileMenu { align-self: stretch; flex-shrink: 0; margin-left: 10px; }
-.moduleBar > .fileMenu summary { height: 100%; padding-inline: 14px; color: var(--blue); }
-.moduleBar > .fileMenu > div { top: 100%; }
 
 /* Recovered customer ANSA HTML: outlined tabs, gray inactive surface, open selected bottom. */
 .moduleBar[data-module-style="tabs"] { background: var(--panel-soft); }
 .moduleBar[data-module-style="tabs"] .modules button { background: var(--panel-soft); border: 1px solid var(--control-border); border-bottom: 0; }
 .moduleBar[data-module-style="tabs"] .modules button[aria-current="page"] { border-color: var(--blue); background: var(--paper); color: var(--blue); box-shadow: none; }
-
-.fileMenu > div hr { border: 0; border-top: 1px solid var(--line); margin: 4px; }

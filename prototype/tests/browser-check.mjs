@@ -50,7 +50,8 @@ try {
     await pause(200);
   }
   browser = await chromium.launch({
-    channel: process.env.CAE_BROWSER === "chromium" ? undefined : "chrome",
+    channel: process.env.CAE_BROWSER === "chromium" || process.env.CAE_BROWSER_EXECUTABLE ? undefined : "chrome",
+    executablePath: process.env.CAE_BROWSER_EXECUTABLE,
     headless: true,
     args: ["--enable-webgl", "--use-gl=angle", "--use-angle=swiftshader"],
   });
@@ -84,6 +85,49 @@ try {
   const shot = (name) =>
     page.screenshot({ path: path.join(artifactDir, name + ".png") });
   await page.goto(baseURL);
+  await check("客户复核：两种结果分组换行、Esc 与全局工具", async () => {
+    const navigation = page.getByRole("navigation", { name: "分析模块" });
+    const menu = page.getByRole("navigation", { name: "主菜单" });
+    const commonGroups = ["文件", "编辑", "视图导航", "标准视图", "显示方式", "测量"];
+    const toolbarGroups = (name) => page.getByRole("toolbar", { name, exact: true })
+      .locator(":scope > [role=group]").evaluateAll((groups) =>
+        groups.slice(0, 6).map((group) => group.getAttribute("aria-label")),
+      );
+    assert.deepEqual(await toolbarGroups("常用工具栏"), commonGroups);
+    const fileLeft = (await menu.getByRole("button", { name: "文件", exact: true }).boundingBox()).x;
+
+    try {
+      await page.setViewportSize({ width: 1090, height: 860 });
+      await navigation.getByRole("button", { name: "结果", exact: true }).click();
+      assert.deepEqual(await toolbarGroups("结果常用工具栏"), commonGroups);
+      assert.equal((await menu.getByRole("button", { name: "文件", exact: true }).boundingBox()).x, fileLeft);
+      const ribbon = page.getByLabel("结果 Ribbon 功能区", { exact: true });
+      const type = ribbon.getByRole("combobox", { name: "结果类型" });
+      const assertWrapped = async () => {
+        assert(await ribbon.evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const groups = [...element.querySelectorAll(":scope > [role=group]")];
+          return element.scrollWidth <= element.clientWidth &&
+            new Set(groups.map((group) => group.getBoundingClientRect().top)).size > 1 &&
+            groups.every((group) => group.getBoundingClientRect().right <= bounds.right + 1);
+        }));
+      };
+      await assertWrapped();
+      await ribbon.getByRole("button", { name: "播放动画", exact: true }).click();
+      const probe = ribbon.getByRole("button", { name: "结果探针", exact: true });
+      await probe.click();
+      await probe.press("Escape");
+      await expect(probe).toHaveAttribute("aria-pressed", "false");
+      await expect(ribbon.getByRole("button", { name: "暂停动画", exact: true })).toBeVisible();
+      await type.selectOption("topology");
+      await assertWrapped();
+      await ribbon.getByRole("button", { name: "四窗口", exact: true }).click();
+      await expect(page.getByRole("region", { name: "结果视图 4" })).toBeVisible();
+    } finally {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.reload();
+    }
+  });
   await check("主界面与 WebGL 初始化", async () => {
     await expect(
       page.getByRole("heading", { name: "当前模型没有部件" }),
@@ -407,7 +451,7 @@ try {
         "相互作用",
         "载荷",
         "网格",
-        "优化",
+        "拓扑优化",
       ];
       for (const model of ["Model-1", "Model-Empty"]) {
         await page
@@ -426,7 +470,7 @@ try {
               ? await page
                   .getByRole("combobox", { name: "当前分析步" })
                   .inputValue()
-              : module === "优化"
+              : module === "拓扑优化"
                 ? model === "Model-Empty"
                   ? "无优化任务"
                   : "Task-1"
@@ -734,7 +778,7 @@ try {
     const styles = ["线条", "页签", "色块"];
     for (const style of styles) {
       await page.getByRole("radio", { name: style, exact: true }).check();
-      await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "优化", exact: true }).click();
+      await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "拓扑优化", exact: true }).click();
       await expect(page.getByRole("combobox", { name: "当前优化任务" })).toBeVisible();
       await expect(toolbar).toBeVisible();
       await shot(`module-style-${style}`);
@@ -760,14 +804,14 @@ try {
     await toolbar.getByRole("button", { name: "适合窗口", exact: true }).click();
     await toolbar.getByRole("button", { name: "适合窗口", exact: true }).focus();
     await page.keyboard.press("ArrowRight");
-    await expect(toolbar.getByRole("button", { name: "等轴测视图", exact: true })).toBeFocused();
+    await expect(toolbar.getByRole("button", { name: "重置视图", exact: true })).toBeFocused();
     for (const [width,height] of [[1280,720],[1920,1080]]) {
       await page.setViewportSize({width,height});
       for (const style of styles) {
         await page.getByRole("radio", {name:style,exact:true}).check();
         const nav = page.getByRole("navigation", {name:"分析模块"});
         await expect(nav.getByRole("button", {name:"部件",exact:true})).toBeInViewport();
-        await expect(nav.getByRole("button", {name:"优化",exact:true})).toBeInViewport();
+        await expect(nav.getByRole("button", {name:"拓扑优化",exact:true})).toBeInViewport();
         assert(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth));
       }
       await shot(`module-toolbar-${width}`);
@@ -780,10 +824,12 @@ try {
   });
   await check("客户意见：文件菜单、项目切换与选择工具清空", async () => {
     await page.reload();
-    const moduleBar = page.locator("[data-module-style]");
-    await moduleBar.locator("summary").click();
-    await expect(moduleBar.getByRole("button", { name: "打开文件 · 未接入" })).toBeDisabled();
-    await moduleBar.locator("summary").click();
+    const mainMenu = page.getByRole("navigation", { name: "主菜单" });
+    const trigger = mainMenu.getByRole("button", { name: "文件", exact: true });
+    await trigger.click();
+    const files = mainMenu.getByRole("menu", { name: "文件", exact: true });
+    await expect(files.getByRole("menuitem", { name: "打开文件 未接入" })).toBeDisabled();
+    await trigger.click();
     await page.getByRole("combobox", { name: "当前模型", exact: true }).selectOption("Model-Empty");
     await expect(page.getByRole("heading", { name: "当前模型没有部件" })).toBeVisible();
     await page.getByRole("combobox", { name: "当前模型", exact: true }).selectOption("Model-1");

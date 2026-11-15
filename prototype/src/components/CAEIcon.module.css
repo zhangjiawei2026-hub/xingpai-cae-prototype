@@ -242,6 +242,8 @@
   stroke-width: 1.2;
 }
 
+.icon .rearFace { fill-opacity: 0.45; stroke-dasharray: 2 1.3; }
+
 /* Viewport tools: orientation cubes, zoom lens, triangulated wireframe. */
 .icon polygon.vface {
   stroke: none;
@@ -274,3 +276,27 @@
   stroke: var(--ci-geo-3);
   stroke-width: 0.9;
 }
+
+/* Result commands use the same lit geometry and panel tones as the Ribbon. */
+.icon .resultTile {
+  fill: var(--cig-pale-t, var(--ci-pale-1));
+  stroke: var(--ci-geo-ink);
+}
+.icon .documentBack,
+.icon .documentFold {
+  fill: var(--cig-pale-l, var(--ci-pale-2));
+  stroke: var(--ci-line);
+}
+.icon .playbackFill,
+.icon .cutPlane {
+  fill: var(--cig-geo-l, var(--ci-geo-2));
+  stroke: var(--ci-geo-ink);
+}
+.icon .cutPlane { fill-opacity: .8; }
+.icon .cutTrace { stroke: var(--ci-acc-ink); stroke-dasharray: 2 1.5; }
+.icon .resultTrace { stroke: var(--ci-geo-ink); stroke-width: 1.6; }
+.icon .contourWarm { fill: var(--cig-acc-t, var(--ci-acc-1)); stroke: var(--ci-acc-ink); }
+.icon .contourMid { fill: var(--ci-contour-mid); stroke: var(--ci-contour-mid-ink); }
+.icon .contourCool { fill: var(--cig-geo-r, var(--ci-geo-3)); stroke: var(--ci-geo-ink); }
+.icon .probePin, .icon .exportArrow { stroke: var(--ci-geo-ink); stroke-width: 1.8; }
+.icon .formulaMark { fill: var(--ci-geo-ink); font: italic 9.5px Georgia, serif; }

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { useStore } from "../../app/Store";
 import { MODULES, MODULE_LABELS } from "../../data/demo";
 import s from "./Workspace.module.css";
@@ -8,13 +8,38 @@ const styles = [
   { value: "tabs", label: "页签" },
   { value: "block", label: "色块" },
 ] as const;
-export function ModuleBar({ fileMenu }: { fileMenu: ReactNode }) {
+export function ModuleBar() {
   const { state, dispatch } = useStore();
   const [style, setStyle] = useState<(typeof styles)[number]["value"]>("tabs");
   return (
     <div className={s.moduleBar} data-module-style={style}>
-      {fileMenu}
-      <nav className={s.modules} aria-label="分析模块">
+      <nav
+        className={s.modules}
+        aria-label="分析模块"
+        onKeyDown={(event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+            return;
+          const items = Array.from(
+            event.currentTarget.querySelectorAll<HTMLButtonElement>(
+              "button:not(:disabled)",
+            ),
+          );
+          if (!items.length) return;
+          const index = items.indexOf(
+            document.activeElement as HTMLButtonElement,
+          );
+          event.preventDefault();
+          const offset = event.key === "ArrowRight" ? 1 : -1;
+          const next =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? items.length - 1
+                : (index + offset + items.length) % items.length;
+          items[next].focus();
+          items[next].click();
+        }}
+      >
         {MODULES.map((module, index) => (
           <button
             key={module}

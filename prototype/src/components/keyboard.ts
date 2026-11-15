@@ -10,7 +10,9 @@ export function moveFocus(
   if (![...keys, "Home", "End"].includes(event.key)) return;
   const items = [
     ...event.currentTarget.querySelectorAll<HTMLButtonElement>(
-      `[role="${role}"]:not(:disabled)`,
+      role === "tab"
+        ? '[role="tab"]:not(:disabled)'
+        : ':is([role="menuitem"], [role="menuitemcheckbox"]):not(:disabled)',
     ),
   ];
   if (!items.length) return;

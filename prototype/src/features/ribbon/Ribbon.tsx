@@ -3,88 +3,13 @@ import { ChevronDown } from "lucide-react";
 import { rememberDialogTrigger } from "../../components/dialogFocus";
 import { useState } from "react";
 import { useStore } from "../../app/Store";
-import type { Command, Module } from "../../types/domain";
-import {
-  CAEIcon,
-  type CAEIconBadge,
-  type CAEIconName,
-} from "../../components/CAEIcon";
+import { CAEIcon } from "../../components/CAEIcon";
+import type { ResultKind } from "../results/topologyResult";
+import { modelingRibbon } from "./modelingRibbon";
 import s from "../workspace/Workspace.module.css";
-type SmallCommand = { label: string; icon: CAEIconName; badge?: CAEIconBadge };
-const primary: Record<
-  Module,
-  { icon: CAEIconName; label: string; command?: Command; small: SmallCommand[] }
-> = {
-  Part: {
-    icon: "part",
-    label: "创建部件",
-    small: [
-      { label: "编辑部件", icon: "part", badge: "edit" },
-      { label: "删除部件", icon: "part", badge: "delete" },
-    ],
-  },
-  Property: {
-    icon: "material",
-    label: "创建材料",
-    small: [
-      { label: "截面定义", icon: "section" },
-      { label: "属性指派", icon: "section", badge: "assign" },
-    ],
-  },
-  Assembly: {
-    icon: "instance",
-    label: "创建实例",
-    small: [
-      { label: "平移实例", icon: "instance", badge: "move" },
-      { label: "旋转实例", icon: "instance", badge: "rotate" },
-    ],
-  },
-  Step: {
-    icon: "step",
-    label: "创建分析步",
-    command: "step",
-    small: [
-      { label: "编辑分析步", icon: "step", badge: "edit" },
-      { label: "分析步管理", icon: "step", badge: "manage" },
-    ],
-  },
-  Interaction: {
-    icon: "interaction",
-    label: "创建相互作用",
-    small: [
-      { label: "接触属性", icon: "interaction", badge: "edit" },
-      { label: "约束管理", icon: "interaction", badge: "manage" },
-    ],
-  },
-  Load: {
-    icon: "load",
-    label: "创建载荷",
-    small: [
-      { label: "边界条件", icon: "boundary" },
-      { label: "载荷管理", icon: "load", badge: "manage" },
-    ],
-  },
-  Mesh: {
-    icon: "nodes",
-    label: "创建节点集合",
-    command: "nodeSet",
-    small: [
-      { label: "编辑节点集合", icon: "nodes", badge: "edit" },
-      { label: "集合管理", icon: "nodes", badge: "manage" },
-    ],
-  },
-  Optimization: {
-    icon: "domain",
-    label: "创建设计域",
-    command: "domain",
-    small: [
-      { label: "编辑设计域", icon: "domain", badge: "edit" },
-      { label: "优化任务管理", icon: "task", badge: "manage" },
-    ],
-  },
-};
 export function Ribbon({
   onLoad,
+  onOpenResults,
   onFit,
   onIso,
   onToggleTree,
@@ -93,6 +18,7 @@ export function Ribbon({
   logVisible,
 }: {
   onLoad: () => void;
+  onOpenResults: (kind: ResultKind) => void;
   onFit: () => void;
   onIso: () => void;
   onToggleTree: () => void;
@@ -102,119 +28,97 @@ export function Ribbon({
 }) {
   const { state, dispatch } = useStore();
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
-  const item = primary[state.module],
-    empty = state.model === "Model-Empty";
+  if (state.module === "Results") return null;
   const model = state.models[state.model];
-  const selected =
-    item.command === "nodeSet"
-      ? model.sets.find((v) => v.id === state.selectedTree)
-      : item.command === "step"
-        ? model.steps.find((v) => v.id === state.selectedTree)
-        : item.command === "domain"
-          ? model.domains.find((v) => v.id === state.selectedTree)
-          : undefined;
+  const empty = state.model === "Model-Empty";
   const locked = empty || !!state.command;
-  // Commands outside this prototype stay visually available but semantically
-  // disabled; clicking explains why instead of faking a result.
-  const unavailable = (label: string, reason = "首轮原型未接入此命令") => ({
-    "aria-disabled": true as const,
-    "data-pending": "",
-    disabled: !!state.command,
-    title: `${label} · ${reason}`,
-    onClick: () => dispatch({ type: "notice", value: `「${label}」${reason}` }),
-  });
+  const edits = {
+    editNodeSet: {
+      command: "nodeSet",
+      id: model.sets.find((item) => item.id === state.selectedTree)?.id,
+    },
+    editStep: {
+      command: "step",
+      id: model.steps.find((item) => item.id === state.selectedTree)?.id,
+    },
+    editDomain: {
+      command: "domain",
+      id: model.domains.find((item) => item.id === state.selectedTree)?.id,
+    },
+  } as const;
+  const actions = {
+    nodeSet: () => dispatch({ type: "open", command: "nodeSet" }),
+    step: () => dispatch({ type: "open", command: "step" }),
+    domain: () => dispatch({ type: "open", command: "domain" }),
+    load: onLoad,
+    topologyResult: () => onOpenResults("topology"),
+    structuralResult: () => onOpenResults("structural"),
+  } satisfies Record<string, () => void>;
   return (
     <div className={s.ribbon} aria-label="Ribbon 功能区">
-      <div className={s.ribbonGroup} role="group" aria-label="创建与编辑">
-        <div className={s.ribbonItems}>
-          <button
-            className={s.largeCommand}
-            {...(item.command
-              ? {
-                  disabled: locked,
-                  title: item.label,
-                  onClick: () =>
-                    item.command &&
-                    dispatch({ type: "open", command: item.command }),
-                }
-              : state.module === "Load" ? { disabled: locked, onClick: onLoad, title: "编辑载荷" } : unavailable(item.label))}
-          >
-            <CAEIcon
-              name={item.icon}
-              size={32}
-              badge="add"
-              hiddenNodes={item.icon === "nodes" ? [3] : undefined}
-            />
-            <span>{state.module === "Load" ? "编辑载荷" : item.label}</span>
-          </button>
-          <div className={s.smallCommands}>
-            {item.small.map(({ label, icon, badge }, i) => (
-              <button
-                key={label}
-                {...(i !== 0 || !item.command
-                  ? unavailable(label)
-                  : !selected
-                    ? unavailable(label, "请先在模型树中选中要编辑的对象")
-                    : {
-                        disabled: !!state.command,
-                        title: "编辑选中对象；模型树也支持双击或 F2",
-                        onClick: () =>
-                          item.command &&
-                          dispatch({
-                            type: "open",
-                            command: item.command,
-                            id: selected.id,
-                          }),
-                      })}
+      {modelingRibbon[state.module].map(({ label, columns }) => (
+        <div
+          className={s.ribbonGroup}
+          role="group"
+          aria-label={label}
+          key={label}
+        >
+          <div className={s.ribbonItems}>
+            {columns.map(({ size, commands }) => (
+              <div
+                className={size === "small" ? s.smallCommands : s.largeColumn}
+                key={commands[0].label}
               >
-                <CAEIcon name={icon} size={18} badge={badge} />
-                {label}
-              </button>
+                {commands.map(({ label, icon, badge, action, reason }) => {
+                  const selected =
+                    action && action in edits
+                      ? edits[action as keyof typeof edits]
+                      : undefined;
+                  const edit = selected?.id
+                    ? () =>
+                        dispatch({
+                          type: "open",
+                          command: selected.command,
+                          id: selected.id,
+                        })
+                    : undefined;
+                  const run = selected
+                    ? edit
+                    : action
+                      ? actions[action as keyof typeof actions]
+                      : undefined;
+                  const unavailable =
+                    selected && !selected.id
+                      ? "请先在模型树中选中要编辑的对象"
+                      : (reason ?? "当前原型仅展示入口");
+                  const reviewResult =
+                    action === "topologyResult" ||
+                    action === "structuralResult";
+                  return (
+                    <button
+                      key={label}
+                      className={size === "large" ? s.largeCommand : undefined}
+                      onClick={run}
+                      disabled={
+                        !run || !!state.command || (empty && !reviewResult)
+                      }
+                      data-reference={!action || undefined}
+                      title={run ? label : `${label} · ${unavailable}`}
+                    >
+                      <CAEIcon
+                        name={icon}
+                        size={size === "large" ? 32 : 18}
+                        badge={badge}
+                      />
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             ))}
           </div>
-          <button
-            className={s.commandDropdown}
-            id="ribbon-menu-trigger"
-            aria-label="创建命令下拉菜单"
-            popoverTarget="ribbon-command-menu"
-            disabled={empty || !!state.command}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setMenuAnchor({ x: rect.left, y: rect.bottom + 4 });
-            }}
-          >
-            <ChevronDown size={12} />
-          </button>
         </div>
-      </div>
-      <div
-        className={s.ribbonGroup}
-        role="group"
-        aria-label="网格工具"
-      >
-        <div className={s.ribbonItems}>
-          <button
-            className={s.largeCommand}
-            {...unavailable("生成网格", "真实网格生成功能未接入")}
-          >
-            <CAEIcon name="mesh" size={32} />
-            <span className={s.splitLabel}>
-              生成网格
-              <ChevronDown size={10} />
-            </span>
-          </button>
-          <div className={s.smallCommands}>
-            <button {...unavailable("种子布置", "未接入真实网格能力")}>
-              <CAEIcon name="seed" size={18} />
-              种子布置
-            </button>
-            <button {...unavailable("单元类型", "未接入真实网格能力")}>
-              <CAEIcon name="elementType" size={18} />
-              单元类型
-            </button>
-          </div>
-        </div>
-      </div>
+      ))}
       <div className={s.ribbonGroup} role="group" aria-label="视图">
         <div className={s.ribbonItems}>
           <button className={s.largeCommand} onClick={onFit}>
@@ -226,7 +130,11 @@ export function Ribbon({
               <CAEIcon name="iso" size={18} />
               等轴测视图
             </button>
-            <button {...unavailable("显示 / 隐藏", "首轮仅显示一个演示部件")}>
+            <button
+              disabled
+              data-reference
+              title="显示 / 隐藏 · 原型仅显示一个演示部件"
+            >
               <CAEIcon name="part" size={18} badge="view" />
               显示 / 隐藏
               <ChevronDown className={s.caret} size={10} />
@@ -271,6 +179,22 @@ export function Ribbon({
               <span>{i.label}</span>
             </button>
           ))}
+          <button
+            className={s.commandDropdown}
+            id="ribbon-menu-trigger"
+            aria-label="创建命令下拉菜单"
+            popoverTarget="ribbon-command-menu"
+            disabled={locked}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setMenuAnchor({
+                x: Math.min(rect.left, window.innerWidth - 165),
+                y: rect.bottom + 4,
+              });
+            }}
+          >
+            <ChevronDown size={12} />
+          </button>
         </div>
       </div>
       <div

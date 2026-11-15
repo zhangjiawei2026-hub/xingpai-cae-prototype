@@ -37,8 +37,32 @@
 | treePanel | 模型树面板开关 | 本轮 SVG 占位；待确认 |
 | logPanel | 信息窗口面板开关 | 本轮 SVG 占位；待确认 |
 | viewIso / viewTop / viewFront / viewRight | 视图方向（立方体，观察面为蓝，其余面浅灰；等轴测三面全亮） | 本轮 SVG 占位；待确认 |
+| viewBack / viewLeft / viewBottom | 相反方向使用淡蓝面与虚线边区分 | 按 R18 标准视图入口补齐的原型图标 |
 | zoomIn / zoomOut | 视口放大/缩小（放大镜） | 本轮 SVG 占位；待确认 |
 | wireframe | 显示三角面边线（三角剖分立方体） | 本轮 SVG 占位；待确认 |
 | box | 旧名称，等同 part | 兼容别名 |
 
 通用界面动作（关闭、搜索、展开、模型树/信息窗口开关等）来自 npm `lucide-react`，遵循包内 ISC 许可，不冒充专业 CAE 图标。模型树子对象仍复用通用 Box/Folder 标记。应用标志亦为临时几何标记，并非品牌标志交付。
+
+## 结果模块图标 · R07 工作台评审
+
+| 组合 | 图标命名 | 识别方式 |
+| --- | --- | --- |
+| 显示模式 | resultLinear / resultHarmonic | 蓝色轴线与线性、简谐曲线，琥珀采样点 |
+| 网格结果 | resultContour / resultDeform / resultCut / resultLegend | 蓝灰立体网格、色阶面、原形虚线与剖切面 |
+| 帧与动画 | resultPrev / resultPlay / resultPause / resultNext / resultStop | 浅色底座和蓝色实心轮廓 |
+| 查找关键位置 | resultProbe / resultClear / resultMax / resultMin | 网格及选中点、删除角标和曲线端点 |
+| 输出与公式 | resultExport / resultReport / resultFormula | 蓝白叠层纸张、导出箭头、报告柱形和函数符号 |
+| 窗口布局 | resultSide / resultThree / resultFour / resultSingle | 与既有面板图标共用蓝色填充和可辨识分栏 |
+
+22 项仍为原型语义评审稿。结果模块上下文栏的「图标与状态」提供默认、适用的选中态和禁用态对照。
+
+## R18 增补图标
+
+| 范围 | 图标命名 | 识别方式 |
+| --- | --- | --- |
+| 材料显示 | topologyDensity / topologyRetained / topologyRemoved | 色阶格、保留轮廓和移除格 |
+| 评价与阈值 | topologyObjective / topologyConstraint / topologyThresholdReset | 目标曲线、带限制线的约束历史和阈值复位 |
+| 装配与相互作用 | transfer / surface / referencePoint / connector | 位置箭头、曲面、局部坐标轴和两端点连接单元 |
+
+新增 SVG 延续原工作台的 32×32 图标网格与语义色，状态随 Ribbon 命令呈现。其余入口按功能语义复用既有图形或角标。

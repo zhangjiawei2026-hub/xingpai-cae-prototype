@@ -1,27 +1,45 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import { Box, Check, X, MousePointer2, MoreHorizontal } from "lucide-react";
 import { CAEIcon, type CAEIconName } from "../components/CAEIcon";
 import { moveFocus } from "../components/keyboard";
 import { useStore } from "../app/Store";
 import { createViewport } from "./adapter";
-import type { ViewMode } from "./adapter";
+import type { ModelDisplay, ViewMode } from "./adapter";
 import s from "./Viewport.module.css";
 import type { EntityType } from "../types/domain";
 
-const viewIcon: Record<ViewMode, CAEIconName> = {
+const viewIcon = {
   iso: "viewIso",
   top: "viewTop",
   front: "viewFront",
   right: "viewRight",
+} satisfies Partial<Record<ViewMode, CAEIconName>>;
+
+export type ViewportControls = {
+  orient: (mode: ViewMode) => void;
+  fit: () => void;
+  zoom: (factor: number) => void;
+  focusSelectionType: () => void;
+  openSelectionMethods: () => void;
+  clearSelection: () => void;
 };
 
-export function Viewport() {
+export function Viewport({ ref, display, setDisplay, view, setView, onSelectionCount }: {
+  ref: Ref<ViewportControls>;
+  display: ModelDisplay;
+  setDisplay: (mode: ModelDisplay) => void;
+  view: ViewMode | null;
+  setView: (mode: ViewMode | null) => void;
+  onSelectionCount: (count: number) => void;
+}) {
   const { state, dispatch } = useStore();
   const host = useRef<HTMLDivElement>(null),
     adapter = useRef<ReturnType<typeof createViewport> | null>(null);
-  const [error, setError] = useState(""),
-    [wire, setWire] = useState(true),
-    [view, setView] = useState<ViewMode | null>("iso");
+  const [error, setError] = useState("");
+  const selectionType = useRef<HTMLSelectElement>(null);
+  const selectionMethods = useRef<HTMLButtonElement>(null);
+  const clearSelection = useRef<HTMLButtonElement>(null);
+  const wire = display !== "solid";
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
   const [inspectionActive, setInspectionActive] = useState(false);
   const [counts, setCounts] = useState({ nodes: 0, elements: 0 });
@@ -36,6 +54,8 @@ export function Viewport() {
     };
   }, [state.selection, state.model, dispatch]);
   const selection = state.selection;
+  const selectedCount = (selection?.ids ?? inspectIds).length;
+  useEffect(() => onSelectionCount(selectedCount), [onSelectionCount, selectedCount]);
   const pointActive = !!selection || (inspectionActive && !state.command && state.model !== "Model-Empty");
   useEffect(() => {
     if (!host.current) return;
@@ -62,7 +82,8 @@ export function Viewport() {
       );
     }
     return () => adapter.current?.dispose();
-  }, [dispatch]);
+  }, [dispatch, setView]);
+  useEffect(() => adapter.current?.setDisplay(display), [display]);
   useEffect(() => {
     adapter.current?.setSelection(
       selection?.entity ?? (inspectionActive && !state.command ? inspection.entity : null),
@@ -76,6 +97,14 @@ export function Viewport() {
     adapter.current?.view(value);
     setView(value);
   };
+  useImperativeHandle(ref, () => ({
+    orient: changeView,
+    fit: () => adapter.current?.fit(),
+    zoom: (factor) => adapter.current?.zoom(factor),
+    focusSelectionType: () => selectionType.current?.focus(),
+    openSelectionMethods: () => selectionMethods.current?.click(),
+    clearSelection: () => clearSelection.current?.click(),
+  }));
   return (
     <section className={s.viewport} aria-label="模型视图区">
       <header className={s.tabbar}>
@@ -88,16 +117,16 @@ export function Viewport() {
       <div className={s.stage}>
         <div ref={host} className={s.canvas} data-testid="viewport" />
         <div className={s.selectionToolbar} role="group" aria-label="视图区选择工具">
-          <select aria-label="选择对象类型" disabled={!!selection || state.model === "Model-Empty" || !!state.command} value={selection?.entity ?? inspection.entity} onChange={e => setInspection({ model: state.model, entity: e.target.value as EntityType, ids: [] })}>
+          <select ref={selectionType} aria-label="选择对象类型" disabled={!!selection || state.model === "Model-Empty" || !!state.command} value={selection?.entity ?? inspection.entity} onChange={e => setInspection({ model: state.model, entity: e.target.value as EntityType, ids: [] })}>
             <option value="Element">Element · 单元</option><option value="Node">Node · 节点</option><option disabled>Nset · 节点集合（未接入）</option><option disabled>Elset · 单元集合（未接入）</option>
           </select>
           <button aria-label="点选显示网格" aria-pressed={pointActive} title={pointActive ? "点选已激活，逐项累积选择" : "激活点选显示网格"} disabled={!!selection || !!state.command || state.model === "Model-Empty"} onClick={() => setInspectionActive(!inspectionActive)}><MousePointer2 size={13} />点选</button>
           <span aria-label="已选数量" className={(selection?.ids ?? inspectIds).length ? s.selectedCount : ""} aria-live="polite">{(selection?.ids ?? inspectIds).length}</span>
-          <button id="selection-method-trigger" aria-label="更多选择方式" aria-haspopup="menu" popoverTarget="selection-method-menu" onClick={event => {
+          <button ref={selectionMethods} id="selection-method-trigger" aria-label="更多选择方式" aria-haspopup="menu" popoverTarget="selection-method-menu" onClick={event => {
             const box = event.currentTarget.getBoundingClientRect();
             setMenuAnchor({ x: Math.max(8, Math.min(box.left, window.innerWidth - 232)), y: box.bottom + 208 < window.innerHeight ? box.bottom + 4 : Math.max(8, box.top - 208) });
           }}><MoreHorizontal size={15} /></button>
-          <button title="清除全部选择" aria-label="清除全部选择" disabled={!(selection?.ids ?? inspectIds).length} onClick={() => { if (selection) selection.ids.forEach(id => dispatch({ type: "toggle", id })); else setInspection({ ...inspection, ids: [] }); }}><X size={14} /></button>
+          <button ref={clearSelection} title="清除全部选择" aria-label="清除全部选择" disabled={!(selection?.ids ?? inspectIds).length} onClick={() => { if (selection) selection.ids.forEach(id => dispatch({ type: "toggle", id })); else setInspection({ ...inspection, ids: [] }); }}><X size={14} /></button>
         </div>
         <div id="selection-method-menu" popover="auto" role="menu" tabIndex={-1} aria-label="选择方式菜单" className={s.methodMenu} style={{ left: menuAnchor.x, top: menuAnchor.y }}
           onToggle={event => { if (event.newState === "open") (event.currentTarget.querySelector<HTMLButtonElement>("button:not(:disabled)") ?? event.currentTarget).focus(); }}
@@ -160,10 +189,7 @@ export function Viewport() {
               title="显示三角面边线"
               aria-pressed={wire}
               className={wire ? s.active : ""}
-              onClick={() => {
-                setWire(!wire);
-                adapter.current?.setWireframe(!wire);
-              }}
+              onClick={() => setDisplay(wire ? "solid" : "edges")}
             >
               <CAEIcon name="wireframe" size={20} />
             </button>
