@@ -26,12 +26,14 @@ export function ResultQuickToolbar({
   wire,
   setWire,
   legend,
+  legendAvailable,
   toggleLegend,
   resetView,
 }: {
   wire: boolean;
   setWire: (wire: boolean) => void;
   legend: boolean;
+  legendAvailable: boolean;
   toggleLegend: () => void;
   resetView: () => void;
 }) {
@@ -141,8 +143,9 @@ export function ResultQuickToolbar({
         </button>
         <button
           aria-label="显示控制"
-          title="显示控制 · 切换示意色阶图例"
-          aria-pressed={legend}
+          title={legendAvailable ? "显示控制 · 切换示意色阶图例" : "当前显示方式没有色阶图例"}
+          aria-pressed={legendAvailable && legend}
+          disabled={!legendAvailable}
           onClick={toggleLegend}
         >
           <ClipboardPen size={17} />

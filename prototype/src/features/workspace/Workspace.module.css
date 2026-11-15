@@ -1044,7 +1044,12 @@
 .projectSwitch, .contextbar { --select-height: 25px; --select-font-size: 11px; }
 .projectSwitch { --select-min-width: 145px; }
 .menuSession { margin-left: 16px; }
-.ribbon { height: 88px; }
+.ribbon { min-height: 88px; height: auto; }
+.ribbonItems { min-height: 62px; }
+.largeColumn > button { height: 100%; }
+.smallCommands:has(> :nth-child(3)) button { height: 20px; }
+.ribbon button[data-reference]:disabled { color: var(--muted); }
+.ribbon button[data-reference]:disabled > svg { filter: none; opacity: 0.72; }
 .ribbonGroup::before { content: attr(aria-label); order: 2; height: 17px; text-align: center; color: var(--muted); font-size: 10px; line-height: 17px; }
 .contextbar { height: 33px; }
 .modules { flex: 0 1 auto; padding-inline: 8px; }

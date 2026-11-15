@@ -55,3 +55,13 @@
 | 窗口布局 | resultSide / resultThree / resultFour / resultSingle | 与既有面板图标共用蓝色填充和可辨识分栏 |
 
 22 项仍为原型语义评审稿。结果模块上下文栏的「图标与状态」提供默认、适用的选中态和禁用态对照。
+
+## R18 增补图标
+
+| 范围 | 图标命名 | 识别方式 |
+| --- | --- | --- |
+| 材料显示 | topologyDensity / topologyRetained / topologyRemoved | 色阶格、保留轮廓和移除格 |
+| 评价与阈值 | topologyObjective / topologyConstraint / topologyThresholdReset | 目标曲线、带限制线的约束历史和阈值复位 |
+| 装配与相互作用 | transfer / surface / referencePoint / connector | 位置箭头、曲面、局部坐标轴和两端点连接单元 |
+
+新增 SVG 延续原工作台的 32×32 图标网格与语义色，状态随 Ribbon 命令呈现。其余入口按功能语义复用既有图形或角标。

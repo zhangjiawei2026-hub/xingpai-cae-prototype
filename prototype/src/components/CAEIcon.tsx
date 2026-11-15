@@ -54,6 +54,16 @@ export type CAEIconName =
   | "resultThree"
   | "resultFour"
   | "resultSingle"
+  | "topologyDensity"
+  | "topologyRetained"
+  | "topologyRemoved"
+  | "topologyObjective"
+  | "topologyConstraint"
+  | "topologyThresholdReset"
+  | "connector"
+  | "transfer"
+  | "surface"
+  | "referencePoint"
   // Legacy alias kept for existing call sites.
   | "box";
 
@@ -173,6 +183,56 @@ function glyph(
   hiddenNodes: number[] = [],
 ): ReactNode {
   switch (name) {
+    case "topologyDensity":
+    case "topologyRetained":
+    case "topologyRemoved": {
+      const retained = [0, 3, 4, 6, 7, 8];
+      const shades = [c.contourWarm, c.contourMid, c.contourCool];
+      return (
+        <>
+          {name !== "topologyDensity" && <rect x="4" y="4" width="24" height="24" rx="1" className={c.dash} />}
+          {Array.from({ length: 9 }, (_, index) => {
+            const kept = retained.includes(index);
+            if (name === "topologyRetained" && !kept) return null;
+            if (name === "topologyRemoved" && kept) return null;
+            return <rect key={index} x={4 + index % 3 * 8} y={4 + Math.floor(index / 3) * 8} width="8" height="8" className={name === "topologyDensity" ? shades[(Math.floor(index / 3) + index) % 3] : name === "topologyRetained" ? c.contourMid : c.contourWarm} />;
+          })}
+        </>
+      );
+    }
+    case "topologyObjective":
+    case "topologyConstraint":
+      return <>
+        <path className={c.thin} d="M5 4v23h23" />
+        {name === "topologyConstraint" && <path className={c.dash} d="M5 14h23" />}
+        <path className={c.resultTrace} d={name === "topologyObjective" ? "M7 8l5 9 6 4 5 2h4" : "M7 10l5 6 6-8 5 9 4-2"} />
+      </>;
+    case "topologyThresholdReset":
+      return <>
+        <path className={c.resultTrace} d="M8 13a9 9 0 1 1 0 8M8 6v7h7M14 17h7m-3.5-3.5v7" />
+      </>;
+    case "connector":
+      return <>
+        <path className={c.resultTrace} d="M7 24 25 8m-11 4 6 7m-9-4 6 7" />
+        <circle cx="6" cy="25" r="3.5" className={c.contourMid} />
+        <circle cx="26" cy="7" r="3.5" className={c.contourWarm} />
+      </>;
+    case "transfer":
+      return <>
+        <rect x="3" y="21" width="8" height="8" rx="1" className={c.contourCool} />
+        <rect x="21" y="3" width="8" height="8" rx="1" className={c.dash} />
+        <path className={c.resultTrace} d="M10 22 23 9m-7 0h7v7" />
+      </>;
+    case "surface":
+      return <>
+        <path className={c.contourCool} d="M3 12c9-15 17 3 26-7v15c-9 10-17-8-26 7z" />
+        <path className={c.grid} d="M11 7v15m9-13v15M3 19c9-14 17 4 26-7" />
+      </>;
+    case "referencePoint":
+      return <>
+        <path className={c.resultTrace} d="M12 20V5m-3 4 3-4 3 4M12 20h15m-4-3 4 3-4 3M12 20l-7 7" />
+        <circle cx="12" cy="20" r="3" className={c.contourWarm} />
+      </>;
     case "resultContour": {
       const v = iso(16, 4, 11, 12);
       return (

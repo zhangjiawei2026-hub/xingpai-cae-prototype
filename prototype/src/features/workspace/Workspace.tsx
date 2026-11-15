@@ -23,6 +23,7 @@ import { ResultQuickToolbar } from "../results/ResultQuickToolbar";
 import { ResultRibbon } from "../results/ResultRibbon";
 import { ResultViewport } from "../results/ResultViewport";
 import { useResultReview } from "../results/resultState";
+import type { ResultKind } from "../results/topologyResult";
 import { ModelTree, initialTreeView } from "../model-tree/ModelTree";
 import { Viewport } from "../../viewport/Viewport";
 import { NodeSetDialog } from "../node-set/NodeSetDialog";
@@ -77,6 +78,7 @@ export function Workspace() {
   const review = useResultReview(resultModule);
   const [resultWire, setResultWire] = useState(false);
   const resultProbe = review.result.probe;
+  const hasResultLegend = review.kind === "topology" ? review.topology.display === "density" : review.result.cloud;
   const stopResultInteraction = review.pause;
   const [treeView, setTreeView] = useState(initialTreeView);
   const [loadOpen, setLoadOpen] = useState(false);
@@ -110,6 +112,11 @@ export function Workspace() {
     return () => window.removeEventListener("keydown", handler);
   }, [state.selection, dispatch, resultModule, resultProbe, stopResultInteraction]);
   const context = workspaceContext(state);
+  const openResults = (kind: ResultKind) => {
+    review.chooseKind(kind);
+    dispatch({ type: "module", value: "Results" });
+    requestAnimationFrame(() => document.querySelector<HTMLSelectElement>('[aria-label="结果类型"]')?.focus());
+  };
   const viewAction = (action: ViewAction) => {
     const title = {
       fit: "适合窗口",
@@ -133,7 +140,7 @@ export function Workspace() {
             <button disabled>打开文件 · 未接入</button>
             <button disabled>保存工程 · 未接入</button>
             <button disabled>另存为 · 未接入</button>
-            {resultModule && <button disabled>导入 INP 模型 · 未接入</button>}
+            <button disabled>导入 INP 模型 · 未接入</button>
             <hr />
             <button
               disabled={!!state.command}
@@ -220,6 +227,7 @@ export function Workspace() {
       <ModuleBar fileMenu={resultModule ? null : fileMenu} />
       {resultModule ? <ResultRibbon review={review} /> : <Ribbon
         onLoad={() => setLoadOpen(true)}
+        onOpenResults={openResults}
         onFit={() => viewAction("fit")}
         onIso={() => viewAction("iso")}
         onToggleTree={() => setTreeVisible(!treeVisible)}
@@ -228,6 +236,7 @@ export function Workspace() {
         logVisible={logVisible}
       />}
       {resultModule ? <ResultQuickToolbar wire={resultWire} setWire={setResultWire}
+        legendAvailable={hasResultLegend}
         legend={review.result.legend} toggleLegend={() => review.change({ legend: !review.result.legend })}
         resetView={() => {
           setResultWire(false);

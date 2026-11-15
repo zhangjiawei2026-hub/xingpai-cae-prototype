@@ -407,7 +407,7 @@ try {
         "相互作用",
         "载荷",
         "网格",
-        "优化",
+        "拓扑优化",
       ];
       for (const model of ["Model-1", "Model-Empty"]) {
         await page
@@ -426,7 +426,7 @@ try {
               ? await page
                   .getByRole("combobox", { name: "当前分析步" })
                   .inputValue()
-              : module === "优化"
+              : module === "拓扑优化"
                 ? model === "Model-Empty"
                   ? "无优化任务"
                   : "Task-1"
@@ -734,7 +734,7 @@ try {
     const styles = ["线条", "页签", "色块"];
     for (const style of styles) {
       await page.getByRole("radio", { name: style, exact: true }).check();
-      await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "优化", exact: true }).click();
+      await page.getByRole("navigation", { name: "分析模块" }).getByRole("button", { name: "拓扑优化", exact: true }).click();
       await expect(page.getByRole("combobox", { name: "当前优化任务" })).toBeVisible();
       await expect(toolbar).toBeVisible();
       await shot(`module-style-${style}`);
@@ -767,7 +767,7 @@ try {
         await page.getByRole("radio", {name:style,exact:true}).check();
         const nav = page.getByRole("navigation", {name:"分析模块"});
         await expect(nav.getByRole("button", {name:"部件",exact:true})).toBeInViewport();
-        await expect(nav.getByRole("button", {name:"优化",exact:true})).toBeInViewport();
+        await expect(nav.getByRole("button", {name:"拓扑优化",exact:true})).toBeInViewport();
         assert(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth));
       }
       await shot(`module-toolbar-${width}`);

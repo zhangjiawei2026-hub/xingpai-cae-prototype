@@ -36,7 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-height: 86px;
+  min-height: 109px;
   padding: 3px 5px 2px;
 }
 .caption {
@@ -153,6 +153,36 @@
 .clearOptions[hidden] {
   display: none;
 }
+
+.ribbon[data-result-kind="topology"] .group {
+  flex-basis: auto;
+}
+.ribbon[data-result-kind="topology"] .group:first-child { flex-basis: 230px; }
+.ribbon[data-result-kind="topology"] .group:nth-child(3) { flex-basis: 140px; }
+.ribbon[data-result-kind="topology"] .group:nth-child(5) { flex-basis: 124px; }
+.topologySourceFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 5px;
+}
+.iterationButtons {
+  display: grid;
+  grid-template-columns: repeat(2, 25px);
+  align-content: center;
+  grid-area: 1 / 2 / span 3;
+  gap: 3px;
+}
+.iterationButtons [data-backward] svg { transform: scaleX(-1); }
+.topologyChoices {
+  display: flex;
+  gap: 4px;
+  margin: auto 0;
+}
+.topologyChoices button { flex: 1 0 auto; min-width: 51px; }
+.threshold { margin: auto 0; }
+.threshold > .row { margin-bottom: 4px; }
+.threshold input[type="range"] { flex: 1; width: 0; margin: 0; accent-color: var(--blue); }
+.noDensity { position: absolute; color: var(--muted); pointer-events: none; }
 
 .viewport {
   min-width: 0;

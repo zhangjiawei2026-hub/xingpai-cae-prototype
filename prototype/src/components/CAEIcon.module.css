@@ -292,6 +292,7 @@
 }
 .icon .cutPlane { fill-opacity: .8; }
 .icon .cutTrace { stroke: var(--ci-acc-ink); stroke-dasharray: 2 1.5; }
+.icon .resultTrace { stroke: var(--ci-geo-ink); stroke-width: 1.6; }
 .icon .contourWarm { fill: var(--cig-acc-t, var(--ci-acc-1)); stroke: var(--ci-acc-ink); }
 .icon .contourMid { fill: var(--ci-contour-mid); stroke: var(--ci-contour-mid-ink); }
 .icon .contourCool { fill: var(--cig-geo-r, var(--ci-geo-3)); stroke: var(--ci-geo-ink); }

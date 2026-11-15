@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { initialTopology, type ResultKind } from "./topologyResult";
 
 export const fields = {
   S: ["S · 应力", ["Mises", "S11", "S22"]],
@@ -173,9 +174,11 @@ export function selectContext(
 }
 export function useResultReview(active: boolean) {
   const [result, setResult] = useState(initialResult);
+  const [kind, setKind] = useState<ResultKind>("structural");
+  const [topology, setTopology] = useState(initialTopology);
   const [feedback, setFeedback] = useState("");
   useEffect(() => {
-    if (!active || !result.playing) return;
+    if (!active || kind !== "structural" || !result.playing) return;
     const timer = window.setInterval(
       () => {
         setResult((previous) => {
@@ -191,7 +194,7 @@ export function useResultReview(active: boolean) {
       result.harmonic ? 85 : 620,
     );
     return () => window.clearInterval(timer);
-  }, [active, result.harmonic, result.playing]);
+  }, [active, kind, result.harmonic, result.playing]);
   function change(changes: Partial<ResultState>) {
     setFeedback("");
     setResult((previous) => ({ ...previous, ...changes }));
@@ -215,6 +218,12 @@ export function useResultReview(active: boolean) {
   useEffect(() => {
     if (active) return pause;
   }, [active, pause]);
+  function chooseKind(next: ResultKind) {
+    if (next === kind) return;
+    pause();
+    setFeedback("");
+    setKind(next);
+  }
   function rotatePlayback() {
     setFeedback("");
     setResult((previous) => {
@@ -256,10 +265,16 @@ export function useResultReview(active: boolean) {
   }
   function reset() {
     setResult(initialResult());
+    setKind("structural");
+    setTopology(initialTopology());
     setFeedback("");
   }
   return {
     result,
+    kind,
+    topology,
+    setTopology,
+    chooseKind,
     feedback,
     setFeedback,
     change,

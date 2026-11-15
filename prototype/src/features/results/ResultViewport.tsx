@@ -6,6 +6,13 @@ import {
   type ResultReview,
   type ResultState,
 } from "./resultState";
+import {
+  demoDensity,
+  materialDisplays,
+  showDensity,
+  topologyTasks,
+  type TopologyResult,
+} from "./topologyResult";
 import s from "./Results.module.css";
 
 const colors = [
@@ -19,7 +26,15 @@ const colors = [
   "#d97056",
 ];
 
-function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
+function ResultMesh({
+  result,
+  wire,
+  topology,
+}: {
+  result: ResultState;
+  wire: boolean;
+  topology?: TopologyResult;
+}) {
   const clip = useId();
   const phase = result.harmonic
     ? Math.sin((result.phase * Math.PI) / 180)
@@ -30,7 +45,9 @@ function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
     const u = column / 12;
     const v = row / 4;
     const bend =
-      !original && result.deform ? phase * scale * 28 * Math.pow(u, power) : 0;
+      !topology && !original && result.deform
+        ? phase * scale * 28 * Math.pow(u, power)
+        : 0;
     return [74 + u * 468 - v * 50, 156 + v * 105 - u * 23 - bend];
   };
   const poly = (points: number[][]) =>
@@ -107,12 +124,12 @@ function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
       className={s.mesh}
       viewBox={`0 ${viewTop} 620 ${height}`}
       role="img"
-      aria-label="示意结果网格"
+      aria-label={topology ? "拓扑示意密度网格" : "示意结果网格"}
     >
       <defs>
         <clipPath id={clip}>{clipBounds}</clipPath>
       </defs>
-      {result.overlay && result.deform && (
+      {!topology && result.overlay && result.deform && (
         <polygon
           points={outline(true)}
           fill="none"
@@ -122,11 +139,15 @@ function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
         />
       )}
       <g clipPath={result.cut ? `url(#${clip})` : undefined}>
-        {!wire && <polygon points={side} fill="#829bb3" opacity={0.75} />}
+        {!topology && !wire && (
+          <polygon points={side} fill="#829bb3" opacity={0.75} />
+        )}
         <g stroke="#426786" strokeWidth={0.65}>
           {Array.from({ length: 48 }, (_, index) => {
             const column = Math.floor(index / 4);
             const row = index % 4;
+            const density = topology ? demoDensity(column, row, topology) : 0;
+            if (topology && !showDensity(density, topology)) return null;
             const demoValue =
               column * 6 +
               row * 4 +
@@ -140,13 +161,20 @@ function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
             const upper = point(column + 1, row);
             const fill = wire
               ? "none"
-              : result.cloud
-                ? colors[band]
-                : "#9ab1c7";
+              : topology
+                ? topology.display === "density"
+                  ? colors[Math.round(density * (colors.length - 1))]
+                  : topology.display === "retained"
+                    ? "#8eb4a0"
+                    : "#dca182"
+                : result.cloud
+                  ? colors[band]
+                  : "#9ab1c7";
             return (
               <g key={index}>
                 <polygon
                   data-result-face={index}
+                  data-density={topology ? density : undefined}
                   points={poly([
                     point(column, row),
                     upper,
@@ -164,12 +192,14 @@ function ResultMesh({ result, wire }: { result: ResultState; wire: boolean }) {
             );
           })}
         </g>
-        <polygon
-          points={outline()}
-          fill="none"
-          stroke="#355879"
-          strokeWidth={1.45}
-        />
+        {!topology && (
+          <polygon
+            points={outline()}
+            fill="none"
+            stroke="#355879"
+            strokeWidth={1.45}
+          />
+        )}
       </g>
       {result.cut && (
         <line
@@ -197,14 +227,31 @@ export function ResultViewport({
   const panes =
     layouts.find((layout) => layout.id === result.layout)?.count ?? 1;
   const context = currentResult(result);
+  const topology = review.kind === "topology" ? review.topology : undefined;
+  const task = topology ? topologyTasks[topology.task] : undefined;
+  const hasDensityCells =
+    !topology ||
+    Array.from({ length: 48 }, (_, index) =>
+      demoDensity(Math.floor(index / 4), index % 4, topology),
+    ).some((density) => showDensity(density, topology));
+  const showLegend =
+    result.legend && (topology ? topology.display === "density" : result.cloud);
   return (
     <section className={s.viewport} aria-label="结果视图区">
       <div className={s.viewportHeader}>
         <strong>
-          {context.frame.label} · {context.label}
-          {result.component ? ` / ${result.component}` : ""}
+          {topology ? (
+            `${task?.regions.find((item) => item.id === topology.region)?.label} · 迭代 ${topology.iteration}${topology.iteration === task?.final ? "（最终）" : ""} · ${materialDisplays.find((item) => item.id === topology.display)?.label}`
+          ) : (
+            <>
+              {context.frame.label} · {context.label}
+              {result.component ? ` / ${result.component}` : ""}
+            </>
+          )}
         </strong>
-        <span>结果示意 · 会话内数据</span>
+        <span>
+          {topology ? "拓扑优化结果 · 示意密度" : "结构结果 · 会话内示意"}
+        </span>
       </div>
       <div className={s.views} data-layout={result.layout}>
         {Array.from({ length: panes }, (_, index) => (
@@ -263,15 +310,26 @@ export function ResultViewport({
                 review.addMarker(index, 50, 50);
               }}
             >
-              <ResultMesh result={result} wire={wire} />
-              {result.legend && result.cloud && (
+              <ResultMesh result={result} wire={wire} topology={topology} />
+              {!hasDensityCells && (
+                <span className={s.noDensity}>当前阈值下没有可显示区域</span>
+              )}
+              {showLegend && (
                 <div className={s.legend} aria-label="示意色阶">
                   <span>
-                    {result.range === "manual" ? result.maximum : "高"}
+                    {topology
+                      ? 1
+                      : result.range === "manual"
+                        ? result.maximum
+                        : "高"}
                   </span>
                   <i />
                   <span>
-                    {result.range === "manual" ? result.minimum : "低"}
+                    {topology
+                      ? 0
+                      : result.range === "manual"
+                        ? result.minimum
+                        : "低"}
                   </span>
                 </div>
               )}

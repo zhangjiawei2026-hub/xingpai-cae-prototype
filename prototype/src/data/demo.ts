@@ -21,7 +21,7 @@ export const MODULE_LABELS = [
   "网格",
   "求解",
   "结果",
-  "优化",
+  "拓扑优化",
 ];
 export const MODEL_ID = "Model-1";
 export function initialState(): WorkState {

@@ -60,6 +60,11 @@ export function QuickToolbar({
       }}
     >
       <span className={s.toolbarLabel}>常用</span>
+      <div role="group" aria-label="文件" className={s.quickGroup}>
+        <button disabled title="导入 INP 模型 · 未接入" aria-label="导入 INP 模型">
+          <CAEIcon name="part" size={20} badge="assign" />
+        </button>
+      </div>
       <div role="group" aria-label="创建对象" className={s.quickGroup}>
         {commands.map(({ command, icon, label }) => (
           <button

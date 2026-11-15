@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Dialog, formStyles } from "../../components/Dialog";
 import { CAEIcon } from "../../components/CAEIcon";
@@ -14,135 +14,13 @@ import {
 } from "./resultState";
 import s from "./Results.module.css";
 
-function Group({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <section className={s.group} role="group" aria-label={label}>
-      <div className={s.controls}>{children}</div>
-      <span className={s.caption} aria-hidden="true">
-        {label}
-      </span>
-    </section>
-  );
-}
-
-function Select({
-  label,
-  name = label,
-  value,
-  options,
-  disabled,
-  set,
-}: {
-  label: string;
-  name?: string;
-  value: string | number;
-  options: readonly (readonly [string | number, string])[];
-  disabled?: boolean;
-  set: (value: string) => void;
-}) {
-  return (
-    <label className={s.row}>
-      {label && <span>{label}</span>}
-      <select
-        aria-label={name}
-        value={value}
-        disabled={disabled}
-        title={options.find(([key]) => key === value)?.[1]}
-        onChange={(event) => set(event.target.value)}
-      >
-        {options.map(([key, text]) => (
-          <option key={key} value={key}>
-            {text}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function Numeric({
-  label,
-  name,
-  value,
-  disabled,
-  unit,
-  min,
-  max,
-  placeholder,
-  change,
-  error,
-}: {
-  label: string;
-  name: string;
-  value?: number;
-  disabled?: boolean;
-  unit?: string;
-  min?: number;
-  max?: number;
-  placeholder?: string;
-  change: (value: number) => string | void;
-  error: (message: string) => void;
-}) {
-  const [draft, setDraft] = useState<string | null>(null);
-  return (
-    <label className={s.row}>
-      <span>{label}</span>
-      <input
-        type="number"
-        step="any"
-        aria-label={name}
-        min={min}
-        max={max}
-        placeholder={placeholder}
-        disabled={disabled}
-        value={draft ?? value ?? ""}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={(event) => {
-          if (draft === null) return;
-          const next = event.target.valueAsNumber;
-          setDraft(null);
-          if (!Number.isFinite(next)) {
-            error("请输入有效数值，已保留上次输入。");
-            return;
-          }
-          const message = change(next);
-          if (message) error(message);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            event.currentTarget.blur();
-          }
-        }}
-      />
-      {unit && <span className={s.unit}>{unit}</span>}
-    </label>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  disabled,
-  change,
-}: {
-  label: string;
-  checked: boolean;
-  disabled?: boolean;
-  change: (checked: boolean) => void;
-}) {
-  return (
-    <label className={s.check}>
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={disabled}
-        onChange={(event) => change(event.target.checked)}
-      />
-      {label}
-    </label>
-  );
-}
+import { Group, Numeric, Select, Toggle } from "./ResultRibbonControls";
+import { TopologyGroups, TopologySource } from "./TopologyRibbon";
+import {
+  resultKinds,
+  topologyEvaluation,
+  type ResultKind,
+} from "./topologyResult";
 
 const modes = [
   ["auto", "自动"],
@@ -158,10 +36,12 @@ const details = {
   导出: "导出格式与结果字段待确认。",
   报告: "报告模板与数据范围待确认。",
   自定义运算: "表达式语法、输入变量和校验规则待确认。",
+  ...topologyEvaluation,
 } as const;
 
 export function ResultRibbon({ review }: { review: ResultReview }) {
   const { result, change, choose } = review;
+  const isTopology = review.kind === "topology";
   const context = currentResult(result);
   const [detail, setDetail] = useState<keyof typeof details>();
   const [clearOpen, setClearOpen] = useState(false);
@@ -205,150 +85,179 @@ export function ResultRibbon({ review }: { review: ResultReview }) {
   };
 
   return (
-    <div className={s.ribbon} aria-label="结果 Ribbon 功能区">
-      <Group label="结果数据">
+    <div
+      className={s.ribbon}
+      aria-label="结果 Ribbon 功能区"
+      data-result-kind={review.kind}
+    >
+      <Group label={isTopology ? "结果与迭代" : "结果数据"}>
         <Select
           label="结果"
-          name="结果文件"
-          value={result.dataset}
-          options={Object.entries(datasets).map(([key, data]) => [
-            key,
-            data.label,
-          ])}
-          set={(dataset) => choose({ dataset: dataset as Dataset })}
+          name="结果类型"
+          value={review.kind}
+          options={Object.entries(resultKinds)}
+          set={(kind) => review.chooseKind(kind as ResultKind)}
         />
-        <Select
-          label="分析步"
-          name="结果分析步"
-          value={result.step}
-          options={datasets[result.dataset].steps.map((step, index) => [
-            index,
-            step.label,
-          ])}
-          set={(step) => choose({ step: Number(step) })}
-        />
-        <Select
-          label={context.modal ? "振型" : "帧/时刻"}
-          name={context.modal ? "模态阶次与固有频率" : "结果帧与时刻"}
-          value={result.frame}
-          options={context.step.frames.map((frame, index) => [
-            index,
-            frame.label,
-          ])}
-          set={(frame) => choose({ frame: Number(frame) })}
-        />
+        {isTopology ? (
+          <TopologySource review={review} />
+        ) : (
+          <>
+            <Select
+              label="数据"
+              name="结果文件"
+              value={result.dataset}
+              options={Object.entries(datasets).map(([key, data]) => [
+                key,
+                data.label,
+              ])}
+              set={(dataset) => choose({ dataset: dataset as Dataset })}
+            />
+            <Select
+              label="分析步"
+              name="结果分析步"
+              value={result.step}
+              options={datasets[result.dataset].steps.map((step, index) => [
+                index,
+                step.label,
+              ])}
+              set={(step) => choose({ step: Number(step) })}
+            />
+            <Select
+              label={context.modal ? "振型" : "帧/时刻"}
+              name={context.modal ? "模态阶次与固有频率" : "结果帧与时刻"}
+              value={result.frame}
+              options={context.step.frames.map((frame, index) => [
+                index,
+                frame.label,
+              ])}
+              set={(frame) => choose({ frame: Number(frame) })}
+            />
+          </>
+        )}
       </Group>
-      <Group label="显示模式">
-        <button
-          aria-pressed={!result.harmonic}
-          onClick={() => change({ harmonic: false, phase: 0, playing: false })}
-        >
-          <CAEIcon name="resultLinear" size={18} />
-          常规线性
-        </button>
-        <button
-          aria-pressed={result.harmonic}
-          disabled={!context.hasDisplacement}
-          onClick={() => change({ harmonic: true, phase: 0, playing: false })}
-        >
-          <CAEIcon name="resultHarmonic" size={18} />
-          简谐
-        </button>
-      </Group>
-      <Group label="云图">
-        <button
-          aria-pressed={result.cloud}
-          onClick={() => change({ cloud: !result.cloud })}
-        >
-          <CAEIcon name="resultContour" size={19} />
-          云图
-        </button>
-        <Select
-          label="变量"
-          name="结果变量"
-          value={result.field}
-          options={context.frame.fields.map((field) => [
-            field,
-            context.modal ? "U · 振型" : fields[field][0],
-          ])}
-          set={(field) => choose({ field: field as keyof typeof fields })}
-        />
-        <Select
-          label="分量"
-          name="结果分量"
-          value={result.component}
-          options={
-            context.components.length
-              ? context.components.map((item) => [item, item])
-              : [["", "标量"]]
-          }
-          disabled={!result.cloud || !context.components.length}
-          set={(component) => change({ component })}
-        />
-      </Group>
-      <Group label="变形">
-        <div className={s.row}>
-          <button
-            disabled={!context.hasDisplacement}
-            aria-pressed={result.deform}
-            onClick={() => {
-              if (result.deform)
-                change({
-                  deform: false,
-                  overlay: false,
-                  playing: result.harmonic ? false : result.playing,
-                });
-              else change({ deform: true });
-            }}
-          >
-            <CAEIcon name="resultDeform" size={18} />
-            变形
-          </button>
-          <Select
-            label=""
-            name="变形比例模式"
-            value={result.scaleMode}
-            options={modes}
-            disabled={!deformReady}
-            set={(scaleMode) =>
-              change({ scaleMode: scaleMode as ResultState["scaleMode"] })
-            }
-          />
-        </div>
-        <Numeric
-          label="倍数"
-          name="变形放大倍数"
-          value={autoScale ? undefined : result.scale}
-          disabled={!deformReady || autoScale}
-          placeholder="自动"
-          unit={deformReady && !autoScale ? `≤${demoScaleLimit}×` : undefined}
-          max={demoScaleLimit}
-          change={(value) => numeric("scale", value)}
-          error={review.setFeedback}
-        />
-        <div className={s.row}>
-          <Toggle
-            label="叠加原形"
-            checked={result.overlay}
-            disabled={!deformReady}
-            change={(overlay) => change({ overlay })}
-          />
-          <button
-            disabled={!result.deform && !result.cloud}
-            onClick={() =>
-              change({
-                deform: false,
-                cloud: false,
-                overlay: false,
-                phase: 0,
-                playing: false,
-              })
-            }
-          >
-            原形
-          </button>
-        </div>
-      </Group>
+      {isTopology ? (
+        <TopologyGroups review={review} onEvaluation={setDetail} />
+      ) : (
+        <>
+          <Group label="显示模式">
+            <button
+              aria-pressed={!result.harmonic}
+              onClick={() =>
+                change({ harmonic: false, phase: 0, playing: false })
+              }
+            >
+              <CAEIcon name="resultLinear" size={18} />
+              常规线性
+            </button>
+            <button
+              aria-pressed={result.harmonic}
+              disabled={!context.hasDisplacement}
+              onClick={() =>
+                change({ harmonic: true, phase: 0, playing: false })
+              }
+            >
+              <CAEIcon name="resultHarmonic" size={18} />
+              简谐
+            </button>
+          </Group>
+          <Group label="云图">
+            <button
+              aria-pressed={result.cloud}
+              onClick={() => change({ cloud: !result.cloud })}
+            >
+              <CAEIcon name="resultContour" size={19} />
+              云图
+            </button>
+            <Select
+              label="变量"
+              name="结果变量"
+              value={result.field}
+              options={context.frame.fields.map((field) => [
+                field,
+                context.modal ? "U · 振型" : fields[field][0],
+              ])}
+              set={(field) => choose({ field: field as keyof typeof fields })}
+            />
+            <Select
+              label="分量"
+              name="结果分量"
+              value={result.component}
+              options={
+                context.components.length
+                  ? context.components.map((item) => [item, item])
+                  : [["", "标量"]]
+              }
+              disabled={!result.cloud || !context.components.length}
+              set={(component) => change({ component })}
+            />
+          </Group>
+          <Group label="变形">
+            <div className={s.row}>
+              <button
+                disabled={!context.hasDisplacement}
+                aria-pressed={result.deform}
+                onClick={() => {
+                  if (result.deform)
+                    change({
+                      deform: false,
+                      overlay: false,
+                      playing: result.harmonic ? false : result.playing,
+                    });
+                  else change({ deform: true });
+                }}
+              >
+                <CAEIcon name="resultDeform" size={18} />
+                变形
+              </button>
+              <Select
+                label=""
+                name="变形比例模式"
+                value={result.scaleMode}
+                options={modes}
+                disabled={!deformReady}
+                set={(scaleMode) =>
+                  change({ scaleMode: scaleMode as ResultState["scaleMode"] })
+                }
+              />
+            </div>
+            <Numeric
+              label="倍数"
+              name="变形放大倍数"
+              value={autoScale ? undefined : result.scale}
+              disabled={!deformReady || autoScale}
+              placeholder="自动"
+              unit={
+                deformReady && !autoScale ? `≤${demoScaleLimit}×` : undefined
+              }
+              max={demoScaleLimit}
+              change={(value) => numeric("scale", value)}
+              error={review.setFeedback}
+            />
+            <div className={s.row}>
+              <Toggle
+                label="叠加原形"
+                checked={result.overlay}
+                disabled={!deformReady}
+                change={(overlay) => change({ overlay })}
+              />
+              <button
+                disabled={!result.deform && !result.cloud}
+                onClick={() =>
+                  change({
+                    deform: false,
+                    cloud: false,
+                    overlay: false,
+                    phase: 0,
+                    playing: false,
+                  })
+                }
+              >
+                原形
+              </button>
+            </div>
+          </Group>
+        </>
+      )}
       <Group label="结果剖切">
         <div className={s.row}>
           <button
@@ -398,106 +307,112 @@ export function ResultRibbon({ review }: { review: ResultReview }) {
           </button>
         </div>
       </Group>
-      <Group label="图例与范围">
-        <div className={s.row}>
-          <Toggle
-            label="图例"
-            checked={result.legend}
-            disabled={!result.cloud}
-            change={(legend) => change({ legend })}
-          />
-          <Select
-            label=""
-            name="云图范围模式"
-            value={result.range}
-            options={[
-              ["auto", "自动范围"],
-              ["manual", "手动范围"],
-            ]}
-            disabled={!result.cloud}
-            set={(range) => change({ range: range as ResultState["range"] })}
-          />
-        </div>
-        <Numeric
-          label="最小"
-          name="范围最小值"
-          value={manualRange ? result.minimum : undefined}
-          placeholder="自动"
-          disabled={!manualRange}
-          change={(value) => numeric("minimum", value)}
-          error={review.setFeedback}
-        />
-        <Numeric
-          label="最大"
-          name="范围最大值"
-          value={manualRange ? result.maximum : undefined}
-          placeholder="自动"
-          disabled={!manualRange}
-          change={(value) => numeric("maximum", value)}
-          error={review.setFeedback}
-        />
-      </Group>
-      <Group label="动画">
-        <div className={s.playback}>
-          <button
-            title={`上一${frameWord}`}
-            aria-label={`上一${frameWord}`}
-            disabled={result.frame === 0}
-            onClick={() => choose({ frame: result.frame - 1 })}
-          >
-            <CAEIcon name="resultPrev" size={18} />
-          </button>
-          <button
-            title={result.playing ? "暂停动画" : "播放动画"}
-            aria-label={result.playing ? "暂停动画" : "播放动画"}
-            disabled={!context.canPlay}
-            onClick={review.rotatePlayback}
-          >
-            {result.playing ? (
-              <CAEIcon name="resultPause" size={18} />
+      {!isTopology && (
+        <>
+          <Group label="图例与范围">
+            <div className={s.row}>
+              <Toggle
+                label="图例"
+                checked={result.legend}
+                disabled={!result.cloud}
+                change={(legend) => change({ legend })}
+              />
+              <Select
+                label=""
+                name="云图范围模式"
+                value={result.range}
+                options={[
+                  ["auto", "自动范围"],
+                  ["manual", "手动范围"],
+                ]}
+                disabled={!result.cloud}
+                set={(range) =>
+                  change({ range: range as ResultState["range"] })
+                }
+              />
+            </div>
+            <Numeric
+              label="最小"
+              name="范围最小值"
+              value={manualRange ? result.minimum : undefined}
+              placeholder="自动"
+              disabled={!manualRange}
+              change={(value) => numeric("minimum", value)}
+              error={review.setFeedback}
+            />
+            <Numeric
+              label="最大"
+              name="范围最大值"
+              value={manualRange ? result.maximum : undefined}
+              placeholder="自动"
+              disabled={!manualRange}
+              change={(value) => numeric("maximum", value)}
+              error={review.setFeedback}
+            />
+          </Group>
+          <Group label="动画">
+            <div className={s.playback}>
+              <button
+                title={`上一${frameWord}`}
+                aria-label={`上一${frameWord}`}
+                disabled={result.frame === 0}
+                onClick={() => choose({ frame: result.frame - 1 })}
+              >
+                <CAEIcon name="resultPrev" size={18} />
+              </button>
+              <button
+                title={result.playing ? "暂停动画" : "播放动画"}
+                aria-label={result.playing ? "暂停动画" : "播放动画"}
+                disabled={!context.canPlay}
+                onClick={review.rotatePlayback}
+              >
+                {result.playing ? (
+                  <CAEIcon name="resultPause" size={18} />
+                ) : (
+                  <CAEIcon name="resultPlay" size={18} />
+                )}
+              </button>
+              <button
+                title={`下一${frameWord}`}
+                aria-label={`下一${frameWord}`}
+                disabled={result.frame === lastFrame}
+                onClick={() => choose({ frame: result.frame + 1 })}
+              >
+                <CAEIcon name="resultNext" size={18} />
+              </button>
+              <button
+                title="停止动画"
+                aria-label="停止动画"
+                disabled={
+                  !result.playing &&
+                  result.phase === 0 &&
+                  (context.modal || result.frame === 0)
+                }
+                onClick={review.stop}
+              >
+                <CAEIcon name="resultStop" size={18} />
+              </button>
+            </div>
+            {result.harmonic ? (
+              <Numeric
+                label="相位"
+                name="显示相位"
+                value={result.phase}
+                disabled={!deformReady}
+                unit="°"
+                min={0}
+                max={360}
+                change={(value) => numeric("phase", value)}
+                error={review.setFeedback}
+              />
             ) : (
-              <CAEIcon name="resultPlay" size={18} />
+              <span className={s.unit}>
+                {context.modal ? "静态振型" : "已保存结果帧"}
+              </span>
             )}
-          </button>
-          <button
-            title={`下一${frameWord}`}
-            aria-label={`下一${frameWord}`}
-            disabled={result.frame === lastFrame}
-            onClick={() => choose({ frame: result.frame + 1 })}
-          >
-            <CAEIcon name="resultNext" size={18} />
-          </button>
-          <button
-            title="停止动画"
-            aria-label="停止动画"
-            disabled={
-              !result.playing &&
-              result.phase === 0 &&
-              (context.modal || result.frame === 0)
-            }
-            onClick={review.stop}
-          >
-            <CAEIcon name="resultStop" size={18} />
-          </button>
-        </div>
-        {result.harmonic ? (
-          <Numeric
-            label="相位"
-            name="显示相位"
-            value={result.phase}
-            disabled={!deformReady}
-            unit="°"
-            min={0}
-            max={360}
-            change={(value) => numeric("phase", value)}
-            error={review.setFeedback}
-          />
-        ) : (
-          <span className={s.unit}>
-            {context.modal ? "静态振型" : "已保存结果帧"}
-          </span>
-        )}
-      </Group>
+          </Group>
+        </>
+      )}
       <Group label="查找关键位置">
         <button
           ref={probe}
@@ -573,16 +488,18 @@ export function ResultRibbon({ review }: { review: ResultReview }) {
           报告
         </button>
       </Group>
-      <Group label="自定义运算">
-        <button className={s.large} onClick={() => setDetail("自定义运算")}>
-          <CAEIcon name="resultFormula" size={28} />
-          <span>
-            自定义
-            <br />
-            运算
-          </span>
-        </button>
-      </Group>
+      {!isTopology && (
+        <Group label="自定义运算">
+          <button className={s.large} onClick={() => setDetail("自定义运算")}>
+            <CAEIcon name="resultFormula" size={28} />
+            <span>
+              自定义
+              <br />
+              运算
+            </span>
+          </button>
+        </Group>
+      )}
       <Group label="多窗口对比">
         <div className={s.layouts}>
           {layouts.map(({ id, label, count }) => {
