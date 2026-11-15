@@ -14,7 +14,33 @@ export function ModuleBar({ fileMenu }: { fileMenu: ReactNode }) {
   return (
     <div className={s.moduleBar} data-module-style={style}>
       {fileMenu}
-      <nav className={s.modules} aria-label="分析模块">
+      <nav
+        className={s.modules}
+        aria-label="分析模块"
+        onKeyDown={(event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+            return;
+          const items = Array.from(
+            event.currentTarget.querySelectorAll<HTMLButtonElement>(
+              "button:not(:disabled)",
+            ),
+          );
+          if (!items.length) return;
+          const index = items.indexOf(
+            document.activeElement as HTMLButtonElement,
+          );
+          event.preventDefault();
+          const offset = event.key === "ArrowRight" ? 1 : -1;
+          const next =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? items.length - 1
+                : (index + offset + items.length) % items.length;
+          items[next].focus();
+          items[next].click();
+        }}
+      >
         {MODULES.map((module, index) => (
           <button
             key={module}

@@ -7,6 +7,8 @@ export const MODULES = [
   "Interaction",
   "Load",
   "Mesh",
+  "Solve",
+  "Results",
   "Optimization",
 ] as const;
 export const MODULE_LABELS = [
@@ -17,6 +19,8 @@ export const MODULE_LABELS = [
   "相互作用",
   "载荷",
   "网格",
+  "求解",
+  "结果",
   "优化",
 ];
 export const MODEL_ID = "Model-1";

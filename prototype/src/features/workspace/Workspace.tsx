@@ -18,6 +18,11 @@ import { ModuleBar } from "./ModuleBar";
 import { QuickToolbar, type ViewAction } from "./QuickToolbar";
 import { CAEIcon } from "../../components/CAEIcon";
 import { Ribbon } from "../ribbon/Ribbon";
+import { ResultIconReview } from "../results/ResultIconReview";
+import { ResultQuickToolbar } from "../results/ResultQuickToolbar";
+import { ResultRibbon } from "../results/ResultRibbon";
+import { ResultViewport } from "../results/ResultViewport";
+import { useResultReview } from "../results/resultState";
 import { ModelTree, initialTreeView } from "../model-tree/ModelTree";
 import { Viewport } from "../../viewport/Viewport";
 import { NodeSetDialog } from "../node-set/NodeSetDialog";
@@ -68,6 +73,11 @@ function Help({ close }: { close: () => void }) {
 }
 export function Workspace() {
   const { state, dispatch } = useStore();
+  const resultModule = state.module === "Results";
+  const review = useResultReview(resultModule);
+  const [resultWire, setResultWire] = useState(false);
+  const resultProbe = review.result.probe;
+  const stopResultInteraction = review.pause;
   const [treeView, setTreeView] = useState(initialTreeView);
   const [loadOpen, setLoadOpen] = useState(false);
   const [loads, setLoads] = useState<Record<string, LoadDraft>>({});
@@ -84,7 +94,13 @@ export function Workspace() {
   }, [state.logs]);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && state.selection) {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
+      if (resultModule && resultProbe) {
+        e.preventDefault();
+        stopResultInteraction();
+        return;
+      }
+      if (state.selection) {
         e.preventDefault();
         e.stopPropagation();
         dispatch({ type: "pickCancel" });
@@ -92,7 +108,7 @@ export function Workspace() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [state.selection, dispatch]);
+  }, [state.selection, dispatch, resultModule, resultProbe, stopResultInteraction]);
   const context = workspaceContext(state);
   const viewAction = (action: ViewAction) => {
     const title = {
@@ -107,25 +123,70 @@ export function Workspace() {
       )
       ?.click();
   };
+  const fileMenu = (
+    <details className={s.fileMenu}>
+          <summary>
+            <span>文件</span>
+            <ChevronDown size={10} aria-hidden="true" />
+          </summary>
+          <div>
+            <button disabled>打开文件 · 未接入</button>
+            <button disabled>保存工程 · 未接入</button>
+            <button disabled>另存为 · 未接入</button>
+            {resultModule && <button disabled>导入 INP 模型 · 未接入</button>}
+            <hr />
+            <button
+              disabled={!!state.command}
+              onClick={(e) => {
+                rememberDialogTrigger(
+                  e.currentTarget
+                    .closest("details")
+                    ?.querySelector("summary") ?? null,
+                );
+                setResetPending(true);
+                document
+                  .querySelector("details[open]")
+                  ?.removeAttribute("open");
+              }}
+            >
+              恢复初始演示
+            </button>
+          </div>
+        </details>
+  );
   return (
     <div className={s.app}>
       <div className={s.menubar}>
-
-        <button disabled title="首轮编辑命令通过 Ribbon 提供">
-          编辑
-        </button>
-        <button onClick={() => setTreeVisible(!treeVisible)}>视图</button>
-        <button disabled={!!state.command} onClick={() => setHelp(true)}>
-          帮助
-        </button>
-        <a
-          className={s.referenceLink}
-          href={`${import.meta.env.BASE_URL}reference/results-reference.html`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          结果模块参考
-        </a>
+        {resultModule && fileMenu}
+        {resultModule ? (
+          <>
+            <details className={s.fileMenu}>
+              <summary>编辑 <ChevronDown size={10} aria-hidden="true" /></summary>
+              <div><button disabled>撤销 · 未接入</button><button disabled>重做 · 未接入</button></div>
+            </details>
+            <details className={s.fileMenu}>
+              <summary>视图 <ChevronDown size={10} aria-hidden="true" /></summary>
+              <div>
+                <button onClick={() => setTreeVisible(!treeVisible)}>{treeVisible ? "隐藏模型树" : "显示模型树"}</button>
+                <button onClick={() => setLogVisible(!logVisible)}>{logVisible ? "隐藏信息窗口" : "显示信息窗口"}</button>
+                <button onClick={() => setAiVisible(!aiVisible)}>{aiVisible ? "隐藏 AI 对话" : "显示 AI 对话"}</button>
+              </div>
+            </details>
+            <details className={s.fileMenu}>
+              <summary>工具 <ChevronDown size={10} aria-hidden="true" /></summary>
+              <div>
+                <button onClick={() => review.change({ probe: !review.result.probe })}>{review.result.probe ? "退出结果探针" : "启动结果探针"}</button>
+                <button disabled>测量 · 未接入</button>
+              </div>
+            </details>
+          </>
+        ) : (
+          <>
+            <button disabled title="首轮编辑命令通过 Ribbon 提供">编辑</button>
+            <button onClick={() => setTreeVisible(!treeVisible)}>视图</button>
+          </>
+        )}
+        <button disabled={!!state.command} onClick={() => setHelp(true)}>帮助</button>
         <span className={s.menuDivider} />
         <button
           title="恢复初始演示"
@@ -156,37 +217,8 @@ export function Workspace() {
           本次会话 <Check size={11} />
         </span>
       </div>
-      <ModuleBar fileMenu={
-        <details className={s.fileMenu}>
-          <summary>
-            <span>文件</span>
-            <ChevronDown size={10} aria-hidden="true" />
-          </summary>
-          <div>
-            <button disabled>打开文件 · 未接入</button>
-            <button disabled>保存工程 · 未接入</button>
-            <button disabled>另存为 · 未接入</button>
-            <hr />
-            <button
-              disabled={!!state.command}
-              onClick={(e) => {
-                rememberDialogTrigger(
-                  e.currentTarget
-                    .closest("details")
-                    ?.querySelector("summary") ?? null,
-                );
-                setResetPending(true);
-                document
-                  .querySelector("details[open]")
-                  ?.removeAttribute("open");
-              }}
-            >
-              恢复初始演示
-            </button>
-          </div>
-        </details>
-      } />
-      <Ribbon
+      <ModuleBar fileMenu={resultModule ? null : fileMenu} />
+      {resultModule ? <ResultRibbon review={review} /> : <Ribbon
         onLoad={() => setLoadOpen(true)}
         onFit={() => viewAction("fit")}
         onIso={() => viewAction("iso")}
@@ -194,14 +226,19 @@ export function Workspace() {
         onToggleLog={() => setLogVisible(!logVisible)}
         treeVisible={treeVisible}
         logVisible={logVisible}
-      />
-      <QuickToolbar
+      />}
+      {resultModule ? <ResultQuickToolbar wire={resultWire} setWire={setResultWire}
+        legend={review.result.legend} toggleLegend={() => review.change({ legend: !review.result.legend })}
+        resetView={() => {
+          setResultWire(false);
+          review.change({ layout: "single", activePane: 0, cut: false, plane: "XY", offset: 0, flip: false });
+        }} /> : <QuickToolbar
         onView={viewAction}
         treeVisible={treeVisible}
         logVisible={logVisible}
         onToggleTree={() => setTreeVisible(!treeVisible)}
         onToggleLog={() => setLogVisible(!logVisible)}
-      />
+      />}
       <div className={s.contextbar} data-testid="workspace-context">
         {!treeVisible && (
           <button
@@ -265,9 +302,13 @@ export function Workspace() {
           </span>
           {state.selection && <b>{state.selection.ids.length} 项</b>}
         </div>
+        {resultModule && <ResultIconReview />}
         <button className={s.iconButton} aria-pressed={aiVisible} onClick={() => setAiVisible(!aiVisible)}>AI 对话</button>
       </div>
-      <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} viewState={treeView} onViewChange={changes => setTreeView(previous => ({ ...previous, ...changes }))} /> : null} viewport={<Viewport />} log={logVisible ? (
+      <DockLayout tree={treeVisible ? <ModelTree onClose={() => setTreeVisible(false)} viewState={treeView} onViewChange={changes => setTreeView(previous => ({ ...previous, ...changes }))} /> : null} viewport={<>
+        <div className={s.modelViewport} hidden={resultModule}><Viewport /></div>
+        {resultModule && <ResultViewport review={review} wire={resultWire} />}
+      </>} log={logVisible ? (
             <section className={s.log} aria-label="信息窗口">
               <header>
                 <div
@@ -361,6 +402,8 @@ export function Workspace() {
                 onClick={() => {
                   dispatch({ type: "reset" });
                   setLoads({});
+                  review.reset();
+                  setResultWire(false);
                   setResetPending(false);
                 }}
               >
@@ -370,7 +413,7 @@ export function Workspace() {
           }
         >
           <p>
-            本次会话中新建和修改的节点集合、分析步与设计域将被清除。此操作不可撤销。
+            本次会话中新建和修改的节点集合、分析步、设计域及结果演示状态将被清除。此操作不可撤销。
           </p>
         </Dialog>
       )}

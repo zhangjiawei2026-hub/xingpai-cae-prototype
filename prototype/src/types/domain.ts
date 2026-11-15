@@ -6,7 +6,9 @@ export type Module =
   | "Interaction"
   | "Load"
   | "Mesh"
-  | "Optimization";
+  | "Optimization"
+  | "Solve"
+  | "Results";
 export type Command = "nodeSet" | "step" | "domain";
 export type EntityType = "Node" | "Element";
 export interface NodeSet {

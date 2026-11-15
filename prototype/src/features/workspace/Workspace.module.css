@@ -126,13 +126,14 @@
 .fileMenu > div button:hover:not(:disabled) {
   background: var(--blue-soft);
 }
-.referenceLink {
-  padding: 4px 8px;
-  color: var(--ink-secondary);
-  white-space: nowrap;
+.modelViewport:not([hidden]) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 }
-.referenceLink:hover {
-  background: var(--blue-soft);
+.modelViewport > section {
+  flex: 1;
 }
 .menuDivider {
   height: 12px;

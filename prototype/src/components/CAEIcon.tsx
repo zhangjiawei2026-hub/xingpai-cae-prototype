@@ -32,6 +32,28 @@ export type CAEIconName =
   | "zoomIn"
   | "zoomOut"
   | "wireframe"
+  | "resultLinear"
+  | "resultHarmonic"
+  | "resultContour"
+  | "resultDeform"
+  | "resultCut"
+  | "resultLegend"
+  | "resultPrev"
+  | "resultPlay"
+  | "resultPause"
+  | "resultNext"
+  | "resultStop"
+  | "resultProbe"
+  | "resultClear"
+  | "resultMax"
+  | "resultMin"
+  | "resultExport"
+  | "resultReport"
+  | "resultFormula"
+  | "resultSide"
+  | "resultThree"
+  | "resultFour"
+  | "resultSingle"
   // Legacy alias kept for existing call sites.
   | "box";
 
@@ -151,6 +173,284 @@ function glyph(
   hiddenNodes: number[] = [],
 ): ReactNode {
   switch (name) {
+    case "resultContour": {
+      const v = iso(16, 4, 11, 12);
+      return (
+        <>
+          <Box />
+          <polygon
+            className={c.contourWarm}
+            points={pts(v.top, v.r, v.f, v.l)}
+          />
+          <polygon
+            className={c.contourMid}
+            points={pts(v.l, v.f, v.fb, v.lb)}
+          />
+          <polygon
+            className={c.contourCool}
+            points={pts(v.f, v.r, v.rb, v.fb)}
+          />
+          <path className={c.grid} d={boxGrid(16, 4, 11, 12, fine ? 3 : 2)} />
+        </>
+      );
+    }
+    case "resultDeform":
+      return (
+        <>
+          <Box cx={16} y={7} w={11} h={11} ghost />
+          <g className={c.geo}>
+            <path className={c.f1} d="M5 12 14 4 27 8 17 16Z" />
+            <path className={c.f2} d="M5 12 17 16 15 27 5 23Z" />
+            <path className={c.f3} d="M17 16 27 8 26 19 15 27Z" />
+          </g>
+          <path className={c.bevel} d="m6 12 11 3 8-6" />
+        </>
+      );
+    case "resultCut":
+      return (
+        <>
+          <Box y={6} tone="pale" />
+          <path className={c.cutPlane} d="M11 8 23 2v21l-12 7Z" />
+          <path className={c.cutTrace} d="m8 21 16-8" />
+          <path className={c.bevel} d="m12.5 9 9-5" />
+        </>
+      );
+    case "resultLinear":
+    case "resultHarmonic":
+      return (
+        <>
+          <rect
+            className={c.resultTile}
+            x="3.5"
+            y="5"
+            width="25"
+            height="22"
+            rx="2"
+          />
+          <path className={c.thin} d="M8 9v13h17" />
+          {name === "resultLinear" ? (
+            <path className={c.anaLine} d="m9 20 14-10" />
+          ) : (
+            <path
+              className={c.anaLine}
+              d="M8 16c3.2-7.5 5.1-7.5 8 0s4.7 7.5 8 0"
+            />
+          )}
+          <Dot at={name === "resultLinear" ? [23, 10] : [16, 16]} r={2.5} />
+        </>
+      );
+    case "resultLegend":
+      return (
+        <>
+          <rect
+            className={c.resultTile}
+            x="5"
+            y="4"
+            width="22"
+            height="24"
+            rx="2"
+          />
+          <path className={c.contourWarm} d="M9 8h7v5H9z" />
+          <path className={c.contourMid} d="M9 13h7v6H9z" />
+          <path className={c.contourCool} d="M9 19h7v5H9z" />
+          <path className={c.axis} d="M19 9h4m-4 7h3m-3 7h4" />
+        </>
+      );
+    case "resultPlay":
+    case "resultPrev":
+    case "resultNext": {
+      const reverse = name === "resultPrev";
+      return (
+        <>
+          <rect
+            className={c.resultTile}
+            x="3.5"
+            y="5"
+            width="25"
+            height="22"
+            rx="3"
+          />
+          <path
+            className={c.playbackFill}
+            d={
+              reverse
+                ? "M21 10 12 16l9 6Z"
+                : name === "resultNext"
+                  ? "m11 10 9 6-9 6Z"
+                  : "m11 9 12 7-12 7Z"
+            }
+          />
+          {name !== "resultPlay" && (
+            <path className={c.axis} d={reverse ? "M9 10v12" : "M23 10v12"} />
+          )}
+        </>
+      );
+    }
+    case "resultPause":
+    case "resultStop":
+      return (
+        <>
+          <rect
+            className={c.resultTile}
+            x="3.5"
+            y="5"
+            width="25"
+            height="22"
+            rx="3"
+          />
+          {name === "resultPause" ? (
+            <>
+              <rect
+                className={c.playbackFill}
+                x="10"
+                y="10"
+                width="4"
+                height="12"
+                rx="1"
+              />
+              <rect
+                className={c.playbackFill}
+                x="18"
+                y="10"
+                width="4"
+                height="12"
+                rx="1"
+              />
+            </>
+          ) : (
+            <rect
+              className={c.playbackFill}
+              x="10"
+              y="10"
+              width="12"
+              height="12"
+              rx="1"
+            />
+          )}
+        </>
+      );
+    case "resultProbe":
+    case "resultClear":
+      return (
+        <>
+          <Box cx={13.5} y={9} w={9} h={9} tone="pale" />
+          <path className={c.probePin} d="m25 5-8 11" />
+          <circle className={c.playbackFill} cx="25" cy="6" r="3.5" />
+          <Dot at={[16.5, 17]} r={3} />
+          {name === "resultClear" && (
+            <>
+              <circle
+                className={c.badgeDanger + " " + c.badge}
+                cx="24.5"
+                cy="24.5"
+                r="5.5"
+              />
+              <path className={c.badgeGlyph} d="m22.5 22.5 4 4m0-4-4 4" />
+            </>
+          )}
+        </>
+      );
+    case "resultMax":
+    case "resultMin":
+      return (
+        <>
+          <rect
+            className={c.resultTile}
+            x="3.5"
+            y="5"
+            width="25"
+            height="22"
+            rx="2"
+          />
+          <path className={c.axis} d="M8 9v13h17" />
+          <path
+            className={c.anaLine}
+            d={name === "resultMax" ? "m9 18 5-4 4 3 7-7" : "m9 11 5 4 4-3 7 8"}
+          />
+          <Dot at={name === "resultMax" ? [25, 10] : [25, 20]} r={2.6} />
+        </>
+      );
+    case "resultExport":
+    case "resultReport":
+    case "resultFormula":
+      return (
+        <>
+          <path className={c.documentBack} d="M10 3h13l6 6v17H10Z" />
+          <path className={c.resultTile} d="M5 6h13l6 6v16H5Z" />
+          <path className={c.documentFold} d="M18 6v6h6" />
+          {name === "resultExport" && (
+            <path
+              className={c.exportArrow}
+              d="M10 23h10l-3 3m3-3-3-3M10 14v9"
+            />
+          )}
+          {name === "resultReport" && (
+            <>
+              <path className={c.axis} d="M9 15h10m-10 3h10" />
+              <path className={c.anaLine} d="M10 24v-2m4 2v-3m4 3v-4" />
+            </>
+          )}
+          {name === "resultFormula" && (
+            <text x="8" y="23.5" className={c.formulaMark}>
+              ƒ(x)
+            </text>
+          )}
+        </>
+      );
+    case "resultSide":
+    case "resultThree":
+    case "resultFour":
+    case "resultSingle": {
+      const sections = {
+        resultSide: [
+          [6, 8, 9, 16],
+          [17, 8, 9, 16],
+        ],
+        resultThree: [
+          [6, 8, 9, 7],
+          [17, 8, 9, 7],
+          [6, 17, 20, 7],
+        ],
+        resultFour: [
+          [6, 8, 9, 7],
+          [17, 8, 9, 7],
+          [6, 17, 9, 7],
+          [17, 17, 9, 7],
+        ],
+        resultSingle: [[6, 8, 20, 16]],
+      }[name];
+      return (
+        <>
+          <rect
+            className={c.documentBack}
+            x="5"
+            y="4"
+            width="25"
+            height="21"
+            rx="2"
+          />
+          <rect
+            className={c.resultTile}
+            x="3"
+            y="6"
+            width="26"
+            height="21"
+            rx="2"
+          />
+          {sections.map(([x, y, width, height]) => (
+            <rect
+              className={c.playbackFill}
+              key={`${x}-${y}`}
+              x={x}
+              y={y}
+              width={width}
+              height={height}
+              rx=".7"
+            />
+          ))}
+        </>
+      );
+    }
     case "part":
     case "box":
       return <Box />;
@@ -476,6 +776,8 @@ const ground: Partial<Record<CAEIconName, [number, number, number]>> = {
   part: [16, 27.4, 12],
   box: [16, 27.4, 12],
   mesh: [16, 27.4, 12],
+  resultContour: [16, 27.4, 12],
+  resultDeform: [16, 27.4, 12],
   seed: [16, 27.4, 12],
   nodes: [16, 27.4, 12],
   instance: [13, 29.2, 9.5],

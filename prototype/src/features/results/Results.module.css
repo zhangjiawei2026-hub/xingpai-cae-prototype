@@ -1,0 +1,320 @@
+.ribbon {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-soft);
+  flex: 0 0 auto;
+  overflow-x: auto;
+  padding: 3px 5px 0;
+  font-size: 11px;
+  --select-height: 24px;
+  --select-font-size: 11px;
+}
+.group {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  min-width: 0;
+}
+.group:last-child {
+  border-right: 0;
+}
+.group:first-child {
+  flex-basis: 160px;
+}
+.group:nth-child(3),
+.group:nth-child(4),
+.group:nth-child(5),
+.group:nth-child(6) {
+  flex-basis: 122px;
+}
+.group:nth-child(7),
+.group:nth-child(8) {
+  flex-basis: 107px;
+}
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 86px;
+  padding: 3px 5px 2px;
+}
+.caption {
+  margin-top: auto;
+  padding: 3px 5px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--paper);
+  white-space: nowrap;
+}
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  gap: 4px;
+  white-space: nowrap;
+}
+.row .row {
+  min-width: 0;
+  flex: 1;
+}
+.row > :is(select, input[type="number"]) {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+}
+.row > select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row input[type="number"] {
+  height: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 3px;
+}
+.row input[type="number"]:disabled {
+  color: var(--muted);
+  background: var(--panel-soft);
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.check input {
+  margin: 0 3px 0 0;
+  accent-color: var(--blue);
+}
+.ribbon button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 4px;
+  white-space: nowrap;
+  color: var(--ink-secondary);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+}
+.ribbon button:hover:not(:disabled),
+.ribbon button[aria-pressed="true"] {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+.ribbon button:disabled {
+  opacity: 0.55;
+}
+.ribbon button > svg {
+  flex-shrink: 0;
+}
+.ribbon .large {
+  flex-direction: column;
+  height: 77px;
+}
+.ribbon .large svg {
+  width: 28px;
+  height: 28px;
+}
+.playback,
+.layouts {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(4, minmax(23px, 1fr));
+}
+.layouts {
+  grid-template-columns: repeat(2, 27px);
+  place-content: center;
+  padding: 8px 0;
+}
+.unit {
+  font-size: 10px;
+  color: var(--muted);
+}
+.clearSlot {
+  position: relative;
+}
+.clearOptions {
+  position: fixed;
+  z-index: 30;
+  display: grid;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0 4px 14px #22354a25;
+}
+.clearOptions[hidden] {
+  display: none;
+}
+
+.viewport {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 11px;
+}
+.viewportHeader,
+.viewportStatus {
+  color: var(--muted);
+  padding: 5px 8px;
+  flex: 0 0 auto;
+}
+.viewportHeader {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.viewportHeader strong {
+  color: var(--ink-secondary);
+}
+.viewportStatus {
+  border-top: 1px solid var(--line);
+}
+.views {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 4px;
+  padding: 4px;
+}
+.views:is([data-layout="side"], [data-layout="three"], [data-layout="four"]) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.views[data-layout="three"] .pane:last-child {
+  grid-column: 1 / -1;
+}
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+}
+.pane[data-current="true"] {
+  border-color: var(--blue);
+}
+.paneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 5px;
+  background: var(--blue-soft);
+  color: var(--muted);
+}
+.paneHeader button {
+  background: transparent;
+  border: 0;
+  padding: 2px 3px;
+  color: var(--blue);
+  font-size: 11px;
+}
+.plot {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(#eff5fc, #e3edf8);
+}
+.plot:focus-visible {
+  outline-offset: -2px;
+}
+.plot[data-probe="true"] {
+  cursor: crosshair;
+}
+.mesh {
+  width: 87%;
+  height: 93%;
+  max-width: 640px;
+  max-height: 400px;
+  pointer-events: none;
+}
+.legend {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  pointer-events: none;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend i {
+  width: 8px;
+  height: clamp(28px, 8vh, 78px);
+  background: linear-gradient(#d97056, #f1c472, #97cd9f, #3b7dbf);
+  border: 1px solid var(--line);
+}
+.marker,
+.extreme {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 1px 4px;
+  white-space: nowrap;
+  background: var(--paper);
+  color: var(--blue);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.extreme {
+  pointer-events: none;
+  font-size: 10px;
+}
+.marker button {
+  padding: 0 2px;
+  color: var(--blue);
+  background: transparent;
+  border: 0;
+}
+.iconGallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(125px, 100%), 1fr));
+  gap: 8px;
+}
+.iconCard {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  font-size: 11px;
+}
+.iconSamples {
+  display: flex;
+  gap: 5px;
+  justify-content: space-around;
+}
+.iconSample {
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+.iconSample > svg {
+  width: 22px;
+  height: 22px;
+  padding: 1px;
+  color: var(--blue);
+}
+.iconSample[data-state="选中"] > svg {
+  background: var(--blue-soft);
+  outline: 1px solid var(--blue);
+}
+.iconSample[data-state="禁用"] > svg {
+  opacity: 0.4;
+}

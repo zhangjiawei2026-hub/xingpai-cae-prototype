@@ -12,7 +12,7 @@ import {
 import s from "../workspace/Workspace.module.css";
 type SmallCommand = { label: string; icon: CAEIconName; badge?: CAEIconBadge };
 const primary: Record<
-  Module,
+  Exclude<Module, "Results">,
   { icon: CAEIconName; label: string; command?: Command; small: SmallCommand[] }
 > = {
   Part: {
@@ -73,6 +73,11 @@ const primary: Record<
       { label: "集合管理", icon: "nodes", badge: "manage" },
     ],
   },
+  Solve: {
+    icon: "task",
+    label: "创建作业",
+    small: [{ label: "作业管理器", icon: "task", badge: "manage" }],
+  },
   Optimization: {
     icon: "domain",
     label: "创建设计域",
@@ -102,6 +107,7 @@ export function Ribbon({
 }) {
   const { state, dispatch } = useStore();
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
+  if (state.module === "Results") return null;
   const item = primary[state.module],
     empty = state.model === "Model-Empty";
   const model = state.models[state.model];

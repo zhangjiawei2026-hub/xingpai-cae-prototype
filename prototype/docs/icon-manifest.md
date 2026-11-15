@@ -42,3 +42,16 @@
 | box | 旧名称，等同 part | 兼容别名 |
 
 通用界面动作（关闭、搜索、展开、模型树/信息窗口开关等）来自 npm `lucide-react`，遵循包内 ISC 许可，不冒充专业 CAE 图标。模型树子对象仍复用通用 Box/Folder 标记。应用标志亦为临时几何标记，并非品牌标志交付。
+
+## 结果模块图标 · R07 工作台评审
+
+| 组合 | 图标命名 | 识别方式 |
+| --- | --- | --- |
+| 显示模式 | resultLinear / resultHarmonic | 蓝色轴线与线性、简谐曲线，琥珀采样点 |
+| 网格结果 | resultContour / resultDeform / resultCut / resultLegend | 蓝灰立体网格、色阶面、原形虚线与剖切面 |
+| 帧与动画 | resultPrev / resultPlay / resultPause / resultNext / resultStop | 浅色底座和蓝色实心轮廓 |
+| 查找关键位置 | resultProbe / resultClear / resultMax / resultMin | 网格及选中点、删除角标和曲线端点 |
+| 输出与公式 | resultExport / resultReport / resultFormula | 蓝白叠层纸张、导出箭头、报告柱形和函数符号 |
+| 窗口布局 | resultSide / resultThree / resultFour / resultSingle | 与既有面板图标共用蓝色填充和可辨识分栏 |
+
+22 项仍为原型语义评审稿。结果模块上下文栏的「图标与状态」提供默认、适用的选中态和禁用态对照。
